@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { playSuccessSound } from '../services/audioService';
+
 
 interface BrazilFlagProps {
     className?: string;
@@ -25,7 +25,7 @@ const BrazilFlag: React.FC<BrazilFlagProps> = ({ className = '', showSoundToggle
       const end = Date.now() + duration;
 
       if (soundEnabled) {
-          playSuccessSound();
+          AudioService.play('SUCCESS');
       }
 
       const frame = () => {
