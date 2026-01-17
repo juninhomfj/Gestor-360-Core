@@ -1046,3 +1046,43 @@ export const smartMergeSales = (items: Sale[]): Sale => {
         updatedAt: new Date().toISOString()
     };
 };
+
+export const bootstrapProductionData = async (): Promise<void> => {
+  try {
+    // Garante que existe session / user antes de qualquer tentativa
+    const user = getSession();
+
+    // 1) Tenta garantir que o config/system é legível
+    //    (getSystemConfig já tem fallback local, então não quebra)
+    const cfg = await getSystemConfig();
+
+    // 2) Se não existir um config consistente, tenta salvar
+    //    OBS: pelas rules, write em /config/* só DEV, então isso pode falhar.
+    const merged: SystemConfig = {
+      ...DEFAULT_SYSTEM_CONFIG,
+      ...cfg,
+      modules: {
+        ...DEFAULT_SYSTEM_CONFIG.modules,
+        ...(cfg?.modules || {})
+      }
+    };
+
+    // Critério: só tenta salvar se estiver DEV (ou se não houver user detectado, não tenta)
+    if (user?.role === "DEV") {
+      await saveSystemConfig(merged);
+    } else {
+      // Usuário comum: grava apenas no cache local para não travar
+      await dbPut("config" as any, { ...merged, id: "system" } as any);
+    }
+
+    Logger.info("Bootstrap: Ambiente de produção inicializado.", {
+      role: user?.role || "unknown"
+    });
+  } catch (e: any) {
+    // Bootstrap nunca deve impedir o app de subir
+    Logger.warn("Bootstrap: Falha silenciosa ao inicializar dados de produção.", {
+      message: e?.message,
+      code: e?.code
+    });
+  }
+};
