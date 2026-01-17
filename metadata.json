@@ -1,0 +1,17 @@
+{
+  "name": "Gestor 360 - ENTERPRISE ANALYTICS",
+  "description": "Sistema V3.1.5 - Governança global de módulos, Auditoria de Autoridade Root e University 360 Expandida.",
+  "version": "3.1.5",
+  "releaseDate": "2025-02-27",
+  "features": [
+    "BI: Classificação ABC (Pareto) automática por faturamento",
+    "Admin: Toggles globais de módulos (System Override)",
+    "Training: University 360 com guias para WhatsApp, Finanças e IA",
+    "Security: Widget de Auditoria de Permissões no Perfil do Usuário",
+    "Core: Bypass de segurança Root para perfis de engenharia (DEV)"
+  ],
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

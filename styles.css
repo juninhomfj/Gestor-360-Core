@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: #10b981;
+    --brand-secondary: #6366f1;
+  }
+  
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased overflow-hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  #root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-900/60 backdrop-blur-md border border-white/10 shadow-2xl;
+  }
+
+  .card-hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:border-indigo-500/30;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+  }
+
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+.animate-countdown {
+  animation: countdown linear forwards;
+}
+
+.animate-trash-paper-1 {
+  animation: trash-paper-1 1.5s ease-in forwards;
+}
+
+.animate-trash-paper-2 {
+  animation: trash-paper-2 1.5s ease-in 0.2s forwards;
+}
+
+@keyframes trash-paper-1 {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(40px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes trash-paper-2 {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(50px) rotate(-360deg); opacity: 0; }
+}

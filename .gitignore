@@ -1,0 +1,47 @@
+
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Produção / Build
+dist/
+build/
+*.local
+
+# Ambiente e Segredos (Bloqueadores de Commit)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+env_final.txt
+*.env.txt
+*.sql
+*.sql.txt
+*.dump
+supabase_setup_commands.txt
+supabase_clients.txt
+supabase_keys.txt
+secrets.json
+
+# Backups e Snapshots (Arquivos Grandes/Sensíveis)
+*.log
+*.v360
+sys_snapshots/
+backup_*.json
+backup_*.csv
+
+# Sistema e IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ferramentas de Teste
+concurrent_test/node_modules/

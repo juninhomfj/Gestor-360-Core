@@ -1,0 +1,563 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ========= FUNÇÕES ========= */
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function myUid() {
+      return request.auth.uid;
+    }
+
+    function myEmail() {
+      return request.auth.token.email;
+    }
+
+    function hasProfile() {
+      return exists(/databases/$(database)/documents/profiles/$(myUid()));
+    }
+
+    function p() {
+      return get(/databases/$(database)/documents/profiles/$(myUid())).data;
+    }
+
+    function isActive() {
+      return hasProfile() && p().isActive == true;
+    }
+
+    function isDEV() {
+      return hasProfile() && p().role == "DEV";
+    }
+
+    function isADMIN() {
+      return hasProfile() && p().role == "ADMIN";
+    }
+
+    function hasModule(m) {
+      return hasProfile() && (p().modules[m] == true);
+    }
+
+    function hasFinanceAccess() {
+      return hasModule("finance") || hasModule("sales");
+    }
+
+    /* ========= USERS ========= */
+    /* users/{uid} - doc do app (metadados do usuário) */
+    match /users/{uid} {
+      allow read: if isAuth() && (uid == request.auth.uid || isDEV());
+      allow create: if isAuth() && (uid == request.auth.uid || isDEV());
+      allow update: if isAuth() && (uid == request.auth.uid || isDEV());
+      allow delete: if false;
+    }
+
+    /* ========= INVITES (CONSOLIDADO) ========= */
+    /* invites/{id} - docId pode ser email OU emailLower (compatível com ambos os padrões) */
+    match /invites/{id} {
+
+      // Ler:
+      // - DEV lê tudo
+      // - ADMIN(users) lê tudo
+      // - usuário lê o próprio convite (por docId ou por email no conteúdo)
+      allow read: if isAuth() && (
+        isDEV() ||
+        (isADMIN() && hasModule("users")) ||
+        (request.auth.token.email != null && request.auth.token.email.lower() == id) ||
+        (request.auth.token.email != null && request.auth.token.email == id) ||
+        (myEmail() == resource.data.email)
+      );
+
+      // Criar convite: DEV ou ADMIN(users)
+      allow create: if isAuth() && (
+        isDEV() ||
+        (isADMIN() && hasModule("users"))
+      );
+
+      // Atualizar convite:
+      // - DEV/ADMIN(users) pode
+      // - o próprio usuário pode marcar como usado (usedAt/usedBy) após criar conta
+      allow update: if isAuth() && (
+        isDEV() ||
+        (isADMIN() && hasModule("users")) ||
+        (
+          myEmail() == resource.data.email &&
+          resource.data.usedAt == null &&
+          request.resource.data.usedBy == myUid()
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    /* ========= PROFILES (usuários) ========= */
+    match /profiles/{uid} {
+
+      // Ler:
+      // - o próprio documento
+      // - DEV lê tudo
+      // - ADMIN pode ler tudo se tiver módulo "users" (gestão)
+      allow read: if isAuth() && (
+        uid == myUid() ||
+        isDEV() ||
+        (isADMIN() && hasModule("users"))
+      );
+
+      // Criar:
+      // - convite-only: usuário cria SOMENTE o próprio doc, se tiver invite.
+      // - compatível com invite docId = email OU emailLower
+      allow create: if isAuth() && (
+        // DEV pode criar perfis
+        isDEV() ||
+
+        (
+          uid == myUid() &&
+
+          (
+            (
+              exists(/databases/$(database)/documents/invites/$(myEmail())) &&
+              get(/databases/$(database)/documents/invites/$(myEmail())).data.usedAt == null
+            ) ||
+            (
+              exists(/databases/$(database)/documents/invites/$(myEmail().lower())) &&
+              get(/databases/$(database)/documents/invites/$(myEmail().lower())).data.usedAt == null
+            )
+          ) &&
+
+          request.resource.data.email == myEmail()
+        )
+      );
+
+      // Update:
+      // - DEV pode atualizar tudo
+      // - ADMIN(users) pode atualizar tudo
+      // - Usuário comum só pode atualizar prefs / displayName / photoURL / lastLoginAt
+      allow update: if isAuth() && (
+        isDEV() ||
+        (isADMIN() && hasModule("users")) ||
+        (
+          uid == myUid() &&
+          // BLOQUEIA usuário alterando permissões/role/email
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.modules == resource.data.modules &&
+          request.resource.data.email == resource.data.email &&
+          request.resource.data.emailLower == resource.data.emailLower &&
+          (
+            // Atualizações comuns sem ativação
+            request.resource.data.isActive == resource.data.isActive ||
+            // Permite auto-ativação inicial (PENDING -> ACTIVE)
+            (
+              resource.data.isActive == false &&
+              request.resource.data.isActive == true &&
+              resource.data.userStatus == "PENDING" &&
+              request.resource.data.userStatus == "ACTIVE"
+            )
+          )
+        )
+      );
+
+      allow delete: if false;
+    }
+
+    /* ========= SYSTEM / CONFIG ========= */
+    match /system/{id} {
+      allow read: if isAuth();
+      allow write: if isAuth() && isDEV();
+    }
+
+    match /config/{id} {
+      allow read: if isAuth();
+      allow write: if isAuth() && isDEV();
+    }
+
+    /* ========= WEBHOOKS ========= */
+    match /webhooks/{id} {
+      allow read: if isAuth() && (isADMIN() || isDEV());
+      allow write: if isAuth() && (isADMIN() || isDEV());
+    }
+
+    /* ========= VENDAS360 ========= */
+
+    match /accounts/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /transactions/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /sales/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasModule("sales") && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /sales_tasks/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasModule("sales") && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /clients/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasModule("sales") && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasModule("sales") && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /receivables/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /campaigns/{id} {
+
+      // READ (USER: apenas próprios com módulo "sales"; DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        (hasModule("sales") && (resource.data.userId == myUid())) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (inalterado)
+      allow create: if isAuth() && isActive() && (
+        (hasModule("sales") && (request.resource.data.userId == myUid())) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        (hasModule("sales") && (resource.data.userId == myUid())) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /cards/{id} {
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /categories/{id} {
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /goals/{id} {
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /challenges/{id} {
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /challenge_cells/{id} {
+      allow read: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow create: if isAuth() && isActive() && (
+        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        (hasFinanceAccess() && resource.data.userId == myUid()) ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+    }
+
+    match /tickets/{id} {
+
+      // READ (USER: apenas próprios; ADMIN/DEV: lê tudo)
+      allow read: if isAuth() && isActive() && (
+        resource.data.userId == myUid() ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // CREATE (USER: apenas próprios; ADMIN/DEV: bypass)
+      allow create: if isAuth() && isActive() && (
+        request.resource.data.userId == myUid() ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // UPDATE (USER: apenas próprios; ADMIN/DEV: atualiza tudo)
+      allow update: if isAuth() && isActive() && (
+        resource.data.userId == myUid() ||
+        isADMIN() ||
+        isDEV()
+      );
+
+      // DELETE (somente DEV)
+      allow delete: if isAuth() && isActive() && isDEV();
+    }
+
+    /* ========= TABELAS DE COMISSÃO ========= */
+    match /commission_basic/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (isDEV() || isADMIN());
+    }
+
+    match /commission_natal/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (isDEV() || isADMIN());
+    }
+
+    match /commissions_basic/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (isDEV() || isADMIN());
+    }
+
+    match /commissions_natal/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (isDEV() || isADMIN());
+    }
+
+    /* ========= AUDIT ========= */
+    match /audit_log/{id} {
+      allow read: if isAuth() && (isDEV() || hasModule("logs"));
+      allow create: if isAuth();
+      allow update, delete: if false;
+    }
+
+    /* ========= INTERNAL MESSAGES ========= */
+    match /internal_messages/{id} {
+      allow read: if isAuth() && isActive() && (
+        isDEV() ||
+        isADMIN() ||
+        resource.data.senderId == myUid() ||
+        resource.data.recipientId == myUid() ||
+        resource.data.recipientId == "BROADCAST"
+      );
+
+      allow create: if isAuth() && isActive() && (
+        isDEV() ||
+        isADMIN() ||
+        request.resource.data.senderId == myUid()
+      );
+
+      allow update: if isAuth() && isActive() && (
+        isDEV() ||
+        isADMIN() ||
+        resource.data.senderId == myUid() ||
+        resource.data.recipientId == myUid()
+      );
+
+      allow delete: if false;
+    }
+  }
+}
