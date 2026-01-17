@@ -22,7 +22,7 @@ import {
     Sale, Transaction, FinanceAccount, Receivable,
     ReportConfig, SystemConfig, ProductType, CommissionRule,
     ChallengeCell, FinancialPacing, ProductivityMetrics, ImportMapping,
-    User, ChallengeModel, SalesTask
+    User, ChallengeModel, SalesTask, Client
 } from '../types';
 import { Logger } from './logger';
 import { getSession } from './auth';
@@ -79,7 +79,6 @@ export const canAccess = (user: User | null, mod: string): boolean => {
     if (!user || !user.isActive) return false;
     if (user.role === 'DEV') return true;
     
-    // Regras de liberação de abas comuns (v3.2)
     const alwaysVisible = ['profile', 'settings', 'commissions', 'clients_hub', 'home'];
     if (alwaysVisible.includes(mod)) return true;
 
@@ -517,7 +516,6 @@ export const getStoredSales = async (): Promise<Sale[]> => {
     let errorCode: string | undefined;
     let indexRequired = false;
     try {
-        // Firestore index necessário: collection "sales" com userId ASC + createdAt DESC.
         const q = query(collection(db, 'sales'), where('userId', '==', uid), orderBy('createdAt', 'desc'), limit(500));
         const snap = await getDocsFromServer(q);
         cloudCount = snap.size;
@@ -584,6 +582,18 @@ export const saveSalesTask = async (task: SalesTask): Promise<void> => {
     await validateSalesWriteAccess();
     await dbPut('sales_tasks', task);
     await safeSetDoc('sales_tasks', task.id, task as any, { merge: true }, task as any, 'UPDATE');
+};
+
+export const getClients = async (): Promise<Client[]> => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return [];
+    try {
+        const q = query(collection(db, 'clients'), where('userId', '==', uid), where('deleted', '==', false));
+        const snap = await getDocsFromServer(q);
+        const items = snap.docs.map(d => ({ ...d.data(), id: d.id } as Client));
+        await dbBulkPutSkipPending('clients', items);
+    } catch (e) {}
+    return await dbGetAll('clients', c => c.userId === uid && !c.deleted);
 };
 
 export const getFinanceData = async () => {
@@ -707,17 +717,14 @@ export const downloadSalesTemplate = () => {
 
 export const saveSales = async (sales: Sale[]) => {
     await validateSalesWriteAccess();
-    // Local-first
     await dbBulkPut('sales', sales);
 
-    // Offline: apenas enfileira
     if (!isOnline()) {
         await Promise.all(sales.map(s => safeSetDoc('sales', s.id, s as any, { merge: true }, s as any, 'UPDATE')));
         SessionTraffic.trackWrite(sales.length);
         return;
     }
 
-    // Online: tenta batch. Se falhar, fallback para fila item-a-item.
     try {
         const batch = writeBatch(db);
         for (const sale of sales) {
@@ -746,14 +753,13 @@ export const bulkBillSales = async (ids: string[], date: string, createReceivabl
             await createReceivableFromSale(updated);
         }
     }
-    // Offline: apenas fila
+
     if (!isOnline()) {
         await Promise.all(updates.map(u => safeSetDoc('sales', u.id, u as any, { merge: true }, u as any, 'UPDATE')));
         Logger.info(`Audit: Faturamento em lote enfileirado para ${ids.length} vendas.`);
         return;
     }
 
-    // Online: tenta batch; se falhar, fallback item-a-item
     try {
         const batch = writeBatch(db);
         for (const updated of updates) {
@@ -1011,7 +1017,6 @@ export const atomicClearUserTables = async (userId: string, tables: string[]) =>
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
         
-        // Local clear
         const local = await dbGetAll(table as any);
         for(const item of local) {
             if (item.userId === userId) await dbDelete(table as any, item.id);
@@ -1032,7 +1037,6 @@ export const clearNotifications = async (userId: string, source: string) => {
     await batch.commit();
 };
 
-
 export const smartMergeSales = (items: Sale[]): Sale => {
     const sorted = [...items].sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     const master = sorted[0];
@@ -1049,15 +1053,9 @@ export const smartMergeSales = (items: Sale[]): Sale => {
 
 export const bootstrapProductionData = async (): Promise<void> => {
   try {
-    // Garante que existe session / user antes de qualquer tentativa
     const user = getSession();
-
-    // 1) Tenta garantir que o config/system é legível
-    //    (getSystemConfig já tem fallback local, então não quebra)
     const cfg = await getSystemConfig();
 
-    // 2) Se não existir um config consistente, tenta salvar
-    //    OBS: pelas rules, write em /config/* só DEV, então isso pode falhar.
     const merged: SystemConfig = {
       ...DEFAULT_SYSTEM_CONFIG,
       ...cfg,
@@ -1067,11 +1065,9 @@ export const bootstrapProductionData = async (): Promise<void> => {
       }
     };
 
-    // Critério: só tenta salvar se estiver DEV (ou se não houver user detectado, não tenta)
     if (user?.role === "DEV") {
       await saveSystemConfig(merged);
     } else {
-      // Usuário comum: grava apenas no cache local para não travar
       await dbPut("config" as any, { ...merged, id: "system" } as any);
     }
 
@@ -1079,7 +1075,6 @@ export const bootstrapProductionData = async (): Promise<void> => {
       role: user?.role || "unknown"
     });
   } catch (e: any) {
-    // Bootstrap nunca deve impedir o app de subir
     Logger.warn("Bootstrap: Falha silenciosa ao inicializar dados de produção.", {
       message: e?.message,
       code: e?.code
