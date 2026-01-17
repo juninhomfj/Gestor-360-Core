@@ -1081,3 +1081,61 @@ export const bootstrapProductionData = async (): Promise<void> => {
     });
   }
 };
+
+// ===============================
+// REPORT CONFIG (Dashboard / Charts)
+// ===============================
+
+const DEFAULT_REPORT_CONFIG: ReportConfig = {
+  daysForNewClient: 30,
+  daysForInactive: 60,
+  daysForLost: 180
+};
+
+export const getReportConfig = async (): Promise<ReportConfig> => {
+  // tenta Firestore → fallback local → fallback default
+  try {
+    const snap = await getDocFromServer(doc(db, "config", "report"));
+    if (snap.exists()) {
+      const data = snap.data() as Partial<ReportConfig>;
+      const merged: ReportConfig = { ...DEFAULT_REPORT_CONFIG, ...data };
+      // cache local
+      await dbPut("config" as any, { id: "report", ...merged } as any);
+      return merged;
+    }
+  } catch (e) {}
+
+  try {
+    const local = await dbGet("config" as any, "report");
+    if (local) {
+      const merged: ReportConfig = { ...DEFAULT_REPORT_CONFIG, ...(local as any) };
+      return merged;
+    }
+  } catch (e) {}
+
+  return DEFAULT_REPORT_CONFIG;
+};
+
+export const saveReportConfig = async (cfg: ReportConfig): Promise<void> => {
+  await validateWriteAccess();
+
+  const normalized: ReportConfig = {
+    ...DEFAULT_REPORT_CONFIG,
+    ...cfg
+  };
+
+  // cache local
+  await dbPut("config" as any, { id: "report", ...normalized } as any);
+
+  // Firestore
+  await safeSetDoc(
+    "config",
+    "report",
+    normalized as any,
+    { merge: true },
+    { id: "report", ...normalized } as any,
+    "UPDATE"
+  );
+
+  Logger.info("Audit: ReportConfig salvo.", normalized as any);
+};

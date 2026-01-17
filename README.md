@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="./docs/assets/gestor360-banner.png" alt="Gestor 360" width="100%" />
+<img src="./docs/assets/gestor360-banner.png" alt="Gestor 360 Core" width="100%" />
 
-# Gestor 360 Core  
+# Gestor 360 Core
 ### Vendas360 + Financeiro360 + SettingsHub + DEV/Logs + Chat (Online-First)
 
 <p>
@@ -14,72 +14,62 @@
 </p>
 
 <p>
-Plataforma web modular focada em **Vendas** e **Finanças**, com **cache local (IndexedDB)** e **sincronização confiável** com Firestore.
+Aplicação web modular focada em <b>Vendas</b> e <b>Finanças</b>, com <b>cache local (IndexedDB)</b> e sincronização confiável com Firestore.
 </p>
 
 </div>
 
 ---
 
-## ✨ Módulos incluídos (escopo do Core)
+## Escopo do Core
 
+Incluído:
 - **Vendas360**
-  - Cadastro e gestão de vendas
-  - Pendências (`sales_tasks`)
-  - Comissões (regras e cálculo)
-  - Importação (CSV/XLSX)
 - **Financeiro360**
-  - Transações, contas, cartões e categorias
-  - Recebíveis e distribuição
-  - Metas e desafios
-- **SettingsHub**
-  - Configurações do sistema (tema, módulos, preferências)
-  - Administração (conforme permissões)
-- **DEV / Diagnóstico**
-  - Health-check, telemetria e utilitários internos
-- **Logs**
-  - Persistência local + envio para `audit_log`
+- **SettingsHub** (somente funções pertinentes ao core)
+- **DEV / Logs / Diagnóstico**
 - **Chat interno**
-  - Mensagens internas (`internal_messages`)
 
-> Este repositório **não contém** WhatsApp/Fiscal/ERP/outros módulos (removidos do escopo).
+Removido do escopo:
+- Qualquer módulo fora do core (WhatsApp, CRM completo, extras, etc.)
 
 ---
 
-## 🧠 Online-First (como funciona)
+## Online-First (fluxo)
 
 ### Leitura
-- Quando online: busca do **Firestore** (server refresh) e hidrata o cache local.
-- Quando offline: usa **IndexedDB**.
+- Online: busca do **Firestore (server refresh)** e hidrata o cache local
+- Offline: usa **IndexedDB** como fonte imediata
 
 ### Escrita
-- Escreve no **cache local** e tenta Firestore.
-- Se offline/erro transitório → enfileira em `sync_queue` para sincronizar depois.
-- O Sync Worker tenta novamente quando a rede volta.
+- Sempre grava no **IndexedDB**
+- Quando offline/erro transitório: enfileira e sincroniza depois via worker
 
 ---
 
-## 🏗️ Arquitetura (alto nível)
+## Arquitetura
 
 **UI (React)** → **services/** → **storage/** → **Firestore**
 
-Pontos-chave:
-- `services/firebase.ts` inicializa Firebase/Auth/Firestore (cache persistente multi-aba com fallback).
-- `storage/db.ts` mantém stores do IndexedDB + fila `sync_queue`.
-- `services/syncWorker.ts` processa `sync_queue` com retry/backoff.
-- `services/logic.ts` concentra leitura/escrita de Vendas e Finanças.
+Principais pontos:
+- `services/firebase.ts`: inicialização Firebase/Auth/Firestore
+- `storage/db.ts`: IndexedDB + fila de sincronização
+- `services/syncWorker.ts`: processa fila com retry/backoff
+- `services/logic.ts`: funções de Vendas/Finanças/SettingsHub (core)
 
 ---
 
-## 🔥 Coleções Firestore (Core)
+## Coleções Firestore (Core)
 
-**Config / Usuários**
+Config/Usuários:
 - `profiles`
 - `users`
 - `invites`
-- `config/*` (`system`, `ping`, `report`)
+- `config/system`
+- `config/ping`
+- `config/report`
 
-**Vendas**
+Vendas:
 - `sales`
 - `sales_tasks`
 - `clients`
@@ -87,7 +77,7 @@ Pontos-chave:
 - `commission_basic`
 - `commission_natal`
 
-**Financeiro**
+Financeiro:
 - `accounts`
 - `cards`
 - `categories`
@@ -97,107 +87,23 @@ Pontos-chave:
 - `challenges`
 - `challenge_cells`
 
-**Transversais**
+Transversais:
 - `internal_messages`
 - `audit_log`
 - `tickets`
 
 ---
 
-## 🧩 Índices Firestore (mínimos)
-Crie estes índices no Firestore:
+## Índices Firestore mínimos
 
+Crie índices:
+- `sales`: `userId ASC` + `createdAt DESC`
 - `sales_tasks`: `userId ASC` + `createdAt DESC`
-- `tickets`: `userId ASC` + `createdAt DESC`
-- `tickets`: `userId ASC` + `status ASC`
 
 ---
 
-## ✅ Requisitos
+## Setup
 
-- Node.js **18+** (recomendado 20)
-- Firebase project com:
-  - Auth habilitado
-  - Firestore habilitado
-
----
-
-## ⚙️ Setup local
-
-### 1) Instalar dependências
+### Instalação
 ```bash
 npm install
-2) Variáveis de ambiente (Vite)
-Crie um .env.local:
-
-VITE_FIREBASE_API_KEY="..."
-VITE_FIREBASE_AUTH_DOMAIN="..."
-VITE_FIREBASE_PROJECT_ID="..."
-VITE_FIREBASE_STORAGE_BUCKET="..."
-VITE_FIREBASE_MESSAGING_SENDER_ID="..."
-VITE_FIREBASE_APP_ID="..."
-VITE_FIREBASE_MEASUREMENT_ID="..."
-VITE_FIREBASE_APPCHECK_RECAPTCHA_KEY="..." # opcional (AppCheck)
-3) Rodar
-npm run dev
-🔐 Permissões (Firestore Rules)
-As regras do Firestore usam profiles/{uid} como fonte de:
-
-role: USER | ADMIN | DEV
-
-modules: chaves booleanas por módulo
-
-Usuário precisa estar isActive: true para operar.
-
-🧪 Testes rápidos (offline-first)
-Logue online, faça uma venda.
-
-Desligue a internet.
-
-Faça outra venda e atualize uma pendência.
-
-Ligue a internet.
-
-Verifique: sincronizou automaticamente.
-
-🖼️ Screenshots (opcional, mas recomendado)
-Coloque imagens em docs/assets/:
-
-gestor360-banner.png
-
-login.png
-
-dashboard.png
-
-E referencie aqui:
-
-<div align="center"> <img src="./docs/assets/login.png" width="45%" /> <img src="./docs/assets/dashboard.png" width="45%" /> </div>
-📦 Scripts
-npm run dev — ambiente de desenvolvimento
-
-npm run build — build de produção
-
-npm run preview — preview do build
-
-🛠️ Troubleshooting
-Tela branca / erro de import
-Verifique o console (F12) e corrija exports/imports.
-
-Se o erro for “does not provide an export named …”, o arquivo importado não exporta esse símbolo.
-
-Firestore “requires an index”
-Crie os índices listados acima e faça deploy.
-
-📄 Licença
-Uso interno/privado (defina aqui se necessário).
-
-
-### Imagens “modernas”
-O README já está preparado para imagens.  
-Só crie a pasta:
-
-- `docs/assets/`
-
-e coloque um banner simples (pode ser print do login) como `gestor360-banner.png`.
-
-
