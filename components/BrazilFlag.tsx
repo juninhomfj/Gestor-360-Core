@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { AudioService } from '../services/audioService';
+import { playSuccessSound } from '../services/audioService';
 
 interface BrazilFlagProps {
     className?: string;
@@ -16,25 +16,28 @@ const BrazilFlag: React.FC<BrazilFlagProps> = ({ className = '', showSoundToggle
   const handleBrazilClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
+      
+      if (isSpinning) return;
+
       setIsSpinning(true);
       
-      const duration = 3000;
+      const duration = 2000; // spin and confetti duration
       const end = Date.now() + duration;
 
       if (soundEnabled) {
-          AudioService.play('SUCCESS');
+          playSuccessSound();
       }
 
       const frame = () => {
         confetti({
-          particleCount: 2,
+          particleCount: 3,
           angle: 60,
           spread: 55,
           origin: { x: 0 },
           colors: ['#009c3b', '#ffdf00', '#002776']
         });
         confetti({
-          particleCount: 2,
+          particleCount: 3,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
@@ -43,11 +46,14 @@ const BrazilFlag: React.FC<BrazilFlagProps> = ({ className = '', showSoundToggle
   
         if (Date.now() < end) {
           requestAnimationFrame(frame);
-        } else {
-            setIsSpinning(false);
         }
       };
+      
       frame();
+
+      setTimeout(() => {
+        setIsSpinning(false);
+      }, duration);
   };
 
   return (

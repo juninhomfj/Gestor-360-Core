@@ -659,24 +659,13 @@ export const saveSystemConfig = async (config: SystemConfig) => {
         ...DEFAULT_SYSTEM_CONFIG,
         ...config,
         modules: {
-        sales: true,
-        finance: true,
-        crm: true,
-        receivables: true,
-        distribution: true,
-        imports: true,
-        settings: true,
-        dev: true,
-        chat: true,
-        logs: true,
-        users: false,
-        profiles: false,
-        abc_analysis: true,
-        ltv_details: true,
-        manual_billing: true,
-        audit_logs: true
-    }
+            ...DEFAULT_SYSTEM_CONFIG.modules,
+            ...config.modules,
+        }
     };
+    await dbPut('config', { ...normalized, id: 'system' });
+    await safeSetDoc('config', 'system', normalized, { merge: true }, { ...normalized, id: 'system' }, 'UPDATE');
+    Logger.info(`Audit: Configuração do sistema salva.`);
 };
 
 export const permanentlyDeleteClient = async (id: string) => {

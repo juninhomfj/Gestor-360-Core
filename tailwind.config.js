@@ -48,13 +48,18 @@ export default {
           '0%': { transform: 'scale(0)', opacity: '0' },
           '70%': { transform: 'scale(1.2)' },
           '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        'spin-slow': {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
         }
       },
       animation: {
         shimmer: "shimmer 2s infinite",
         swing: 'swing 2s ease-in-out infinite',
         'plane-takeoff': 'plane-takeoff 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards',
-        'success-pop': 'success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2s forwards'
+        'success-pop': 'success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2s forwards',
+        'spin-slow': 'spin-slow 3s linear infinite',
       },
     },
   },

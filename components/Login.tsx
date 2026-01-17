@@ -42,13 +42,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#020617] p-4 md:p-8 font-sans text-slate-200">
-        
-        {/* Background Gradients (Professional SaaS look) */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full"></div>
-        </div>
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-4 md:p-8 font-sans text-slate-200 animate-aurora">
 
         <div className="w-full max-w-[420px] z-10 animate-in fade-in zoom-in duration-500">
             {/* Branding Header */}
