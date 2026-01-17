@@ -27,6 +27,7 @@ import {
 
 import { dbPut, dbBulkPut, dbGetAll } from "../storage/db";
 import { Logger } from "./logger";
+import { runFirestoreSeedBootstrap } from "./seedBootstrap";
 import { User, UserPermissions } from "../types";
 import { firebaseConfig } from "./firebase";
 
@@ -284,8 +285,19 @@ export const logout = async () => {
 
 export const watchAuthChanges = (cb: (u: User | null) => void) => {
   return onAuthStateChanged(auth, async (fbUser) => {
-    if (!fbUser) return cb(null);
+    if (!fbUser) {
+      return cb(null);
+    }
+    
     const user = await getProfileFromFirebase(fbUser);
+    
+    // Dispara o bootstrap do Firestore em background, sem bloquear a UI.
+    if (user) {
+      runFirestoreSeedBootstrap().catch(error => {
+        Logger.error("Firestore seed bootstrap failed:", error);
+      });
+    }
+
     cb(user);
   });
 };

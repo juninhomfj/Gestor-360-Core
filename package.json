@@ -15,7 +15,7 @@
     "autoprefixer": "^10.4.19",
     "canvas-confetti": "^1.9.2",
     "crypto-js": "^4.2.0",
-    "firebase": "^10.8.0",
+    "firebase": "^10.14.1",
     "idb": "^8.0.0",
     "lucide-react": "^0.344.0",
     "postcss": "^8.4.38",
