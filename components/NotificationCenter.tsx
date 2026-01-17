@@ -29,15 +29,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notif, onClick }) =
             <div className="flex-1">
                 <div className="flex justify-between items-center mb-0.5">
                     <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                        {notif.source === 'SALES'
-                            ? 'Vendas'
-                            : notif.source === 'FINANCE'
-                              ? 'Finanças'
-                              : notif.source === 'WHATSAPP'
-                                ? 'WhatsApp'
-                                : notif.source === 'ERP'
-                                  ? 'ERP'
-                                  : 'Sistema'}
+                        {notif.source === 'SALES' ? 'Vendas' : (notif.source === 'FINANCE' ? 'Finanças' : (notif.source === 'WHATSAPP' ? 'WhatsApp' : 'Sistema'))}
                     </p>
                     <span className="text-[10px] text-gray-400">{new Date(notif.date).toLocaleDateString('pt-BR')}</span>
                 </div>
