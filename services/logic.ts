@@ -676,6 +676,7 @@ export const saveSystemConfig = async (config: SystemConfig) => {
         manual_billing: true,
         audit_logs: true
     }
+    };
 };
 
 export const permanentlyDeleteClient = async (id: string) => {
