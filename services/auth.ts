@@ -1,38 +1,42 @@
 // services/auth.ts
 import {
-  getAuth,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   updatePassword,
-  fetchSignInMethodsForEmail
+  fetchSignInMethodsForEmail,
+  getAuth
 } from "firebase/auth";
 
 import { getApps, initializeApp } from "firebase/app";
 
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
   updateDoc,
   serverTimestamp,
   collection,
-  getDocs,
-  query,
-  where
+  getDocs
 } from "firebase/firestore";
 
 import { dbPut, dbBulkPut, dbGetAll } from "../storage/db";
 import { Logger } from "./logger";
 import { runFirestoreSeedBootstrap } from "./seedBootstrap";
 import { User, UserPermissions } from "../types";
-import { firebaseConfig } from "./firebase";
 
-const auth = getAuth();
-const db = getFirestore();
+// ✅ use as instâncias únicas do seu projeto
+import { firebaseConfig, auth as primaryAuth, db as primaryDb } from "./firebase";
+
+// ⛔ delete estas linhas antigas:
+// const auth = getAuth();
+// const db = getFirestore();
+
+// ✅ use estas “aliases” para não mexer no resto do arquivo
+const auth = primaryAuth;
+const db = primaryDb;
 
 const DEFAULT_PERMISSIONS: UserPermissions = {
   // Núcleo
