@@ -43,12 +43,26 @@ export const firebaseConfig = {
   measurementId: getEnv("VITE_FIREBASE_MEASUREMENT_ID")
 };
 
+// Guard: evita inicializar com API key vazia (causa auth/invalid-api-key)
+const isDev = !!(import.meta as any)?.env?.DEV;
+if (!isValidKey(firebaseConfig.apiKey) || !firebaseConfig.projectId) {
+  if (isDev) {
+    console.warn(
+      "[Firebase] Variáveis de ambiente incompletas. Verifique .env.local (VITE_FIREBASE_*).",
+      {
+        hasApiKey: !!firebaseConfig.apiKey,
+        projectId: firebaseConfig.projectId || "(empty)",
+        authDomain: firebaseConfig.authDomain || "(empty)"
+      }
+    );
+  }
+}
+
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // --- 🛡️ APP CHECK SHIELD (SAFE INITIALIZATION) ---
 if (typeof window !== "undefined") {
   const recaptchaKey = getEnv("VITE_FIREBASE_APPCHECK_RECAPTCHA_KEY");
-  const isDev = !!(import.meta as any)?.env?.DEV;
 
   if (isValidKey(recaptchaKey)) {
     initializeAppCheck(app, {
@@ -76,7 +90,6 @@ export const db = (() => {
       })
     });
   } catch (e) {
-    const isDev = !!(import.meta as any)?.env?.DEV;
     if (isDev) {
       console.warn(
         "[Firestore] Fallback para getFirestore() (cache persistente indisponível).",
