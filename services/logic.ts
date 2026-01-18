@@ -19,10 +19,11 @@ import { dbPut, dbBulkPut, dbBulkPutSkipPending, dbGetAll, initDB, dbDelete, dbG
 import { sanitizeForFirestore } from '../utils/firestoreUtils';
 import * as XLSX from 'xlsx';
 import {
-    Sale, Transaction, FinanceAccount, Receivable,
-    ReportConfig, SystemConfig, ProductType, CommissionRule,
-    ChallengeCell, FinancialPacing, ProductivityMetrics, ImportMapping,
-    User, ChallengeModel, SalesTask, Client
+  Sale, Transaction, FinanceAccount, Receivable,
+  ReportConfig, SystemConfig, ProductType, CommissionRule,
+  ChallengeCell, FinancialPacing, ProductivityMetrics, ImportMapping,
+  User, ChallengeModel, SalesTask,
+  Client
 } from '../types';
 import { Logger } from './logger';
 import { getSession } from './auth';
@@ -1138,4 +1139,205 @@ export const saveReportConfig = async (cfg: ReportConfig): Promise<void> => {
   );
 
   Logger.info("Audit: ReportConfig salvo.", normalized as any);
+};
+
+const DEFAULT_REPORT_CONFIG: ReportConfig = {
+  daysForNewClient: 30,
+  daysForInactive: 60,
+  daysForLost: 180
+};
+
+export const getReportConfig = async (): Promise<ReportConfig> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return DEFAULT_REPORT_CONFIG;
+
+  // 1) tenta Firestore (/users/{uid}.reportConfig)
+  try {
+    const snap = await getDocFromServer(doc(db, "users", uid));
+    if (snap.exists()) {
+      const data: any = snap.data();
+      if (data?.reportConfig) {
+        return { ...DEFAULT_REPORT_CONFIG, ...(data.reportConfig as ReportConfig) };
+      }
+    }
+  } catch {}
+
+  // 2) fallback local (IndexedDB)
+  try {
+    const local = await dbGet("config" as any, "report");
+    if (local) return { ...DEFAULT_REPORT_CONFIG, ...(local as any) };
+  } catch {}
+
+  return DEFAULT_REPORT_CONFIG;
+};
+
+export const saveReportConfig = async (cfg: ReportConfig): Promise<void> => {
+  await validateWriteAccess();
+  const uid = auth.currentUser?.uid;
+  const normalized: ReportConfig = { ...DEFAULT_REPORT_CONFIG, ...(cfg || {}) };
+
+  // local
+  await dbPut("config" as any, { id: "report", ...normalized } as any);
+
+  // cloud (user-scope)
+  if (uid) {
+    const nowIso = new Date().toISOString();
+    await safeUpdateDoc(
+      "users" as any,
+      uid,
+      { reportConfig: normalized, updatedAt: serverTimestamp() } as any,
+      { reportConfig: normalized, updatedAt: nowIso } as any
+    );
+  }
+};
+
+export const getClients = async (): Promise<Client[]> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return [];
+
+  // tenta sync do Firestore (sem índices compostos: filtra deleted no cliente)
+  try {
+    const q = query(collection(db, "clients"), where("userId", "==", uid), limit(800));
+    const snap = await getDocsFromServer(q);
+    const cloud = snap.docs.map(d => ({ ...(d.data() as any), id: d.id })) as Client[];
+    await dbBulkPutSkipPending("clients" as any, cloud as any);
+  } catch {}
+
+  const local = await dbGetAll("clients" as any, (c: any) => c.userId === uid);
+  return (local || []).filter((c: any) => !c.deleted).sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+};
+
+export const createClientAutomatically = async (clientName: string): Promise<string> => {
+  await validateWriteAccess();
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Unauthenticated");
+
+  const name = String(clientName || "").trim();
+  if (!name) throw new Error("Cliente inválido");
+
+  const normalize = (s: string) =>
+    s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const existing = await dbGetAll("clients" as any, (c: any) => c.userId === uid);
+  const found = (existing || []).find((c: any) => !c.deleted && normalize(c.name || "") === normalize(name));
+  if (found?.id) return found.id;
+
+  const id = crypto.randomUUID();
+  const nowIso = new Date().toISOString();
+
+  const client: Client = {
+    id,
+    userId: uid,
+    name,
+    contactName: "",
+    contactPhone: "",
+    notes: "",
+    clientStatus: "ACTIVE",
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    deleted: false
+  };
+
+  await dbPut("clients" as any, client as any);
+  await safeSetDoc("clients" as any, id, client as any, { merge: true }, client as any, "INSERT");
+  return id;
+};
+
+export const getTrashItems = async (): Promise<{ sales: Sale[]; transactions: Transaction[] }> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return { sales: [], transactions: [] };
+
+  // (opcional) tenta sync leve do cloud (sem índice composto)
+  try {
+    const qs = query(collection(db, "sales"), where("userId", "==", uid), limit(800));
+    const qt = query(collection(db, "transactions"), where("userId", "==", uid), limit(800));
+    const [ss, tt] = await Promise.all([getDocsFromServer(qs), getDocsFromServer(qt)]);
+    await dbBulkPutSkipPending("sales" as any, ss.docs.map(d => ({ ...(d.data() as any), id: d.id })) as any);
+    await dbBulkPutSkipPending("transactions" as any, tt.docs.map(d => ({ ...(d.data() as any), id: d.id })) as any);
+  } catch {}
+
+  const sales = await dbGetAll("sales" as any, (s: any) => s.userId === uid && !!s.deleted);
+  const transactions = await dbGetAll("transactions" as any, (t: any) => t.userId === uid && !!t.deleted);
+
+  return {
+    sales: (sales || []).sort((a: any, b: any) => (b.deletedAt || "").localeCompare(a.deletedAt || "")),
+    transactions: (transactions || []).sort((a: any, b: any) => (b.deletedAt || "").localeCompare(a.deletedAt || ""))
+  };
+};
+
+export const restoreItem = async (type: "sales" | "transactions", item: Sale | Transaction): Promise<void> => {
+  await validateWriteAccess();
+  const nowIso = new Date().toISOString();
+  const restored: any = { ...item, deleted: false, deletedAt: undefined, updatedAt: nowIso };
+
+  await dbPut(type as any, restored);
+  await safeUpdateDoc(
+    type as any,
+    (item as any).id,
+    { deleted: false, deletedAt: null, updatedAt: serverTimestamp() } as any,
+    { deleted: false, deletedAt: null, updatedAt: nowIso } as any
+  );
+};
+
+export const permanentlyDeleteItem = async (type: "sales" | "transactions", id: string): Promise<void> => {
+  await validateWriteAccess();
+
+  // local remove
+  await dbDelete(type as any, id);
+
+  // cloud hard delete (se falhar, não derruba o app)
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, type, id));
+    await batch.commit();
+  } catch {}
+};
+
+export const getDeletedClients = async (): Promise<Client[]> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return [];
+  const local = await dbGetAll("clients" as any, (c: any) => c.userId === uid);
+  return (local || []).filter((c: any) => !!c.deleted).sort((a: any, b: any) => (b.deletedAt || "").localeCompare(a.deletedAt || ""));
+};
+
+export const restoreClient = async (client: Client): Promise<void> => {
+  await validateWriteAccess();
+  const nowIso = new Date().toISOString();
+
+  const restored: any = { ...client, deleted: false, deletedAt: undefined, updatedAt: nowIso };
+  await dbPut("clients" as any, restored);
+
+  await safeUpdateDoc(
+    "clients" as any,
+    client.id,
+    { deleted: false, deletedAt: null, updatedAt: serverTimestamp() } as any,
+    { deleted: false, deletedAt: null, updatedAt: nowIso } as any
+  );
+};
+
+export const bootstrapProductionData = async (): Promise<void> => {
+  try {
+    const user = getSession();
+    const cfg = await getSystemConfig();
+
+    const merged: SystemConfig = {
+      ...DEFAULT_SYSTEM_CONFIG,
+      ...cfg,
+      modules: {
+        ...DEFAULT_SYSTEM_CONFIG.modules,
+        ...(cfg?.modules || {})
+      }
+    };
+
+    // /config/* só DEV (rules). Usuário comum: só cache local.
+    if (user?.role === "DEV") {
+      await saveSystemConfig(merged);
+    } else {
+      await dbPut("config" as any, { ...merged, id: "system" } as any);
+    }
+
+    Logger.info("Bootstrap: Ambiente inicializado.", { role: user?.role || "unknown" });
+  } catch (e: any) {
+    Logger.warn("Bootstrap: Falha silenciosa.", { message: e?.message, code: e?.code });
+  }
 };
