@@ -10,61 +10,75 @@ import { getMessaging, isSupported } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
-const getEnv = (key: string): string => {
-  const metaEnv = (import.meta as any)?.env;
-  if (metaEnv && typeof metaEnv[key] === "string") return String(metaEnv[key]);
+type EnvKey =
+  | "VITE_FIREBASE_API_KEY"
+  | "VITE_FIREBASE_AUTH_DOMAIN"
+  | "VITE_FIREBASE_PROJECT_ID"
+  | "VITE_FIREBASE_STORAGE_BUCKET"
+  | "VITE_FIREBASE_MESSAGING_SENDER_ID"
+  | "VITE_FIREBASE_APP_ID"
+  | "VITE_FIREBASE_MEASUREMENT_ID"
+  | "VITE_FIREBASE_APPCHECK_RECAPTCHA_KEY";
 
-  // Browser-safe: só tenta process.env se existir
+const readEnv = (key: EnvKey): string => {
+  const metaEnv = (import.meta as any)?.env;
+
+  const v1 = metaEnv?.[key];
+  if (typeof v1 === "string" && v1.trim() !== "") return v1.trim();
+
+  const legacyKey = key.replace("VITE_FIREBASE_", "VITE_APP_FIREBASE_");
+  const v2 = metaEnv?.[legacyKey];
+  if (typeof v2 === "string" && v2.trim() !== "") return v2.trim();
+
   const p = (globalThis as any)?.process;
   const nodeEnv = p?.env;
-  if (nodeEnv && typeof nodeEnv[key] === "string") return String(nodeEnv[key]);
+
+  const v3 = nodeEnv?.[key];
+  if (typeof v3 === "string" && v3.trim() !== "") return v3.trim();
+
+  const v4 = nodeEnv?.[legacyKey];
+  if (typeof v4 === "string" && v4.trim() !== "") return v4.trim();
 
   return "";
 };
 
-const isValidKey = (key: string | undefined): boolean => {
-  if (!key) return false;
-  const k = key.trim();
-  return (
-    k !== "" &&
-    k.length > 15 &&
-    !k.includes("REPLACE_WITH") &&
-    !k.includes("PLACEHOLDER")
+const isValidString = (v: string) => typeof v === "string" && v.trim().length > 0;
+
+const firebaseConfig = {
+  apiKey: readEnv("VITE_FIREBASE_API_KEY"),
+  authDomain: readEnv("VITE_FIREBASE_AUTH_DOMAIN"),
+  projectId: readEnv("VITE_FIREBASE_PROJECT_ID"),
+  storageBucket: readEnv("VITE_FIREBASE_STORAGE_BUCKET"),
+  messagingSenderId: readEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
+  appId: readEnv("VITE_FIREBASE_APP_ID"),
+  measurementId: readEnv("VITE_FIREBASE_MEASUREMENT_ID")
+};
+
+const hasCoreConfig =
+  isValidString(firebaseConfig.apiKey) &&
+  isValidString(firebaseConfig.authDomain) &&
+  isValidString(firebaseConfig.projectId);
+
+if (!hasCoreConfig) {
+  console.error(
+    "[Firebase] Config inválido (apiKey/authDomain/projectId). " +
+      "Confirme seu .env(.local|.development|.development.local) e reinicie o Vite. " +
+      "Esperado: VITE_FIREBASE_* (ou fallback VITE_APP_FIREBASE_*).",
+    {
+      apiKey: firebaseConfig.apiKey ? "OK" : "MISSING",
+      authDomain: firebaseConfig.authDomain ? "OK" : "MISSING",
+      projectId: firebaseConfig.projectId ? "OK" : "MISSING"
+    }
   );
-};
-
-export const firebaseConfig = {
-  apiKey: getEnv("VITE_FIREBASE_API_KEY"),
-  authDomain: getEnv("VITE_FIREBASE_AUTH_DOMAIN"),
-  projectId: getEnv("VITE_FIREBASE_PROJECT_ID"),
-  storageBucket: getEnv("VITE_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: getEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: getEnv("VITE_FIREBASE_APP_ID"),
-  measurementId: getEnv("VITE_FIREBASE_MEASUREMENT_ID")
-};
-
-// Guard: evita inicializar com API key vazia (causa auth/invalid-api-key)
-const isDev = !!(import.meta as any)?.env?.DEV;
-if (!isValidKey(firebaseConfig.apiKey) || !firebaseConfig.projectId) {
-  if (isDev) {
-    console.warn(
-      "[Firebase] Variáveis de ambiente incompletas. Verifique .env.local (VITE_FIREBASE_*).",
-      {
-        hasApiKey: !!firebaseConfig.apiKey,
-        projectId: firebaseConfig.projectId || "(empty)",
-        authDomain: firebaseConfig.authDomain || "(empty)"
-      }
-    );
-  }
 }
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// --- 🛡️ APP CHECK SHIELD (SAFE INITIALIZATION) ---
 if (typeof window !== "undefined") {
-  const recaptchaKey = getEnv("VITE_FIREBASE_APPCHECK_RECAPTCHA_KEY");
+  const recaptchaKey = readEnv("VITE_FIREBASE_APPCHECK_RECAPTCHA_KEY");
+  const isDev = !!(import.meta as any)?.env?.DEV;
 
-  if (isValidKey(recaptchaKey)) {
+  if (isValidString(recaptchaKey) && !recaptchaKey.includes("PLACEHOLDER") && !recaptchaKey.includes("REPLACE_WITH")) {
     initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(recaptchaKey),
       isTokenAutoRefreshEnabled: true
@@ -81,7 +95,6 @@ if (typeof window !== "undefined") {
 export const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence);
 
-// Firestore: tenta usar cache persistente multi-aba. Se falhar, fallback para getFirestore().
 export const db = (() => {
   try {
     return initializeFirestore(app, {
@@ -90,11 +103,9 @@ export const db = (() => {
       })
     });
   } catch (e) {
+    const isDev = !!(import.meta as any)?.env?.DEV;
     if (isDev) {
-      console.warn(
-        "[Firestore] Fallback para getFirestore() (cache persistente indisponível).",
-        e
-      );
+      console.warn("[Firestore] Fallback para getFirestore() (cache persistente indisponível).", e);
     }
     return getFirestore(app);
   }
@@ -108,3 +119,5 @@ export const initMessaging = async () => {
   }
   return null;
 };
+
+export { firebaseConfig };
