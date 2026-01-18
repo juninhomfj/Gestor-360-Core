@@ -14,20 +14,28 @@ type EnvBag = Record<string, any>;
 
 const envBag = (): EnvBag => {
   const metaEnv = (import.meta as any)?.env;
-  return (metaEnv && typeof metaEnv === "object") ? metaEnv : {};
+  return metaEnv && typeof metaEnv === "object" ? metaEnv : {};
+};
+
+const cleanEnvValue = (v: unknown): string => {
+  if (v == null) return "";
+  const s = String(v).trim();
+  // remove aspas "..." ou '...'
+  return s.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1").trim();
 };
 
 const readEnv = (...keys: string[]): string => {
   const e = envBag();
   for (const k of keys) {
-    const v = e?.[k];
-    if (typeof v === "string" && v.trim() !== "") return v.trim();
+    const v = cleanEnvValue(e?.[k]);
+    if (v !== "") return v;
   }
   return "";
 };
 
-const isValid = (v: string): boolean => v.trim().length > 5;
+const isValid = (v: string): boolean => cleanEnvValue(v).length > 5;
 
+// Vite injeta DEV/PROD aqui; em dev, DEV = true.
 const DEV = !!envBag()?.DEV;
 
 export const firebaseConfig = {
@@ -45,15 +53,31 @@ const hasRequired =
   isValid(firebaseConfig.authDomain) &&
   isValid(firebaseConfig.projectId);
 
+// ✅ IMPORTANTE: se não tem env, NÃO inicializa o Firebase.
+// Isso evita o "auth/invalid-api-key" e a tela branca sem explicação.
 if (!hasRequired) {
+  const e = envBag();
+
   console.error(
-    "[Firebase] Config inválido (apiKey/authDomain/projectId). Confirme seu .env.local e reinicie o Vite. " +
-    "Esperado: VITE_FIREBASE_* (ou fallback VITE_APP_FIREBASE_*).",
+    "[Firebase] Config inválido (apiKey/authDomain/projectId). " +
+      "O Vite NÃO está enxergando suas variáveis do .env.local.\n" +
+      "✅ Coloque o .env.local na MESMA pasta do package.json do frontend (onde você roda npm run dev) e reinicie o Vite.\n" +
+      "Esperado: VITE_FIREBASE_* (ou fallback VITE_APP_FIREBASE_*).",
     {
+      mode: e?.MODE,
+      baseUrl: e?.BASE_URL,
       hasApiKey: !!firebaseConfig.apiKey,
       hasAuthDomain: !!firebaseConfig.authDomain,
-      hasProjectId: !!firebaseConfig.projectId
+      hasProjectId: !!firebaseConfig.projectId,
+      dica:
+        "Se você editou .env.local, precisa parar e subir o Vite de novo. " +
+        "Se persistir, limpe cache do navegador e apague node_modules/.vite."
     }
+  );
+
+  throw new Error(
+    "Firebase não inicializou: variáveis de ambiente ausentes. " +
+      "Verifique o .env.local no diretório correto do Vite e reinicie (npm run dev)."
   );
 }
 
@@ -66,9 +90,9 @@ if (typeof window !== "undefined") {
     "VITE_APP_FIREBASE_APPCHECK_RECAPTCHA_KEY"
   );
 
-  if (recaptchaKey && recaptchaKey.trim().length > 10 && !recaptchaKey.includes("PLACEHOLDER")) {
+  if (recaptchaKey && recaptchaKey.length > 10 && !recaptchaKey.includes("PLACEHOLDER")) {
     initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider(recaptchaKey.trim()),
+      provider: new ReCaptchaV3Provider(recaptchaKey),
       isTokenAutoRefreshEnabled: true
     });
   } else if (DEV) {
