@@ -11,6 +11,7 @@ build/
 
 # Ambiente e Segredos (Bloqueadores de Commit)
 .env
+.env.*.local
 .env.local
 .env.development.local
 .env.test.local
