@@ -1,109 +1,111 @@
-<div align="center">
+# Gestor 360 — Vendas & Finanças (React + Vite + Firebase)
 
-<img src="./docs/assets/gestor360-banner.png" alt="Gestor 360 Core" width="100%" />
+![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=0B1220)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=0B1220)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
-# Gestor 360 Core
-### Vendas360 + Financeiro360 + SettingsHub + DEV/Logs + Chat (Online-First)
-
-<p>
-  <img alt="Vite" src="https://img.shields.io/badge/Vite-7.x-646CFF?logo=vite&logoColor=white" />
-  <img alt="React" src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black" />
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" />
-  <img alt="Firebase" src="https://img.shields.io/badge/Firebase-Firestore%20%2B%20Auth-FFCA28?logo=firebase&logoColor=black" />
-  <img alt="Online First" src="https://img.shields.io/badge/Mode-Online--First-22c55e" />
-</p>
-
-<p>
-Aplicação web modular focada em <b>Vendas</b> e <b>Finanças</b>, com <b>cache local (IndexedDB)</b> e sincronização confiável com Firestore.
-</p>
-
-</div>
+Plataforma web modular com **Vendas**, **Finanças**, **Distribuição**, **Recebíveis**, **Configurações** e utilitários.  
+Arquitetura **local-first** (IndexedDB) com **sincronização Cloud Firestore** e tolerância a offline.
 
 ---
 
-## Escopo do Core
+## ✨ Principais recursos
 
-Incluído:
-- **Vendas360**
-- **Financeiro360**
-- **SettingsHub** (somente funções pertinentes ao core)
-- **DEV / Logs / Diagnóstico**
-- **Chat interno**
+### Vendas
+- Cadastro e edição de vendas
+- Faturamento em lote
+- Regras de comissão (básica / natal) com assinatura em tempo real
+- Integração com campanhas / overlays de comissão (quando habilitado)
 
-Removido do escopo:
-- Qualquer módulo fora do core (WhatsApp, CRM completo, extras, etc.)
+### Finanças
+- Contas, transações, categorias, metas, desafios, receíveis
+- Indicadores e dashboards
 
----
-
-## Online-First (fluxo)
-
-### Leitura
-- Online: busca do **Firestore (server refresh)** e hidrata o cache local
-- Offline: usa **IndexedDB** como fonte imediata
-
-### Escrita
-- Sempre grava no **IndexedDB**
-- Quando offline/erro transitório: enfileira e sincroniza depois via worker
+### Operação
+- Cache local (IndexedDB) + sync
+- Modo manutenção e bloqueio de escrita (quando habilitado)
+- Lixeira (restaurar e excluir permanentemente)
+- Áudio de feedback (sucesso/erro/notificações)
 
 ---
 
-## Arquitetura
-
-**UI (React)** → **services/** → **storage/** → **Firestore**
-
-Principais pontos:
-- `services/firebase.ts`: inicialização Firebase/Auth/Firestore
-- `storage/db.ts`: IndexedDB + fila de sincronização
-- `services/syncWorker.ts`: processa fila com retry/backoff
-- `services/logic.ts`: funções de Vendas/Finanças/SettingsHub (core)
+## 🧱 Stack
+- **React 18 + TypeScript**
+- **Vite**
+- **Firebase**: Auth, Firestore, Functions, Messaging (opcional), AppCheck (opcional)
+- **IndexedDB (idb)** para cache local-first
+- Tailwind + Lucide + Recharts
 
 ---
 
-## Coleções Firestore (Core)
-
-Config/Usuários:
-- `profiles`
-- `users`
-- `invites`
-- `config/system`
-- `config/ping`
-- `config/report`
-
-Vendas:
-- `sales`
-- `sales_tasks`
-- `clients`
-- `campaigns`
-- `commission_basic`
-- `commission_natal`
-
-Financeiro:
-- `accounts`
-- `cards`
-- `categories`
-- `transactions`
-- `receivables`
-- `goals`
-- `challenges`
-- `challenge_cells`
-
-Transversais:
-- `internal_messages`
-- `audit_log`
-- `tickets`
+## ✅ Pré-requisitos
+- Node.js 18+ recomendado
+- Projeto Firebase configurado (Web App)
 
 ---
 
-## Índices Firestore mínimos
+## 🔐 Variáveis de ambiente
 
-Crie índices:
-- `sales`: `userId ASC` + `createdAt DESC`
-- `sales_tasks`: `userId ASC` + `createdAt DESC`
+Crie **`.env.local`** na raiz do projeto.
 
----
+Você pode usar **qualquer um** dos padrões abaixo (o projeto aceita ambos):
 
-## Setup
+### Padrão A (compat)
+```env
+VITE_APP_FIREBASE_API_KEY="..."
+VITE_APP_FIREBASE_AUTH_DOMAIN="..."
+VITE_APP_FIREBASE_PROJECT_ID="..."
+VITE_APP_FIREBASE_STORAGE_BUCKET="..."
+VITE_APP_FIREBASE_MESSAGING_SENDER_ID="..."
+VITE_APP_FIREBASE_APP_ID="..."
+VITE_APP_FIREBASE_MEASUREMENT_ID="..."
+Padrão B (novo)
+VITE_FIREBASE_API_KEY="..."
+VITE_FIREBASE_AUTH_DOMAIN="..."
+VITE_FIREBASE_PROJECT_ID="..."
+VITE_FIREBASE_STORAGE_BUCKET="..."
+VITE_FIREBASE_MESSAGING_SENDER_ID="..."
+VITE_FIREBASE_APP_ID="..."
+VITE_FIREBASE_MEASUREMENT_ID="..."
+⚠️ Depois de alterar .env.local, reinicie o Vite: Ctrl+C e npm run dev
 
-### Instalação
-```bash
+▶️ Rodar local
 npm install
+npm run dev
+Acesse:
+
+http://localhost:5173
+
+🏗️ Build / Preview
+npm run build
+npm run preview
+☁️ Deploy (Vercel)
+Configure as variáveis de ambiente no painel da Vercel (mesmas do .env.local)
+
+Build command: npm run build
+
+Output: dist
+
+🧩 Estrutura (alto nível)
+services/firebase.ts — init Firebase (env compat + Firestore cache multi-aba)
+
+services/logic.ts — regras de negócio / local-first / sync
+
+storage/db.ts — IndexedDB (idb)
+
+components/* — UI e módulos
+
+🛟 Troubleshooting
+Firebase: Error (auth/invalid-api-key)
+O app não está lendo a apiKey do .env.local ou a chave é inválida/restrita.
+
+Reinicie o Vite após alterar .env.local.
+
+Confirme que a chave é a do Web App do Firebase.
+
+No matching export ... services/logic.ts
+Algum componente importou função que não existe/exporta no logic.ts.
+
+Garanta que os exports compat foram adicionados ao final do arquivo.
+
