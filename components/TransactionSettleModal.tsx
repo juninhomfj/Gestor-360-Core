@@ -151,7 +151,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                 </label>
                 <div className="flex gap-2 items-center flex-wrap">
                     {attachments.map((att, idx) => (
-                        <div key={idx} className="relative w-8 h-8 bg-gray-100 dark:bg-slate-800 rounded overflow-hidden group border border-gray-300 dark:border-slate-600">
+                        <div key={idx} className="relative w-8 h-8 bg-gray-100 dark:bg-slate-800 rounded overflow-hidden group border border-gray-300 dark:border-slate-600 dark:text-slate-100">
                             {renderThumbnail(att)}
                             <button onClick={() => removeAttachment(idx)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Trash2 size={12}/>

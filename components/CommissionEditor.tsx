@@ -183,8 +183,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
           </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden">
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden dark:text-slate-100">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4 dark:text-slate-100">
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-2xl ${type === ProductType.NATAL ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
               <Database size={24} />
@@ -276,7 +276,7 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
         </div>
 
         {!readOnly && isAdminOrDev && (
-            <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4 dark:text-slate-100">
                 <button 
                     onClick={addRow}
                     className="w-full md:w-auto px-6 py-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 text-gray-500 font-bold hover:border-indigo-500 hover:text-indigo-500 transition-all flex items-center justify-center gap-2"

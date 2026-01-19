@@ -69,7 +69,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
-        <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 animate-in zoom-in-95">
+        <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 animate-in zoom-in-95 dark:text-slate-100">
             
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -85,17 +85,17 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                 </p>
 
                 <div className="space-y-4">
-                    <div className="p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 hover:border-blue-300 transition-colors">
+                    <div className="p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 hover:border-blue-300 transition-colors dark:text-slate-100">
                         <div className="flex items-start gap-3">
                             <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded text-blue-600"><FileText size={20}/></div>
                             <div className="flex-1">
                                 <h4 className="font-bold text-gray-800 dark:text-white">Relatórios Legíveis (Excel/CSV)</h4>
                                 <p className="text-xs text-gray-500 mb-3">Ideal para leitura em planilhas.</p>
                                 <div className="flex gap-2">
-                                    <button onClick={() => handleExportSales('CSV')} disabled={loading} className="px-3 py-1.5 bg-white dark:bg-slate-700 border rounded text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
+                                    <button onClick={() => handleExportSales('CSV')} disabled={loading} className="px-3 py-1.5 bg-white dark:bg-slate-700 border rounded text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors dark:text-slate-100">
                                         Baixar Vendas
                                     </button>
-                                    <button onClick={handleExportFinance} disabled={loading} className="px-3 py-1.5 bg-white dark:bg-slate-700 border rounded text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
+                                    <button onClick={handleExportFinance} disabled={loading} className="px-3 py-1.5 bg-white dark:bg-slate-700 border rounded text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors dark:text-slate-100">
                                         Baixar Financeiro
                                     </button>
                                 </div>
@@ -103,7 +103,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                         </div>
                     </div>
 
-                    <div className="p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 hover:border-emerald-300 transition-colors">
+                    <div className="p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 hover:border-emerald-300 transition-colors dark:text-slate-100">
                         <div className="flex items-start gap-3">
                             <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded text-emerald-600"><Database size={20}/></div>
                             <div className="flex-1">
@@ -114,7 +114,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                                     <input 
                                         type="password" 
                                         placeholder="Senha para o arquivo" 
-                                        className="border rounded px-3 py-1.5 text-sm w-40 dark:bg-slate-900 dark:border-slate-600"
+                                        className="border rounded px-3 py-1.5 text-sm w-40 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                                         value={backupPass}
                                         onChange={e => setBackupPass(e.target.value)}
                                     />
@@ -128,7 +128,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                 </div>
             </div>
 
-            <div className="p-4 bg-gray-50 dark:bg-slate-800/80 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/80 border-t border-gray-100 dark:border-slate-800 flex justify-end dark:text-slate-100">
                 <button onClick={onClose} className="px-6 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg font-bold hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors">
                     Fechar
                 </button>

@@ -275,7 +275,7 @@ const SalesList: React.FC<SalesListProps> = ({
 
       {billingModal.isOpen && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl w-full max-w-md">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl w-full max-w-md dark:text-slate-100">
                   <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                       <div>
                           <h3 className="text-lg font-black">Faturar Vendas</h3>
@@ -330,17 +330,17 @@ const SalesList: React.FC<SalesListProps> = ({
             <p className="text-sm text-gray-500">Controle operacional e financeiro.</p>
           </div>
           <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">
-              <button onClick={handleDownloadModel} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-indigo-500 hover:shadow-lg transition-all sm:flex-none" title="Baixar Modelo (Excel/CSV)">
+              <button onClick={handleDownloadModel} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-indigo-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Baixar Modelo (Excel/CSV)">
                   <FileSpreadsheet size={20}/>
               </button>
-              <button onClick={onRestore} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-blue-500 hover:shadow-lg transition-all sm:flex-none" title="Backup e Restauração">
+              <button onClick={onRestore} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-blue-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Backup e Restauração">
                   <Database size={20}/>
               </button>
-              <button disabled={isReadOnly} onClick={handleImportClick} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-emerald-500 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:flex-none" title="Importar Excel/CSV">
+              <button disabled={isReadOnly} onClick={handleImportClick} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-emerald-500 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:flex-none dark:text-slate-100" title="Importar Excel/CSV">
                   <Upload size={20}/>
               </button>
               <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange}/>
-              <button onClick={onClearAll} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-amber-500 hover:shadow-lg transition-all sm:flex-none" title="Limpar Cache Local">
+              <button onClick={onClearAll} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-amber-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Limpar Cache Local">
                   <RefreshCw size={20}/>
               </button>
               <button disabled={isReadOnly} onClick={onNew} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto">

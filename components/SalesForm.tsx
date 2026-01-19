@@ -220,9 +220,9 @@ const SalesForm: React.FC<Props> = ({
         className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 md:p-4 overflow-y-auto"
         onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-5xl max-h-[95vh] shadow-2xl flex flex-col border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-5xl max-h-[95vh] shadow-2xl flex flex-col border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto dark:text-slate-100">
         
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950 shrink-0">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950 shrink-0 dark:text-slate-100">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl">
               <Calculator size={22} />
@@ -261,7 +261,7 @@ const SalesForm: React.FC<Props> = ({
                   onFocus={() => setShowClientList(true)}
                 />
                 {showClientList && filteredClients.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto dark:text-slate-100">
                         {filteredClients.map(c => (
                             <button 
                                 key={c.id} 
@@ -388,7 +388,7 @@ const SalesForm: React.FC<Props> = ({
               </div>
               
               {!isPendingBilling && (
-                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 dark:text-slate-100">
                     <div className="text-xs">
                         <p className="font-bold text-slate-600 dark:text-slate-300">Recebíveis via Importação Mensal</p>
                         <p className="text-slate-500 dark:text-slate-400">Os lançamentos de comissão são feitos por importação do período.</p>
@@ -442,7 +442,7 @@ const SalesForm: React.FC<Props> = ({
           </fieldset>
         </div>
 
-        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-gray-50 dark:bg-slate-950 shrink-0">
+        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-gray-50 dark:bg-slate-950 shrink-0 dark:text-slate-100">
           <div className="flex items-center gap-4">
             <div className="text-center md:text-left">
               <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Base de Comissão</span>
@@ -450,7 +450,7 @@ const SalesForm: React.FC<Props> = ({
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(commissionBase)}
               </p>
             </div>
-            <div className="w-px h-8 bg-gray-200 dark:bg-slate-800"></div>
+            <div className="w-px h-8 bg-gray-200 dark:bg-slate-800 dark:text-slate-100"></div>
             <div className="text-center md:text-left">
               <span className={`block text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-500' : 'text-emerald-500'}`}>
                 {isPendingBilling ? 'Comissão Prevista (Pend.)' : 'Comissão Prevista'}

@@ -132,7 +132,7 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                 </div>
 
                 {/* Editor Area */}
-                <div className="flex-1 flex flex-col p-4 bg-gray-100 dark:bg-slate-950">
+                <div className="flex-1 flex flex-col p-4 bg-gray-100 dark:bg-slate-950 dark:text-slate-100">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className={`text-xs font-bold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             {selectedRecordId !== null ? `ID: ${selectedRecordId}` : 'Selecione um registro'}

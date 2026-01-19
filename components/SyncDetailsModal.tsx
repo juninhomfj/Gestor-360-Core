@@ -50,9 +50,9 @@ const SyncDetailsModal: React.FC<SyncDetailsModalProps> = ({ isOpen, onClose }) 
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in">
-            <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[90vh] dark:text-slate-100">
                 
-                <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950">
+                <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
                     <div className="flex items-center gap-2">
                         <div className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
                             <ShieldCheckIcon size={20} />
@@ -85,7 +85,7 @@ const SyncDetailsModal: React.FC<SyncDetailsModalProps> = ({ isOpen, onClose }) 
                     </div>
 
                     {/* Stats Card */}
-                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800">
+                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800 dark:text-slate-100">
                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <Database size={12}/> Tráfego da Sessão
                         </h4>
@@ -115,7 +115,7 @@ const SyncDetailsModal: React.FC<SyncDetailsModalProps> = ({ isOpen, onClose }) 
                         ) : (
                             <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                                 {queue.map((item, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
                                             <span className="text-[10px] font-black uppercase text-gray-500">{item.table}</span>
@@ -128,7 +128,7 @@ const SyncDetailsModal: React.FC<SyncDetailsModalProps> = ({ isOpen, onClose }) 
                     </div>
                 </div>
 
-                <div className="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950">
+                <div className="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
                     <button 
                         onClick={handleForceSync}
                         disabled={isSyncing}

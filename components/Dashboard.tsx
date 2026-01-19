@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sale, ProductType, DashboardWidgetConfig, Transaction, User, SalesTargets, Receivable, SalesTask } from '../types'; 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users } from 'lucide-react';
+import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users, Sparkles } from 'lucide-react';
 import { getFinanceData, getABCAnalysis, analyzeClients, buildBilledSalesMap } from '../services/logic'; 
 import { SALES_TASK_LABELS } from '../utils/salesTasks';
 

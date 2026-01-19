@@ -89,9 +89,9 @@ const ToastItem: React.FC<{ toast: ToastMessage; onRemove: (id: string) => void;
                       <BellOff size={10} /> Silenciar este aviso por:
                   </p>
                   <div className="flex gap-1">
-                      <button onClick={() => handleMute(1)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors">1m</button>
-                      <button onClick={() => handleMute(5)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors">5m</button>
-                      <button onClick={() => handleMute(60)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors">1h</button>
+                      <button onClick={() => handleMute(1)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors dark:text-slate-100">1m</button>
+                      <button onClick={() => handleMute(5)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors dark:text-slate-100">5m</button>
+                      <button onClick={() => handleMute(60)} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-xs rounded transition-colors dark:text-slate-100">1h</button>
                   </div>
               </div>
           )}

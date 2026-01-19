@@ -57,7 +57,7 @@ import {
     resolveMonthlyBasicBasketTarget
 } from './services/campaignService';
 
-import { reloadSession, logout, getSession, updateUser } from './services/auth';
+import { logout, getSession, updateUser, watchAuthChanges } from './services/auth';
 import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
@@ -220,32 +220,50 @@ const App: React.FC = () => {
             addToast('ERROR', 'Falha ao salvar parâmetros de gráficos.');
         }
     };
-
     useEffect(() => {
         if (initRun.current) return;
         initRun.current = true;
+        let isMounted = true;
+        const lastUidRef: { current: string | null } = { current: null };
+
         const init = async () => {
             try {
                 await AudioService.preload();
-                const sessionUser = await reloadSession();
-                if (sessionUser) {
+                const unsubscribe = watchAuthChanges(async (sessionUser) => {
+                    if (!isMounted) return;
+                    if (!sessionUser) {
+                        lastUidRef.current = null;
+                        setAuthView('LOGIN');
+                        setLoading(false);
+                        return;
+                    }
+                    if (lastUidRef.current === sessionUser.uid) {
+                        return;
+                    }
+                    lastUidRef.current = sessionUser.uid;
                     if (!sessionUser.isActive || sessionUser.userStatus === 'INACTIVE') {
                         setAuthView('BLOCKED');
                         setLoading(false);
-                    } else {
-                        await handleLoginSuccess(sessionUser);
+                        return;
                     }
-                } else {
-                    setAuthView('LOGIN');
-                    setLoading(false);
-                }
+                    await handleLoginSuccess(sessionUser);
+                });
+
+                return () => {
+                    isMounted = false;
+                    unsubscribe?.();
+                };
             } catch (e: any) {
-                setAuthError("Erro na conexão Cloud Firestore.");
+                setAuthError("Erro na conexao Cloud Firestore.");
                 setAuthView('ERROR');
                 setLoading(false);
             }
         };
-        init();
+        const cleanup = init();
+        return () => {
+            isMounted = false;
+            if (typeof cleanup === 'function') cleanup();
+        };
     }, []);
 
     const handleLoginSuccess = async (user: User) => {

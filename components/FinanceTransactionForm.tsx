@@ -91,9 +91,9 @@ const FinanceTransactionForm: React.FC<Props> = ({
 
   const modalContent = (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 p-2 md:p-4 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 my-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 my-auto dark:text-slate-100">
         
-        <div className="p-1 bg-gray-100 dark:bg-slate-950 flex shrink-0">
+        <div className="p-1 bg-gray-100 dark:bg-slate-950 flex shrink-0 dark:text-slate-100">
           <button onClick={() => setType('INCOME')} className={`flex-1 flex items-center justify-center gap-2 py-4 font-black text-sm transition-all ${type === 'INCOME' ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-md rounded-xl' : 'text-gray-400'}`}>
             <TrendingUp size={18}/> RECEITA
           </button>
@@ -146,7 +146,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
                         <input type="date" className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-sm dark:text-white" value={date} onChange={e => setDate(e.target.value)} />
                     </div>
                     <div className="flex flex-col justify-end">
-                        <label className="flex items-center gap-2 cursor-pointer p-4 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30">
+                        <label className="flex items-center gap-2 cursor-pointer p-4 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30 dark:text-slate-100">
                             <input type="checkbox" className="w-5 h-5 rounded text-indigo-600" checked={isPaid} onChange={e => setIsPaid(e.target.checked)} />
                             <span className="text-sm font-bold">{isPaid ? 'Lançamento Realizado' : 'Provisionar p/ Futuro'}</span>
                         </label>
@@ -170,7 +170,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
                     
                     {isRecurring && (
                         <div className="space-y-3 animate-in fade-in">
-                            <select className="w-full p-3 rounded-lg border dark:bg-slate-800 text-sm" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}>
+                            <select className="w-full p-3 rounded-lg border dark:bg-slate-800 text-sm dark:text-slate-100" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}>
                                 <option value="MONTHLY">Todo mês</option>
                                 <option value="WEEKLY">Toda semana</option>
                                 <option value="DAILY">Todo dia</option>
@@ -183,7 +183,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
 
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Classificação de Pessoa</label>
-                    <div className="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <div className="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-xl dark:text-slate-100">
                         <button onClick={() => setPersonType('PF')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${personType === 'PF' ? 'bg-white dark:bg-slate-700 text-purple-600 shadow' : 'text-gray-500'}`}>Pessoal (PF)</button>
                         <button onClick={() => setPersonType('PJ')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${personType === 'PJ' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow' : 'text-gray-500'}`}>Empresa (PJ)</button>
                     </div>
@@ -206,7 +206,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex gap-4 bg-gray-50 dark:bg-slate-950/50 shrink-0">
+        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex gap-4 bg-gray-50 dark:bg-slate-950/50 shrink-0 dark:text-slate-100">
           <button onClick={onClose} className="flex-1 py-4 rounded-xl border border-gray-300 dark:border-slate-700 font-bold text-gray-500 hover:bg-gray-100 transition-all uppercase text-xs">Cancelar</button>
           <button onClick={handleSave} className={`flex-1 py-4 rounded-xl text-white font-black shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 uppercase text-xs ${type === 'INCOME' ? 'bg-emerald-600 hover:bg-emerald-700' : type === 'EXPENSE' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
             <Save size={20}/> Gravar Lançamento

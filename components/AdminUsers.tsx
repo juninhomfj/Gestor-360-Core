@@ -136,19 +136,19 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
         </div>
 
         {isFormOpen && (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95 mb-6">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95 mb-6 dark:text-slate-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Nome do Usuário</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: João Silva" />
+                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: João Silva" />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">E-mail Corporativo</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 disabled:opacity-50" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
+                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 disabled:opacity-50 dark:text-slate-100" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
                     </div>
                 </div>
 
-                <div className="p-6 bg-gray-50 dark:bg-slate-950/50 rounded-2xl border dark:border-slate-800">
+                <div className="p-6 bg-gray-50 dark:bg-slate-950/50 rounded-2xl border dark:border-slate-800 dark:text-slate-100">
                     <label className="block text-xs font-black text-gray-500 uppercase mb-6 tracking-widest">Nível de Autoridade</label>
                     <div className="flex gap-4 mb-10">
                         {['USER', 'ADMIN', 'DEV'].map((r) => (
@@ -220,10 +220,10 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
             </div>
         )}
 
-        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm dark:text-slate-100">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                    <thead className="text-[10px] font-black uppercase text-gray-400 tracking-widest bg-gray-50 dark:bg-slate-950/50 border-b dark:border-slate-800">
+                    <thead className="text-[10px] font-black uppercase text-gray-400 tracking-widest bg-gray-50 dark:bg-slate-950/50 border-b dark:border-slate-800 dark:text-slate-100">
                         <tr>
                             <th className="p-6">Usuário</th>
                             <th className="p-6">Função</th>
@@ -236,7 +236,7 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                             <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-all">
                                 <td className="p-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-black text-xs">
+                                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-black text-xs dark:text-slate-100">
                                             {safeFirstChar(u.name)}
                                         </div>
                                         <div>

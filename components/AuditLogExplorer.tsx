@@ -80,7 +80,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <p className="text-sm text-gray-500">Monitoramento transacional de infraestrutura cloud.</p>
                 </div>
                 <div className="flex w-full flex-wrap gap-2 md:w-auto">
-                    <button onClick={handleExport} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 transition-colors md:flex-none">
+                    <button onClick={handleExport} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 transition-colors md:flex-none dark:text-slate-100">
                         <Download size={20}/>
                     </button>
                     <button onClick={loadLogs} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors md:flex-none">
@@ -154,7 +154,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                                     </td>
                                     <td className="p-5">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                                            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0 dark:text-slate-100">
                                                 <User size={12}/>
                                             </div>
                                             <span className="truncate max-w-[120px]" title={log.userName || log.userId || 'System'}>{log.userName || 'SYSTEM'}</span>

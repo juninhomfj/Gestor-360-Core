@@ -50,7 +50,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
             <div className={`w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} flex flex-col h-[90vh]`}>
                 
                 {/* Header Dossiê */}
-                <div className="p-8 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="p-8 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 dark:text-slate-100">
                     <div className="flex items-center gap-6">
                         <div className="w-20 h-20 rounded-3xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-900/30">
                             <User size={40} />
@@ -92,7 +92,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
                                     <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                                         <BarChart3 size={16}/> Comportamento de Margem
                                     </h4>
-                                    <div className="h-64 w-full p-4 rounded-3xl bg-gray-50 dark:bg-slate-950 border dark:border-slate-800">
+                                    <div className="h-64 w-full p-4 rounded-3xl bg-gray-50 dark:bg-slate-950 border dark:border-slate-800 dark:text-slate-100">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={marginData}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
@@ -122,7 +122,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
                         </div>                </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex justify-between items-center px-10">
+                <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex justify-between items-center px-10 dark:text-slate-100">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Dossiê Gerado em {new Date().toLocaleDateString()}</p>
                     <button onClick={onClose} className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl active:scale-95 transition-all text-[10px] uppercase tracking-widest border border-white/10">Fechar Dossiê</button>
                 </div>
@@ -146,7 +146,7 @@ const KPICard = ({ label, value, icon, color }: any) => (
 );
 
 const SummaryItem = ({ label, value, icon, helper }: { label: string; value: string; icon: React.ReactNode; helper?: string }) => (
-    <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 flex items-center gap-4">
+    <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 flex items-center gap-4 dark:text-slate-100">
         <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
             {icon}
         </div>

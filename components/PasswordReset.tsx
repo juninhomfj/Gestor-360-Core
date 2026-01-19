@@ -39,7 +39,7 @@ const PasswordReset: React.FC<PasswordResetProps> = ({ onSuccess, userId }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4 animate-in fade-in">
-        <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-700">
+        <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-8 border border-slate-700 dark:text-slate-100">
             <div className="text-center mb-8">
                 <Logo size="xl" variant="full" lightMode />
                 <h2 className="text-xl font-bold text-white mt-6">Definir Senha de Acesso</h2>

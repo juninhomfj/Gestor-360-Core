@@ -124,7 +124,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, 
                             {/* Botão de fechar explícito para mobile */}
                             <button 
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 bg-gray-200 dark:bg-slate-700 rounded-full md:p-1 md:bg-transparent"
+                                className="p-2 bg-gray-200 dark:bg-slate-700 rounded-full md:p-1 md:bg-transparent dark:text-slate-100"
                             >
                                 <X size={20} className="text-gray-600 dark:text-gray-300" />
                             </button>
@@ -146,7 +146,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, 
                     </div>
 
                     {count > 0 && onClearAll && (
-                        <div className="p-4 md:p-2 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 safe-area-pb">
+                        <div className="p-4 md:p-2 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 safe-area-pb dark:text-slate-100">
                             <button 
                                 onClick={() => { onClearAll(); setIsOpen(false); }}
                                 className="w-full py-3 md:py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center justify-center gap-2 transition-colors border border-red-100 dark:border-red-900/30"

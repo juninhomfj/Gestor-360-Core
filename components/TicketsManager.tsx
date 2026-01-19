@@ -28,6 +28,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<'ALL' | TicketStatus>('ALL');
     const [priorityFilter, setPriorityFilter] = useState<'ALL' | TicketPriority>('ALL');
+    const [sortBy, setSortBy] = useState<'DATE' | 'PRIORITY'>('DATE');
     const [search, setSearch] = useState('');
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +62,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     };
 
     const filteredTickets = useMemo(() => {
-        return tickets.filter(ticket => {
+        const filtered = tickets.filter(ticket => {
             if (statusFilter !== 'ALL' && ticket.status !== statusFilter) return false;
             if (priorityFilter !== 'ALL' && ticket.priority !== priorityFilter) return false;
             if (search.trim()) {
@@ -75,7 +76,22 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
             }
             return true;
         });
-    }, [tickets, statusFilter, priorityFilter, search]);
+
+        const priorityRank: Record<TicketPriority, number> = {
+            URGENT: 4,
+            HIGH: 3,
+            MEDIUM: 2,
+            LOW: 1
+        };
+
+        return filtered.sort((a, b) => {
+            if (sortBy === 'PRIORITY') {
+                const diff = priorityRank[b.priority] - priorityRank[a.priority];
+                if (diff !== 0) return diff;
+            }
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    }, [tickets, statusFilter, priorityFilter, search, sortBy]);
 
     const selectedTicket = filteredTickets.find(t => t.id === selectedTicketId) || tickets.find(t => t.id === selectedTicketId) || null;
 
@@ -141,6 +157,14 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                         <option value="HIGH">Alta</option>
                         <option value="URGENT">Crítica</option>
                     </select>
+                    <select
+                        value={sortBy}
+                        onChange={e => setSortBy(e.target.value as any)}
+                        className={`px-4 py-3 rounded-2xl border font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-gray-50 border-gray-200'}`}
+                    >
+                        <option value="DATE">Ordenar por data</option>
+                        <option value="PRIORITY">Ordenar por prioridade</option>
+                    </select>
                 </div>
             </div>
 
@@ -180,6 +204,9 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                         <span>{statusLabels[ticket.status]}</span>
                                         <span>•</span>
                                         <span>{ticket.createdByName}</span>
+                                    </div>
+                                    <div className="mt-1 text-[10px] text-gray-400">
+                                        {new Date(ticket.createdAt).toLocaleString()}
                                     </div>
                                 </button>
                             ))

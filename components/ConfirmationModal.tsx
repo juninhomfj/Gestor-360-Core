@@ -33,7 +33,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 transform transition-all scale-100">
+        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 transform transition-all scale-100 dark:text-slate-100">
             
             <div className="p-6 text-center">
                 {/* ÍCONE ANIMADO */}
@@ -45,9 +45,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                             {/* Animação de Papel Caindo */}
                             {isDeleting && (
                                 <>
-                                    <div className="absolute -top-4 w-3 h-4 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-1 z-20"></div>
-                                    <div className="absolute -top-6 w-2 h-3 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-2 z-20"></div>
-                                    <div className="absolute -top-2 w-2.5 h-3.5 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-1 z-20" style={{ animationDelay: '0.3s' }}></div>
+                                    <div className="absolute -top-4 w-3 h-4 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-1 z-20 dark:text-slate-100"></div>
+                                    <div className="absolute -top-6 w-2 h-3 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-2 z-20 dark:text-slate-100"></div>
+                                    <div className="absolute -top-2 w-2.5 h-3.5 bg-white dark:bg-slate-200 shadow-sm rounded-sm animate-trash-paper-1 z-20 dark:text-slate-100" style={{ animationDelay: '0.3s' }}></div>
                                 </>
                             )}
                         </div>

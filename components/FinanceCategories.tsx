@@ -123,7 +123,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
        </div>
 
        {/* TABS (PF/PJ) */}
-       <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-slate-800 w-full md:w-fit">
+       <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-slate-800 w-full md:w-fit dark:text-slate-100">
             <button 
                 onClick={() => setActiveTab('PF')}
                 className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'PF' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-500'}`}

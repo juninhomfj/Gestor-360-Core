@@ -10,7 +10,7 @@ interface InvitationSentModalProps {
 const InvitationSentModal: React.FC<InvitationSentModalProps> = ({ email, onClose }) => {
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-500">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden text-center">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden text-center dark:text-slate-100">
         
         {/* Elementos Decorativos de Fundo */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50"></div>
@@ -44,7 +44,7 @@ const InvitationSentModal: React.FC<InvitationSentModalProps> = ({ email, onClos
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                     Instruções de acesso e criação de senha foram enviadas para o endereço:
                 </p>
-                <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-black/5 dark:border-white/5 w-full">
+                <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-black/5 dark:border-white/5 w-full dark:text-slate-100">
                     <span className="font-mono text-xs font-bold text-indigo-500 break-all select-all">{email}</span>
                 </div>
             </div>

@@ -203,6 +203,17 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
       setSystemConfig({ ...systemConfig, salesLockEnabled: !systemConfig.salesLockEnabled });
   };
 
+  const handleSaveAiSettings = () => {
+      const payload = {
+          provider: aiProvider,
+          apiKey: aiApiKey,
+          aiEnabled,
+          biEnabled
+      };
+      localStorage.setItem('sys_ai_settings_v1', JSON.stringify(payload));
+      onNotify('SUCCESS', 'Preferencias de IA/BI salvas localmente.');
+  };
+
   const handleSaveSystemSettings = async () => {
       const newConfig: any = { 
           ...systemConfig, 
@@ -217,16 +228,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
           warningSound
       };
 
-  const handleSaveAiSettings = () => {
-      const payload = {
-          provider: aiProvider,
-          apiKey: aiApiKey,
-          aiEnabled,
-          biEnabled
-      };
-      localStorage.setItem('sys_ai_settings_v1', JSON.stringify(payload));
-      onNotify('SUCCESS', 'Prefer??ncias de IA/BI salvas localmente.');
-  };
       setSystemConfig(newConfig);
       await saveSystemConfig(newConfig);
       onNotify('SUCCESS', 'Configurações de sistema atualizadas!');
@@ -734,7 +735,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                         
                         <div className="space-y-10">
                             {/* Módulos Globais */}
-                            <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-800">
+                            <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-800 dark:text-slate-100">
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                                     <Layout size={14} className="text-indigo-500" /> Interruptores de Módulos Globais
                                 </h4>
@@ -759,7 +760,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 </div>
                             </div>
 
-                            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800">
+                            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 dark:text-slate-100">
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                                     <AlertTriangle size={14} className="text-amber-500" /> Diagnóstico de Visibilidade
                                 </h4>
@@ -817,7 +818,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 </p>
                             </div>
 
-                            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800">
+                            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 dark:text-slate-100">
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                                     <DollarSign size={14} className="text-emerald-500" /> Formas de Pagamento (Vendas)
                                 </h4>
@@ -939,7 +940,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex p-1 rounded-xl w-fit flex-wrap gap-2 bg-gray-100 dark:bg-slate-800 shadow-inner">
+                    <div className="flex p-1 rounded-xl w-fit flex-wrap gap-2 bg-gray-100 dark:bg-slate-800 shadow-inner dark:text-slate-100">
                         <button onClick={() => setCommissionTab(ProductType.BASICA)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${commissionTab === ProductType.BASICA ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-500'}`}>Cesta Básica</button>
                         <button onClick={() => setCommissionTab(ProductType.NATAL)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${commissionTab === ProductType.NATAL ? 'bg-red-600 text-white shadow-md' : 'text-gray-500'}`}>Cesta de Natal</button>
                     </div>
@@ -961,7 +962,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950">
+                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
                                 <label className="flex items-center justify-between cursor-pointer">
                                     <span className="text-sm font-bold">Ativar Sons</span>
                                     <input 
@@ -972,7 +973,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     />
                                 </label>
                             </div>
-                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950">
+                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Volume Geral</label>
                                 <input 
                                     type="range" min="0" max="1" step="0.1"

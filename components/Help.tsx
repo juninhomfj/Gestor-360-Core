@@ -78,7 +78,7 @@ const Help: React.FC = () => {
           </div>
 
           {/* EMAIL CARD */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center hover:border-blue-300 transition-colors">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center hover:border-blue-300 transition-colors dark:text-slate-100">
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 text-red-500 rounded-lg flex items-center justify-center mb-4">
                   <Mail size={24} />
               </div>
@@ -96,7 +96,7 @@ const Help: React.FC = () => {
       </div>
 
       {/* DIAGNOSTICS & LOGS */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+      <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 dark:text-slate-100">
           <div className="flex items-center gap-3 mb-4">
               <RefreshCw className="text-amber-500" size={24} />
               <div>
@@ -107,7 +107,7 @@ const Help: React.FC = () => {
               </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-700 mb-4">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-slate-700 mb-4 dark:text-slate-100">
               {statusMsg && (
                   <div className={`p-3 rounded-lg text-sm flex items-start gap-2 mb-3 ${statusMsg.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>
                       {statusMsg.type === 'success' ? <CheckCircle size={16} className="mt-0.5"/> : <AlertTriangle size={16} className="mt-0.5"/>}
@@ -118,7 +118,7 @@ const Help: React.FC = () => {
               <button 
                 onClick={handleUploadLogs}
                 disabled={loading}
-                className="w-full sm:w-auto bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 dark:text-slate-100"
               >
                   {loading ? <span className="animate-spin">⏳</span> : <Download size={18} />}
                   {loading ? 'Gerando...' : 'Baixar Relatório de Logs'}

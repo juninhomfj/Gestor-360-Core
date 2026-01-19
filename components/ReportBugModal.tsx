@@ -77,7 +77,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
     }
   };
 
-  const bgClass = darkMode ? 'bg-slate-950 text-white' : 'bg-white text-gray-900';
+  const bgClass = darkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900';
 
   const handleAttachmentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -101,7 +101,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in">
-        <div className={`w-full max-w-lg max-h-[90dvh] rounded-3xl shadow-2xl overflow-hidden border flex flex-col ${darkMode ? 'border-slate-800' : 'border-gray-200'} ${bgClass} animate-in zoom-in-95`}>
+        <div className={`w-full max-w-lg max-h-[90dvh] rounded-3xl shadow-2xl overflow-hidden border flex flex-col modal-surface ${bgClass} animate-in zoom-in-95`}>
             
             {sent ? (
                 <div className="p-12 text-center flex flex-col items-center justify-center space-y-4">
@@ -113,7 +113,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                 </div>
             ) : (
                 <>
-                    <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50">
+                    <div className="p-6 flex justify-between items-center modal-header">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl">
                                 <Bug size={24}/>
@@ -135,7 +135,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Módulo Afetado</label>
                             <select 
-                                className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 outline-none focus:ring-2 ring-red-500/50 font-bold"
+                                className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={module}
                                 onChange={e => setModule(e.target.value)}
                             >
@@ -151,7 +151,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Prioridade</label>
                             <select
-                                className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 outline-none focus:ring-2 ring-red-500/50 font-bold"
+                                className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={priority}
                                 onChange={e => setPriority(e.target.value as TicketPriority)}
                             >
@@ -165,7 +165,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">O que aconteceu?</label>
                             <textarea 
-                                className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 outline-none focus:ring-2 ring-red-500/50 h-32 resize-none text-sm leading-relaxed"
+                                className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 h-32 resize-none text-sm leading-relaxed field-contrast"
                                 placeholder="Descreva o erro..."
                                 value={description}
                                 onChange={e => setDescription(e.target.value)}
@@ -175,7 +175,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Anexos</label>
                             <div className="flex items-center gap-3">
-                                <label className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-xs font-bold cursor-pointer">
+                                <label className="flex items-center gap-2 px-4 py-3 rounded-2xl border text-xs font-bold cursor-pointer btn-soft">
                                     <Paperclip size={16} />
                                     Adicionar arquivo
                                     <input type="file" className="hidden" onChange={handleAttachmentUpload} />
@@ -187,7 +187,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             {attachments.length > 0 && (
                                 <ul className="mt-3 space-y-2 text-xs text-gray-500">
                                     {attachments.map(att => (
-                                        <li key={att.id} className="flex items-center justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2">
+                                        <li key={att.id} className="flex items-center justify-between rounded-xl px-3 py-2 field-contrast">
                                             <span className="truncate">{att.name}</span>
                                             <span className="text-[10px] font-black uppercase">{Math.ceil(att.size / 1024)}kb</span>
                                         </li>
@@ -197,12 +197,12 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         </div>
                     </div>
 
-                    <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex gap-4 bg-gray-50 dark:bg-slate-900/50 pb-[env(safe-area-inset-bottom)]">
-                        <button onClick={onClose} className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-colors uppercase text-xs">Cancelar</button>
+                    <div className="p-6 flex gap-4 modal-footer pb-[env(safe-area-inset-bottom)]">
+                        <button onClick={onClose} className="flex-1 py-4 btn-ghost text-xs">Cancelar</button>
                         <button 
                             onClick={handleSendReport}
                             disabled={isSending}
-                            className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-xl shadow-red-900/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
+                            className="flex-1 py-4 btn-danger text-xs"
                         >
                             {isSending ? <Loader2 className="animate-spin" size={20}/> : <MessageSquare size={20}/>}
                             Enviar Ticket & Push

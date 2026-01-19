@@ -67,7 +67,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Modelos Rápidos</label>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                         {TEMPLATES.map(t => (
-                            <button key={t.id} onClick={() => handleApplyTemplate(t)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 border dark:border-slate-700 hover:border-indigo-500 transition-all whitespace-nowrap text-sm font-bold">
+                            <button key={t.id} onClick={() => handleApplyTemplate(t)} className="flex items-center gap-2 px-4 py-2 rounded-xl border transition-all whitespace-nowrap text-sm font-bold btn-soft">
                                 {t.icon} {t.label}
                             </button>
                         ))}
@@ -78,7 +78,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Corpo do Comunicado (Markdown)</label>
                         <textarea 
-                            className={`w-full p-4 rounded-xl border outline-none focus:ring-2 ring-indigo-500 h-32 resize-none ${darkMode ? 'bg-black/40 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'}`}
+                            className="w-full p-4 rounded-xl border outline-none focus:ring-2 ring-indigo-500 h-32 resize-none field-contrast"
                             placeholder="Escreva sua mensagem aqui..."
                             value={message}
                             onChange={e => setMessage(e.target.value)}
@@ -90,7 +90,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                         <div className="relative">
                             <ImageIcon className="absolute left-3 top-3 text-gray-500" size={18}/>
                             <input 
-                                className={`w-full pl-10 pr-4 py-3 rounded-xl border outline-none focus:ring-2 ring-indigo-500 ${darkMode ? 'bg-black/40 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'}`}
+                                className="w-full pl-10 pr-4 py-3 rounded-xl border outline-none focus:ring-2 ring-indigo-500 field-contrast"
                                 placeholder="https://..."
                                 value={imageUrl}
                                 onChange={e => setImageUrl(e.target.value)}
@@ -112,7 +112,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                     <button 
                         onClick={handleBroadcast}
                         disabled={isSending || !message.trim()}
-                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 disabled:opacity-50 flex items-center gap-3 uppercase text-xs tracking-widest"
+                        className="px-10 py-4 btn-secondary text-xs disabled:opacity-50 flex items-center gap-3"
                     >
                         {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18}/>}
                         Disparar para Todos

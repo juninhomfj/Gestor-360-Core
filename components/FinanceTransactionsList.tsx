@@ -120,7 +120,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
           )}
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div className="flex p-1 bg-gray-100 dark:bg-slate-800 rounded-xl">
+              <div className="flex p-1 bg-gray-100 dark:bg-slate-800 rounded-xl dark:text-slate-100">
                   <button onClick={() => setViewMode('ALL')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'ALL' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-gray-500'}`}>TODOS</button>
                   <button onClick={() => setViewMode('PENDING')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'PENDING' ? 'bg-white dark:bg-slate-700 text-amber-600 shadow-sm' : 'text-gray-500'}`}>PENDENTES</button>
               </div>

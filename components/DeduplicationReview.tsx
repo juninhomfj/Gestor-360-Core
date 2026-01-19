@@ -150,7 +150,7 @@ const DeduplicationReview: React.FC<DeduplicationReviewProps> = ({
                 <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full"><X size={20}/></button>
             </div>
 
-            <div className="flex p-2 gap-2 bg-gray-50 dark:bg-slate-950/50 border-b border-gray-200 dark:border-slate-800">
+            <div className="flex p-2 gap-2 bg-gray-50 dark:bg-slate-950/50 border-b border-gray-200 dark:border-slate-800 dark:text-slate-100">
                 <button 
                     onClick={() => setActiveTab('SALES')}
                     className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'SALES' ? 'bg-white dark:bg-slate-800 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}`}
@@ -180,7 +180,7 @@ const DeduplicationReview: React.FC<DeduplicationReviewProps> = ({
                 )}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 flex justify-end">
+            <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 flex justify-end dark:text-slate-100">
                 <button onClick={onClose} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 shadow-lg">Concluir Análise</button>
             </div>
         </div>

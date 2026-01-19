@@ -270,7 +270,7 @@ const FinanceDashboard: React.FC<FinanceDashboardProps> = ({
                               <span className="text-gray-500">Conciliação de Extrato</span>
                               <span className="text-indigo-500">{stats.reconciliationRate.toFixed(1)}%</span>
                           </div>
-                          <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                          <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner dark:text-slate-100">
                               <div className="h-full bg-indigo-600 transition-all duration-1000" style={{width: `${stats.reconciliationRate}%`}}></div>
                           </div>
                       </div>

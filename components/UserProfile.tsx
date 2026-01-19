@@ -134,7 +134,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="space-y-6">
-             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
                 <h3 className="font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest">
                     <Smartphone className="text-indigo-500" size={16} /> Contato
                 </h3>
@@ -143,7 +143,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">WhatsApp</label>
                         <div className="relative">
                             <Phone size={16} className="absolute left-3 top-3.5 text-gray-500" />
-                            <input className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none" value={tel} onChange={e => setTel(e.target.value)} placeholder="55..." />
+                            <input className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={tel} onChange={e => setTel(e.target.value)} placeholder="55..." />
                         </div>
                     </div>
                 </div>
@@ -151,23 +151,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
                 <h3 className="font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest">
                     <UserIcon className="text-indigo-500" size={16} /> Identidade
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Nome Completo</label>
-                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none" value={name} onChange={e => setName(e.target.value)} />
+                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Usuário</label>
-                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-mono" value={username} onChange={e => setUsername(e.target.value)} />
+                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-mono dark:text-slate-100" value={username} onChange={e => setUsername(e.target.value)} />
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
                 <h3 className="font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest">
                     <LayoutDashboard className="text-indigo-500" size={16} /> Inicialização Automática
                 </h3>
@@ -186,7 +186,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
                 <h3 className="font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest">
                     <LayoutDashboard className="text-indigo-500" size={16} /> Metas Mensais (Campanhas)
                 </h3>
@@ -196,7 +196,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none"
+                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
                             value={salesTargets.basic}
                             onChange={e => setSalesTargets(prev => ({ ...prev, basic: Number(e.target.value) }))}
                         />
@@ -206,7 +206,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none"
+                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
                             value={salesTargets.natal}
                             onChange={e => setSalesTargets(prev => ({ ...prev, natal: Number(e.target.value) }))}
                         />
@@ -215,7 +215,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                 <p className="text-[11px] text-gray-500 mt-3">A meta de cestas básicas alimenta o indicador de campanha por margem baixa.</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
                 <h3 className="font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest">
                     <ShieldAlert className="text-indigo-500" size={16} /> Ocultar Módulos (UI)
                 </h3>

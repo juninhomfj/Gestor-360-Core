@@ -93,6 +93,7 @@ const Layout: React.FC<LayoutProps> = ({
     const isDarkTheme = ['glass', 'cyberpunk', 'dark'].includes(currentTheme);
     if (isDarkTheme) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
+    document.documentElement.setAttribute('data-theme', currentTheme);
   }, [currentTheme]);
 
   useEffect(() => {

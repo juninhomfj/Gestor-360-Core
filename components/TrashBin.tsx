@@ -122,7 +122,7 @@ const TrashBin: React.FC<TrashBinProps> = ({ darkMode }) => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-slate-950/50 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-slate-950/50 custom-scrollbar dark:text-slate-100">
                 
                 {feedback && (
                     <div className={`p-3 rounded-lg text-sm font-bold flex items-center gap-2 mb-4 animate-in slide-in-from-top-2 ${feedback.type === 'success' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>

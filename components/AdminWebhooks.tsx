@@ -147,7 +147,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
             </div>
 
             {isFormOpen && (
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95">
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95 dark:text-slate-100">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-black">{editingId ? 'Editar Webhook' : 'Registrar Webhook'}</h3>
                         <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
@@ -158,7 +158,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Endpoint</label>
                             <input
-                                className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500"
+                                className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={endpoint}
                                 onChange={e => setEndpoint(e.target.value)}
                                 placeholder="https://api.seu-dominio.com/webhooks"
@@ -167,7 +167,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Secret (opcional)</label>
                             <input
-                                className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500"
+                                className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={secret}
                                 onChange={e => setSecret(e.target.value)}
                                 placeholder="Assinatura HMAC"
@@ -181,12 +181,12 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                                 <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Formato do endpoint</p>
                                 <p className="mt-2 leading-relaxed">
                                     Enviaremos um <span className="font-semibold">POST HTTPS</span> para o endereço configurado. Exemplo:
-                                    <span className="font-mono bg-white/80 dark:bg-slate-900 px-2 py-1 rounded ml-2">https://seu-dominio.com/webhooks/gestor360</span>
+                                    <span className="font-mono bg-white/80 dark:bg-slate-900 px-2 py-1 rounded ml-2 dark:text-slate-100">https://seu-dominio.com/webhooks/gestor360</span>
                                 </p>
                             </div>
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Payload de exemplo</p>
-                                <pre className="mt-2 bg-white/80 dark:bg-slate-900 rounded-xl p-3 text-[11px] leading-relaxed overflow-x-auto">
+                                <pre className="mt-2 bg-white/80 dark:bg-slate-900 rounded-xl p-3 text-[11px] leading-relaxed overflow-x-auto dark:text-slate-100">
 {`{
   "event": "sale",
   "data": {
@@ -206,7 +206,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                                 <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Fluxo de autenticação</p>
                                 <p className="mt-2 leading-relaxed">
                                     Se informar uma <span className="font-semibold">secret</span>, geramos uma assinatura HMAC-SHA256 no header
-                                    <span className="font-mono bg-white/80 dark:bg-slate-900 px-2 py-1 rounded ml-2">X-Gestor360-Signature</span>.
+                                    <span className="font-mono bg-white/80 dark:bg-slate-900 px-2 py-1 rounded ml-2 dark:text-slate-100">X-Gestor360-Signature</span>.
                                     Valide a assinatura com o payload bruto para garantir a origem.
                                 </p>
                             </div>
@@ -225,7 +225,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                         </div>
                     </div>
 
-                    <div className="p-6 bg-gray-50 dark:bg-slate-950/50 rounded-2xl border dark:border-slate-800 mb-6">
+                    <div className="p-6 bg-gray-50 dark:bg-slate-950/50 rounded-2xl border dark:border-slate-800 mb-6 dark:text-slate-100">
                         <label className="block text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Eventos monitorados</label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {EVENT_OPTIONS.map(option => {
@@ -280,10 +280,10 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                 </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm dark:text-slate-100">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-[10px] font-black uppercase text-gray-400 tracking-widest bg-gray-50 dark:bg-slate-950/50 border-b dark:border-slate-800">
+                        <thead className="text-[10px] font-black uppercase text-gray-400 tracking-widest bg-gray-50 dark:bg-slate-950/50 border-b dark:border-slate-800 dark:text-slate-100">
                             <tr>
                                 <th className="p-6">Endpoint</th>
                                 <th className="p-6">Eventos</th>

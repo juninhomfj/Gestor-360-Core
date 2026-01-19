@@ -55,7 +55,7 @@ const ClientManagementHub: React.FC<ClientManagementHubProps> = ({ currentUser, 
                     <p className="text-sm text-gray-500">Gestão de propriedade e governança de dados.</p>
                 </div>
 
-                <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-slate-800 w-full md:w-auto overflow-x-auto no-scrollbar">
+                <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-slate-800 w-full md:w-auto overflow-x-auto no-scrollbar dark:text-slate-100">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
