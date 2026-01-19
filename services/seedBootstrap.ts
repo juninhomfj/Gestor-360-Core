@@ -1,5 +1,5 @@
 // services/seedBootstrap.ts
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc, collection, getDocs, query, where, limit } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { Logger } from "./logger";
 
@@ -44,11 +44,11 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
   try {
     // LOCK em users/{uid} -> permitido por rules (o próprio user pode criar/atualizar)
     const userMetaRef = doc(db, "users", uid);
-    const userMetaSnap = await getDoc(userMetaRef);
-
-    const alreadyDone = userMetaSnap.exists() && userMetaSnap.data()?.seedBootstrap?.done === true;
-    if (alreadyDone) {
-      Logger.info("[Seed] Já executado (users/{uid}.seedBootstrap.done=true). Pulando.");
+    const userMetaSnap = await getDoc(userMetaRef);    const seedMeta = userMetaSnap.exists() ? userMetaSnap.data()?.seedBootstrap : undefined;
+    const alreadyDone = seedMeta?.done === true;
+    const minimalDone = seedMeta?.minimalDone === true;
+    if (alreadyDone && minimalDone) {
+      Logger.info("[Seed] Ja executado (seed bootstrap + minimal). Pulando.");
       running = false;
       return;
     }
@@ -66,6 +66,8 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
     const isDEV = role === "DEV";
 
     Logger.info("[Seed] Iniciando seed bootstrap...", { uid, role });
+
+    if (!alreadyDone) {
 
     // (A) Config docs - APENAS DEV (suas rules exigem)
     if (isDEV) {
@@ -205,25 +207,172 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
       result
     );
 
-    // Marca lock no users/{uid}
-    await safeSet(
-      "users/{uid}.seedBootstrap",
-      userMetaRef,
-      {
-        seedBootstrap: {
-          done: true,
-          seedVersion: "v1",
-          createdAt: serverTimestamp(),
-          createdBy: uid,
-          roleDetected: role || "unknown",
-        },
-        updatedAt: serverTimestamp(),
-      },
-      true,
-      result
-    );
+    }
 
-    Logger.info("[Seed] Seed bootstrap concluído.", {
+    
+
+    if (!minimalDone) {
+      const seedNowIso = new Date().toISOString();
+      const seedDate = seedNowIso.slice(0, 10);
+
+      const hasAny = async (coll: string) => {
+        try {
+          const snap = await getDocs(query(collection(db, coll), where("userId", "==", uid), limit(1)));
+          return !snap.empty;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      const hasSales = await hasAny("sales");
+      const hasAccounts = await hasAny("accounts");
+      const hasCategories = await hasAny("categories");
+      const hasTransactions = await hasAny("transactions");
+
+      const accountId = crypto.randomUUID();
+      const categoryId = crypto.randomUUID();
+      const saleId = crypto.randomUUID();
+      const txId = crypto.randomUUID();
+
+      if (!hasAccounts) {
+        await safeSet(
+          "accounts/minimal",
+          doc(db, "accounts", accountId),
+          {
+            id: accountId,
+            name: "Conta Principal",
+            type: "CHECKING",
+            balance: 1000,
+            color: "#10b981",
+            isAccounting: true,
+            includeInDistribution: true,
+            personType: "PJ",
+            isActive: true,
+            deleted: false,
+            userId: uid,
+            createdAt: seedNowIso,
+            updatedAt: seedNowIso,
+          },
+          true,
+          result
+        );
+      }
+
+      if (!hasCategories) {
+        await safeSet(
+          "categories/minimal",
+          doc(db, "categories", categoryId),
+          {
+            id: categoryId,
+            name: "Receitas",
+            type: "INCOME",
+            personType: "PJ",
+            subcategories: [],
+            monthlyBudget: 0,
+            isActive: true,
+            deleted: false,
+            userId: uid,
+          },
+          true,
+          result
+        );
+      }
+
+      if (!hasSales) {
+        await safeSet(
+          "sales/minimal",
+          doc(db, "sales", saleId),
+          {
+            id: saleId,
+            userId: uid,
+            client: "Cliente Exemplo",
+            quantity: 1,
+            type: "BASICA",
+            status: "FATURADO",
+            valueProposed: 100,
+            valueSold: 100,
+            marginPercent: 10,
+            date: seedDate,
+            isBilled: true,
+            hasNF: false,
+            observations: "",
+            trackingCode: "",
+            commissionBaseTotal: 100,
+            commissionValueTotal: 10,
+            commissionRateUsed: 0.1,
+            createdAt: seedNowIso,
+            updatedAt: seedNowIso,
+            deleted: false,
+            paymentMethod: "A vista / Antecipado",
+          },
+          true,
+          result
+        );
+      }
+
+      if (!hasTransactions) {
+        await safeSet(
+          "transactions/minimal",
+          doc(db, "transactions", txId),
+          {
+            id: txId,
+            description: "Venda seed",
+            amount: 100,
+            type: "INCOME",
+            date: seedDate,
+            categoryId: categoryId,
+            accountId: accountId,
+            isPaid: true,
+            provisioned: false,
+            isRecurring: false,
+            deleted: false,
+            createdAt: seedNowIso,
+            userId: uid,
+            updatedAt: seedNowIso,
+          },
+          true,
+          result
+        );
+      }
+
+      await safeSet(
+        "users/{uid}.seedBootstrap.minimal",
+        userMetaRef,
+        {
+          seedBootstrap: {
+            ...(seedMeta || {}),
+            minimalDone: true,
+            minimalSeedVersion: "v1",
+            updatedAt: serverTimestamp(),
+          },
+          updatedAt: serverTimestamp(),
+        },
+        true,
+        result
+      );
+    }
+
+    if (!alreadyDone) {
+      // Marca lock no users/{uid}
+      await safeSet(
+        "users/{uid}.seedBootstrap",
+        userMetaRef,
+        {
+          seedBootstrap: {
+            done: true,
+            seedVersion: "v1",
+            createdAt: serverTimestamp(),
+            createdBy: uid,
+            roleDetected: role || "unknown",
+          },
+          updatedAt: serverTimestamp(),
+        },
+        true,
+        result
+      );
+    }
+
+    Logger.info("[Seed] Seed bootstrap concluido.", {
       ok: result.ok.length,
       skipped: result.skipped,
       failed: result.failed.map(f => f.key),

@@ -224,12 +224,18 @@ const App: React.FC = () => {
         if (initRun.current) return;
         initRun.current = true;
         let isMounted = true;
+        let unsubscribe: (() => void) | undefined;
         const lastUidRef: { current: string | null } = { current: null };
 
-        const init = async () => {
+        const startAuthWatch = async () => {
             try {
                 await AudioService.preload();
-                const unsubscribe = watchAuthChanges(async (sessionUser) => {
+                const cached = getSession();
+                if (cached && !lastUidRef.current) {
+                    lastUidRef.current = cached.uid;
+                    await handleLoginSuccess(cached);
+                }
+                unsubscribe = watchAuthChanges(async (sessionUser) => {
                     if (!isMounted) return;
                     if (!sessionUser) {
                         lastUidRef.current = null;
@@ -248,21 +254,17 @@ const App: React.FC = () => {
                     }
                     await handleLoginSuccess(sessionUser);
                 });
-
-                return () => {
-                    isMounted = false;
-                    unsubscribe?.();
-                };
             } catch (e: any) {
                 setAuthError("Erro na conexao Cloud Firestore.");
                 setAuthView('ERROR');
                 setLoading(false);
             }
         };
-        const cleanup = init();
+
+        startAuthWatch();
         return () => {
             isMounted = false;
-            if (typeof cleanup === 'function') cleanup();
+            unsubscribe?.();
         };
     }, []);
 
