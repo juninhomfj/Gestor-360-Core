@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
@@ -103,6 +103,9 @@ export const sendWebhookTest = functions.https.onCall(async (data, context) => {
     }
 
     const webhook = webhookSnap.data();
+    if (!webhook) {
+        throw new functions.https.HttpsError('not-found', 'Webhook vazio.');
+    }
     const effectiveEvent = event || webhook?.events?.[0] || 'sale';
 
     const payload = {
@@ -127,6 +130,7 @@ export const onTransferWrite = functions.firestore
         if (!change.after.exists) return;
         const action = change.before.exists ? 'updated' : 'created';
         const data = change.after.data();
+        if (!data) return;
         await emitWebhookEvent('transfer', action, data, context.params.requestId, 'client_transfer_requests');
     });
 
@@ -136,6 +140,7 @@ export const onTicketWrite = functions.firestore
         if (!change.after.exists) return;
         const action = change.before.exists ? 'updated' : 'created';
         const data = change.after.data();
+        if (!data) return;
         await emitWebhookEvent('ticket', action, data, context.params.ticketId, 'tickets');
     });
 
@@ -145,6 +150,7 @@ export const onMessageWrite = functions.firestore
         if (!change.after.exists) return;
         const action = change.before.exists ? 'updated' : 'created';
         const data = change.after.data();
+        if (!data) return;
         await emitWebhookEvent('message', action, data, context.params.messageId, 'internal_messages');
     });
 
@@ -154,5 +160,6 @@ export const onSaleWrite = functions.firestore
         if (!change.after.exists) return;
         const action = change.before.exists ? 'updated' : 'created';
         const data = change.after.data();
+        if (!data) return;
         await emitWebhookEvent('sale', action, data, context.params.saleId, 'sales');
     });

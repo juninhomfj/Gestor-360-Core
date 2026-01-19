@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 
 type SendFcmPayload = {
@@ -26,26 +26,28 @@ const chunkTokens = (tokens: string[], size = 500): string[][] => {
     return chunks;
 };
 
-export const sendFcmNotification = functions
-    .runWith({ serviceAccount: 'api-firebase-cloud-messaging@gestor360-app.iam.gserviceaccount.com' })
-    .https.onCall(async (data: SendFcmPayload, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'A solicitação deve estar autenticada.');
-    }
+const applyCors = (req: functions.https.Request, res: functions.Response<any>) => {
+    const origin = req.headers.origin || '*';
+    res.set('Access-Control-Allow-Origin', origin);
+    res.set('Vary', 'Origin');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Firebase-AppCheck, X-Firebase-Client');
+};
 
+const sendNotification = async (data: SendFcmPayload) => {
     const targetUserId = data?.targetUserId;
     const title = data?.title;
     const body = data?.body;
     const normalizedData = normalizeDataPayload(data?.data);
 
     if (!targetUserId || typeof targetUserId !== 'string') {
-        throw new functions.https.HttpsError('invalid-argument', 'Destino inválido para notificação.');
+        throw new functions.https.HttpsError('invalid-argument', 'Destino invalido para notificacao.');
     }
     if (!title || typeof title !== 'string') {
-        throw new functions.https.HttpsError('invalid-argument', 'Título inválido para notificação.');
+        throw new functions.https.HttpsError('invalid-argument', 'Titulo invalido para notificacao.');
     }
     if (!body || typeof body !== 'string') {
-        throw new functions.https.HttpsError('invalid-argument', 'Mensagem inválida para notificação.');
+        throw new functions.https.HttpsError('invalid-argument', 'Mensagem invalida para notificacao.');
     }
 
     const db = admin.firestore();
@@ -83,21 +85,66 @@ export const sendFcmNotification = functions
             : undefined
     };
 
-    try {
-        const chunks = chunkTokens(tokens);
-        const responses = await Promise.all(
-            chunks.map(chunk => admin.messaging().sendEachForMulticast({ ...messageBase, tokens: chunk }))
-        );
+    const chunks = chunkTokens(tokens);
+    const responses = await Promise.all(
+        chunks.map(chunk => admin.messaging().sendEachForMulticast({ ...messageBase, tokens: chunk }))
+    );
 
-        const successCount = responses.reduce((sum, res) => sum + res.successCount, 0);
-        const failureCount = responses.reduce((sum, res) => sum + res.failureCount, 0);
+    const successCount = responses.reduce((sum, res) => sum + res.successCount, 0);
+    const failureCount = responses.reduce((sum, res) => sum + res.failureCount, 0);
 
-        return {
-            success: true,
-            successCount,
-            failureCount
-        };
-    } catch (error) {
-        throw new functions.https.HttpsError('internal', 'Falha ao enviar notificação via FCM.');
-    }
-});
+    return {
+        success: true,
+        successCount,
+        failureCount
+    };
+};
+
+export const sendFcmNotification = functions
+    .runWith({ serviceAccount: 'api-firebase-cloud-messaging@gestor360-app.iam.gserviceaccount.com' })
+    .https.onCall(async (data: SendFcmPayload, context) => {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'A solicitacao deve estar autenticada.');
+        }
+
+        try {
+            return await sendNotification(data);
+        } catch (error) {
+            throw new functions.https.HttpsError('internal', 'Falha ao enviar notificacao via FCM.');
+        }
+    });
+
+export const sendFcmNotificationHttp = functions
+    .runWith({ serviceAccount: 'api-firebase-cloud-messaging@gestor360-app.iam.gserviceaccount.com' })
+    .https.onRequest(async (req, res) => {
+        applyCors(req, res);
+        if (req.method === 'OPTIONS') {
+            res.status(204).send('');
+            return;
+        }
+        if (req.method !== 'POST') {
+            res.status(405).json({ error: 'method-not-allowed' });
+            return;
+        }
+
+        const authHeader = String(req.headers.authorization || '');
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        if (!token) {
+            res.status(401).json({ error: 'unauthenticated' });
+            return;
+        }
+
+        try {
+            await admin.auth().verifyIdToken(token);
+        } catch {
+            res.status(401).json({ error: 'unauthenticated' });
+            return;
+        }
+
+        try {
+            const result = await sendNotification(req.body as SendFcmPayload);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ error: 'internal' });
+        }
+    });

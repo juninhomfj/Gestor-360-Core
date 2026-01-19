@@ -2,7 +2,7 @@ import { getToken } from "firebase/messaging";
 import { initMessaging } from "./firebase";
 import { updateUser } from "./auth";
 import { httpsCallable } from "firebase/functions";
-import { functions } from "./firebase";
+import { functions, firebaseConfig, auth } from "./firebase";
 
 // Chave VAPID para notificações push
 const VAPID_KEY = (import.meta as any).env?.VITE_FIREBASE_VAPID_KEY || "BPEW_REPLACE_WITH_YOUR_ACTUAL_PUBLIC_VAPID_KEY_FROM_FIREBASE_CONSOLE";
@@ -77,8 +77,34 @@ export const sendPushNotification = async (
     try {
         await call(payload);
     } catch (e) {
+        const projectId = firebaseConfig?.projectId;
+        const token = await auth.currentUser?.getIdToken();
+        if (!projectId || !token) {
+            if ((import.meta as any).env?.DEV) {
+                console.error("[Push] Falha ao enviar notificacao:", e);
+            }
+            return;
+        }
+        try {
+            const url = `https://us-central1-${projectId}.cloudfunctions.net/sendFcmNotificationHttp`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok && (import.meta as any).env?.DEV) {
+                console.error("[Push] Falha ao enviar notificacao (http):", res.status);
+            }
+        } catch (httpError) {
+            if ((import.meta as any).env?.DEV) {
+                console.error("[Push] Falha ao enviar notificacao (http):", httpError);
+            }
+        }
         if ((import.meta as any).env?.DEV) {
-            console.error("[Push] Falha ao enviar notificação:", e);
+            console.error("[Push] Falha ao enviar notificacao:", e);
         }
     }
 };

@@ -282,7 +282,7 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
                 stack: e?.stack,
                 isAdmin
             });
-            notifyChatDegraded(onDegraded, "getMessages", e);
+            notifyChatDegraded(undefined, "getMessages", e);
         }
         return {
             messages: filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
