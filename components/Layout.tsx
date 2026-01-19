@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutDashboard, ShoppingCart, Settings, Menu, X, Users, FileText, Wallet, PieChart, Trophy, Tag, ArrowLeftRight, PiggyBank, List, LogOut, ClipboardList, PartyPopper, MessageSquare, Home } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Settings, Menu, X, Users, FileText, Wallet, PieChart, Trophy, Tag, ArrowLeftRight, PiggyBank, List, LogOut, ClipboardList, PartyPopper, MessageSquare, Home, Shield } from 'lucide-react';
 import { AppMode, User, AppTheme, AppNotification, SystemConfig, SystemModules } from '../types';
 import { getSystemConfig, canAccess } from '../services/logic';
 import { isModuleEnabled } from '../config/modulesCatalog';
@@ -152,7 +152,9 @@ const Layout: React.FC<LayoutProps> = ({
   // Sidebar Items - Expandidos para incluir Perfil e Tabelas
   const commonItems = [
     { id: 'tickets', label: 'Gestão de Tickets', icon: MessageSquare, show: true },
+    { id: 'chat', label: 'Chat interno', icon: MessageSquare, show: true },
     { id: 'settings', label: 'Configurações', icon: Settings, show: true },
+    { id: 'dev_roadmap', label: 'Diagnostico DEV', icon: Shield, show: isDev },
   ];
 
   const salesNavItems = [

@@ -10,8 +10,10 @@ import SnowOverlay from './components/SnowOverlay';
 import { SYSTEM_MODULES } from './config/modulesCatalog';
 import ReportBugModal from './components/ReportBugModal';
 import { Analytics } from "@vercel/analytics/react";
+import InternalChatSystem from './components/InternalChatSystem';
 
 // Importação Dinâmica
+const HomeDashboard = lazy(() => import('./components/HomeDashboard'));
 const SalesForm = lazy(() => import('./components/SalesForm'));
 const SalesList = lazy(() => import('./components/SalesList'));
 const BoletoControl = lazy(() => import('./components/BoletoControl'));
@@ -28,8 +30,6 @@ const SettingsHub = lazy(() => import('./components/SettingsHub'));
 const DevRoadmap = lazy(() => import('./components/DevRoadmap'));
 const BackupModal = lazy(() => import('./components/BackupModal'));
 const BulkDateModal = lazy(() => import('./components/BulkDateModal'));
-const UserProfile = lazy(() => import('./components/UserProfile'));
-const CommissionEditor = lazy(() => import('./components/CommissionEditor'));
 const ClientManagementHub = lazy(() => import('./components/ClientManagementHub'));
 const TicketsManager = lazy(() => import('./components/TicketsManager'));
 const Campaigns = lazy(() => import('./components/Campaigns'));
@@ -45,7 +45,8 @@ import {
     getStoredSales, getFinanceData, getSystemConfig, getReportConfig,
     getStoredTable, saveSingleSale, getClients,
     saveCommissionRules, bootstrapProductionData, saveReportConfig,
-    canAccess, handleSoftDelete, clearNotifications, bulkBillSales, DEFAULT_SYSTEM_CONFIG, saveSales, deleteReceivablesBySaleIds, getSalesTasks, getSalesQueryDiagnostics
+    canAccess, handleSoftDelete, clearNotifications, bulkBillSales, DEFAULT_SYSTEM_CONFIG, saveSales, deleteReceivablesBySaleIds, getSalesTasks, getSalesQueryDiagnostics,
+    clearAllSales, computeCommissionValues, saveSalesTask, ensureNumber
 } from './services/logic';
 import { applyAvistaLowMarginRule, applyCampaignOverlay } from './services/commissionCampaignOverlay';
 import {
@@ -56,13 +57,15 @@ import {
     resolveMonthlyBasicBasketTarget
 } from './services/campaignService';
 
-import { reloadSession, logout, getSession } from './services/auth';
+import { reloadSession, logout, getSession, updateUser } from './services/auth';
 import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
 import { sendMessage } from './services/internalChat';
 import { ShieldAlert, LogOut, Loader2 } from 'lucide-react';
 import { SALES_TASK_LABELS } from './utils/salesTasks';
+import { dbBulkPut } from './storage/db';
+import { safeSetDoc } from './services/safeWrites';
 
 type AuthView = 'LOGIN' | 'REQUEST_RESET' | 'APP' | 'ERROR' | 'LOADING' | 'BLOCKED';
 
@@ -92,7 +95,8 @@ const App: React.FC = () => {
     const [editingSale, setEditingSale] = useState<Sale | null>(null);
     const [showSalesForm, setShowSalesForm] = useState(false);
     const [showTxForm, setShowTxForm] = useState(false);
-    const [hideValues, setHideValues] = useState(false);
+    const [txFormType, setTxFormType] = useState<'INCOME' | 'EXPENSE' | 'TRANSFER'>('EXPENSE');
+    const [hideValues, setHideValues] = useState(() => localStorage.getItem('sys_hide_values') === 'true');
     const [showSnow, setShowSnow] = useState(() => localStorage.getItem('sys_snow_enabled') === 'true');
     
     const [toasts, setSortedToasts] = useState<ToastMessage[]>([]);
@@ -124,10 +128,17 @@ const App: React.FC = () => {
         return storedTab === 'boletos' ? 'pendencias' : storedTab;
     });
     const [theme, setTheme] = useState<AppTheme>('glass');
+    const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
 
     const addToast = (type: 'SUCCESS' | 'ERROR' | 'INFO', message: string) => {
         const id = crypto.randomUUID();
         setSortedToasts(prev => [...prev, { id, type, message }]);
+    };
+    const isDarkMode = ['glass', 'cyberpunk', 'dark'].includes(theme);
+    const toggleHideValues = () => {
+        const next = !hideValues;
+        setHideValues(next);
+        localStorage.setItem('sys_hide_values', String(next));
     };
 
     useEffect(() => {
@@ -311,7 +322,7 @@ const App: React.FC = () => {
         return receivables.filter(r => !r.saleId || activeSaleIds.has(r.saleId));
     }, [receivables, sales]);
 
-    const applyCampaignOverlaysToSales = async (rawSales: Sale[]): Promise<Sale[]> => {
+    const applyCampaignOverlaysToSales = async (rawSales: Sale[], cfg?: SystemConfig | null): Promise<Sale[]> => {
         const user = currentUser || getSession();
         if (!user || rawSales.length === 0) {
             Logger.info("Audit: Campanhas ignoradas por falta de usuário ou vendas.", {
@@ -321,11 +332,12 @@ const App: React.FC = () => {
             return rawSales;
         }
         try {
+            const config = cfg || systemConfig;
             const companyId = await resolveCompanyId(user);
             const campaigns = await getCampaignsByCompany(companyId);
-            const avistaRuleEnabled = systemConfig?.avistaLowMarginRuleEnabled ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginRuleEnabled ?? true;
-            const avistaRulePct = systemConfig?.avistaLowMarginCommissionPct ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginCommissionPct ?? 0.25;
-            const avistaRulePayments = systemConfig?.avistaLowMarginPaymentMethods ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginPaymentMethods ?? [];
+            const avistaRuleEnabled = config?.avistaLowMarginRuleEnabled ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginRuleEnabled ?? true;
+            const avistaRulePct = config?.avistaLowMarginCommissionPct ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginCommissionPct ?? 0.25;
+            const avistaRulePayments = config?.avistaLowMarginPaymentMethods ?? DEFAULT_SYSTEM_CONFIG.avistaLowMarginPaymentMethods ?? [];
             const target = resolveMonthlyBasicBasketTarget(user);
             const months = Array.from(new Set(rawSales.map(sale => getSaleMonthKey(sale)).filter(Boolean)));
             const progressByMonth = new Map<string, Awaited<ReturnType<typeof getMonthlyBasicBasketProgress>>>();
@@ -404,6 +416,7 @@ const App: React.FC = () => {
                 getReportConfig()
             ]);
 
+            setSystemConfig(sysCfg || null);
             if (sysCfg?.theme) setTheme(sysCfg.theme);
             setSalesLockEnabled(sysCfg?.salesLockEnabled ?? DEFAULT_SYSTEM_CONFIG.salesLockEnabled ?? false);
 
@@ -445,6 +458,46 @@ const App: React.FC = () => {
         } catch (e) {}
     };
 
+    const persistCollection = async <T extends { id: string }>(
+        table: string,
+        nextItems: T[],
+        prevItems: T[]
+    ) => {
+        const nowIso = new Date().toISOString();
+        const normalized = nextItems.map(item => ({
+            ...item,
+            updatedAt: (item as any).updatedAt || nowIso
+        }));
+        await dbBulkPut(table as any, normalized as any);
+        await Promise.all(
+            normalized.map(item =>
+                safeSetDoc(table as any, item.id, item as any, { merge: true }, item as any, 'UPDATE')
+            )
+        );
+        const removed = prevItems.filter(prev => !normalized.some(next => next.id === prev.id));
+        if (removed.length > 0) {
+            await Promise.all(removed.map(item => handleSoftDelete(table, item.id)));
+        }
+    };
+
+    const handleUpdateUserInApp = (user: User) => {
+        setCurrentUser(user);
+        localStorage.setItem('sys_session_v1', JSON.stringify(user));
+    };
+
+    const handleSetDefaultModule = async (route: string) => {
+        if (!currentUser) return;
+        const nextPrefs = { ...(currentUser.prefs || {}), defaultModule: route };
+        const nextUser = { ...currentUser, prefs: nextPrefs };
+        handleUpdateUserInApp(nextUser);
+        try {
+            await updateUser(currentUser.id, { prefs: nextPrefs });
+            addToast('SUCCESS', 'Preferência de entrada atualizada.');
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao salvar preferência no servidor.');
+        }
+    };
+
     const handleBulkBill = async (ids: string[], date: string, options?: { createReceivables?: boolean }) => {
         try {
             if (salesLockEnabled) {
@@ -457,6 +510,147 @@ const App: React.FC = () => {
         } catch (e: any) {
             addToast('ERROR', 'Falha no faturamento em lote.');
         }
+    };
+
+    const handleSaveSaleInApp = async (sale: Sale) => {
+        try {
+            await saveSingleSale(sale);
+            await loadDataForUser();
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao salvar venda.');
+        }
+    };
+
+    const handleDeleteSaleInApp = async (sale: Sale) => {
+        try {
+            await handleSoftDelete('sales', sale.id);
+            await loadDataForUser();
+            addToast('INFO', 'Venda movida para lixeira.');
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao remover venda.');
+        }
+    };
+
+    const handleBulkAddSales = async (items: any[]) => {
+        if (!currentUser) return;
+        try {
+            const nowIso = new Date().toISOString();
+            const mapped = items.map((item) => {
+                const type = item.type || ProductType.BASICA;
+                const rules = type === ProductType.NATAL ? rulesNatal : rulesBasic;
+                const margin = ensureNumber(item.marginPercent, 0);
+                const { commissionBase, commissionValue, rateUsed } = computeCommissionValues(
+                    ensureNumber(item.quantity, 1),
+                    ensureNumber(item.valueProposed, 0),
+                    margin,
+                    rules
+                );
+                const billDate = item.date || '';
+                return {
+                    id: crypto.randomUUID(),
+                    userId: currentUser.uid,
+                    client: item.client || 'Cliente Importado',
+                    quantity: ensureNumber(item.quantity, 1),
+                    type,
+                    status: billDate ? 'FATURADO' : 'ORÇÎAMENTO',
+                    valueProposed: ensureNumber(item.valueProposed, 0),
+                    valueSold: ensureNumber(item.valueSold, 0),
+                    marginPercent: margin,
+                    date: billDate || undefined,
+                    completionDate: item.completionDate || nowIso.split('T')[0],
+                    isBilled: !!billDate,
+                    hasNF: false,
+                    observations: item.observations || '',
+                    trackingCode: item.trackingCode || '',
+                    commissionBaseTotal: commissionBase,
+                    commissionValueTotal: commissionValue,
+                    commissionRateUsed: rateUsed,
+                    createdAt: nowIso,
+                    updatedAt: nowIso,
+                    deleted: false,
+                    paymentMethod: item.paymentMethod || ''
+                } as Sale;
+            });
+            await saveSales(mapped);
+            await loadDataForUser();
+            addToast('SUCCESS', `ImportaÇõÇœo concluÇðda: ${mapped.length} vendas.`);
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao importar vendas.');
+        }
+    };
+
+    const handleDeleteBulkSales = async (ids: string[], options?: { deleteReceivables?: boolean }) => {
+        if (ids.length === 0) return;
+        try {
+            await Promise.all(ids.map(id => handleSoftDelete('sales', id)));
+            if (options?.deleteReceivables) {
+                await deleteReceivablesBySaleIds(ids);
+            }
+            await loadDataForUser();
+            addToast('SUCCESS', `${ids.length} vendas removidas.`);
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao excluir vendas.');
+        }
+    };
+
+    const handleBulkDateUpdate = async (
+        targetDate: string,
+        filterType: ProductType | 'ALL',
+        launchDateFrom: string,
+        onlyEmpty: boolean
+    ) => {
+        const eligible = sales.filter((sale) => {
+            if (sale.deleted) return false;
+            if (filterType !== 'ALL' && sale.type !== filterType) return false;
+            const compDate = sale.completionDate || sale.date || '';
+            if (launchDateFrom && compDate < launchDateFrom) return false;
+            if (onlyEmpty && sale.date) return false;
+            return true;
+        });
+        if (!eligible.length) {
+            addToast('INFO', 'Nenhuma venda encontrada para atualizar.');
+            return;
+        }
+        await handleBulkBill(eligible.map((s) => s.id), targetDate, { createReceivables: false });
+        setIsBulkDateModalOpen(false);
+    };
+
+    const handleRecalculateSales = async (
+        includeBilled: boolean,
+        filterType: ProductType | 'ALL',
+        dateFrom: string,
+        dateTo?: string
+    ) => {
+        if (salesLockEnabled) {
+            addToast('INFO', 'MИdulo de vendas bloqueado para alteraВリes.');
+            return;
+        }
+        const nowIso = new Date().toISOString();
+        const updated = sales.map((sale) => {
+            if (sale.deleted) return sale;
+            if (!includeBilled && sale.date) return sale;
+            if (filterType !== 'ALL' && sale.type !== filterType) return sale;
+            const compDate = sale.date || sale.completionDate || '';
+            if (dateFrom && compDate < dateFrom) return sale;
+            if (dateTo && compDate > dateTo) return sale;
+            const rules = sale.type === ProductType.NATAL ? rulesNatal : rulesBasic;
+            const { commissionBase, commissionValue, rateUsed } = computeCommissionValues(
+                ensureNumber(sale.quantity, 1),
+                ensureNumber(sale.valueProposed, 0),
+                ensureNumber(sale.marginPercent, 0),
+                rules
+            );
+            return {
+                ...sale,
+                commissionBaseTotal: commissionBase,
+                commissionValueTotal: commissionValue,
+                commissionRateUsed: rateUsed,
+                updatedAt: nowIso
+            } as Sale;
+        });
+        await saveSales(updated);
+        await loadDataForUser();
+        addToast('SUCCESS', 'Recalculo aplicado.');
     };
 
     const handleCreateSalesTask = async (sale: Sale, type: SalesTaskType, dueDate: string) => {
@@ -508,6 +702,390 @@ const App: React.FC = () => {
         }
     };
 
+    const handleUpdateSalesTargets = async (targets: SalesTargets) => {
+        if (!currentUser) return;
+        const nextUser = { ...currentUser, salesTargets: targets };
+        handleUpdateUserInApp(nextUser);
+        try {
+            await updateUser(currentUser.id, { salesTargets: targets });
+            addToast('SUCCESS', 'Meta atualizada.');
+        } catch (e: any) {
+            addToast('ERROR', 'Falha ao salvar meta.');
+        }
+    };
+
+    const handleUpdateSalesInApp = async (nextSales: Sale[]) => {
+        await saveSales(nextSales);
+        await loadDataForUser();
+    };
+
+    const handleUpdateFinanceCategories = async (nextCategories: TransactionCategory[]) => {
+        await persistCollection('categories', nextCategories, categories);
+        setCategories(nextCategories);
+    };
+
+    const handleUpdateFinanceGoals = async (nextGoals: FinanceGoal[]) => {
+        await persistCollection('goals', nextGoals, goals);
+        setGoals(nextGoals);
+    };
+
+    const handleUpdateFinanceChallenges = async (nextChallenges: Challenge[], nextCells: ChallengeCell[]) => {
+        await persistCollection('challenges', nextChallenges, challenges);
+        await persistCollection('challenge_cells', nextCells, cells);
+        setChallenges(nextChallenges);
+        setCells(nextCells);
+    };
+
+    const handleUpdateFinanceReceivables = async (nextReceivables: Receivable[]) => {
+        await persistCollection('receivables', nextReceivables, receivables);
+        setReceivables(nextReceivables);
+    };
+
+    const handleUpdateFinanceManager = async (
+        nextAccounts: FinanceAccount[],
+        nextTransactions: Transaction[],
+        nextCards: CreditCard[]
+    ) => {
+        await persistCollection('accounts', nextAccounts, accounts);
+        await persistCollection('transactions', nextTransactions, transactions);
+        await persistCollection('cards', nextCards, cards);
+        setAccounts(nextAccounts);
+        setTransactions(nextTransactions);
+        setCards(nextCards);
+    };
+
+    const handlePayInvoice = async (cardId: string, accountId: string, amount: number, date: string) => {
+        const nowIso = new Date().toISOString();
+        const paidCardTxs = transactions.map((tx) => {
+            if (tx.cardId === cardId && !tx.isPaid && tx.type === 'EXPENSE') {
+                return { ...tx, isPaid: true, realizedAt: date, updatedAt: nowIso } as Transaction;
+            }
+            return tx;
+        });
+        const paymentTx: Transaction = {
+            id: crypto.randomUUID(),
+            description: 'Pagamento de fatura',
+            amount,
+            type: 'EXPENSE',
+            date,
+            realizedAt: date,
+            categoryId: 'CARD_PAYMENT',
+            accountId,
+            isPaid: true,
+            provisioned: false,
+            isRecurring: false,
+            deleted: false,
+            createdAt: nowIso,
+            updatedAt: nowIso,
+            userId: currentUser?.uid || '',
+            paymentMethod: 'CARD_PAYMENT'
+        };
+        const nextTransactions = [...paidCardTxs, paymentTx];
+        const nextAccounts = accounts.map((acc) =>
+            acc.id === accountId ? { ...acc, balance: acc.balance - amount, updatedAt: nowIso } : acc
+        );
+        await persistCollection('transactions', nextTransactions, transactions);
+        await persistCollection('accounts', nextAccounts, accounts);
+        setTransactions(nextTransactions);
+        setAccounts(nextAccounts);
+        addToast('SUCCESS', 'Fatura registrada.');
+    };
+
+    const handleSetTransactionPaid = async (
+        transaction: Transaction,
+        details: { accountId: string; amount: number; date: string; attachments?: string[] }
+    ) => {
+        const nowIso = new Date().toISOString();
+        const updatedTx = {
+            ...transaction,
+            accountId: details.accountId,
+            realizedAt: details.date,
+            isPaid: true,
+            attachments: details.attachments || transaction.attachments,
+            updatedAt: nowIso
+        } as Transaction;
+        const nextTransactions = transactions.map((tx) => (tx.id === transaction.id ? updatedTx : tx));
+        const nextAccounts = accounts.map((acc) => {
+            if (acc.id !== details.accountId) return acc;
+            if (transaction.type === 'INCOME') return { ...acc, balance: acc.balance + details.amount, updatedAt: nowIso };
+            if (transaction.type === 'EXPENSE') return { ...acc, balance: acc.balance - details.amount, updatedAt: nowIso };
+            return acc;
+        });
+        await persistCollection('transactions', nextTransactions, transactions);
+        await persistCollection('accounts', nextAccounts, accounts);
+        setTransactions(nextTransactions);
+        setAccounts(nextAccounts);
+    };
+
+    const handleDeleteTransaction = async (id: string) => {
+        await handleSoftDelete('transactions', id);
+        await loadDataForUser();
+    };
+
+    const handleDistributeReceivable = async (receivableId: string, distributions: { accountId: string; value: number }[]) => {
+        const nowIso = new Date().toISOString();
+        const nextReceivables = receivables.map((rec) =>
+            rec.id === receivableId ? { ...rec, distributed: true, updatedAt: nowIso } : rec
+        );
+        const nextAccounts = accounts.map((acc) => {
+            const dist = distributions.find((d) => d.accountId === acc.id);
+            if (!dist) return acc;
+            return { ...acc, balance: acc.balance + dist.value, updatedAt: nowIso };
+        });
+        await persistCollection('receivables', nextReceivables, receivables);
+        await persistCollection('accounts', nextAccounts, accounts);
+        setReceivables(nextReceivables);
+        setAccounts(nextAccounts);
+        addToast('SUCCESS', 'DistribuiÇõÇœo registrada.');
+    };
+
+    const handleSaveTransactionInApp = async (tx: Transaction) => {
+        const nowIso = new Date().toISOString();
+        const nextTransactions = [...transactions, { ...tx, updatedAt: nowIso }];
+        let nextAccounts = accounts;
+        if (tx.isPaid) {
+            nextAccounts = accounts.map((acc) => {
+                if (tx.type === 'TRANSFER') {
+                    if (acc.id === tx.accountId) return { ...acc, balance: acc.balance - tx.amount, updatedAt: nowIso };
+                    if (acc.id === tx.targetAccountId) return { ...acc, balance: acc.balance + tx.amount, updatedAt: nowIso };
+                    return acc;
+                }
+                if (acc.id !== tx.accountId) return acc;
+                if (tx.type === 'INCOME') return { ...acc, balance: acc.balance + tx.amount, updatedAt: nowIso };
+                if (tx.type === 'EXPENSE') return { ...acc, balance: acc.balance - tx.amount, updatedAt: nowIso };
+                return acc;
+            });
+        }
+        await persistCollection('transactions', nextTransactions, transactions);
+        if (nextAccounts !== accounts) {
+            await persistCollection('accounts', nextAccounts, accounts);
+        }
+        setTransactions(nextTransactions);
+        setAccounts(nextAccounts);
+    };
+
+    const navigateTo = (tab: string, mode?: AppMode) => {
+        if (mode) {
+            setAppMode(mode);
+            localStorage.setItem('sys_last_mode', mode);
+        }
+        setActiveTab(tab);
+        localStorage.setItem('sys_last_tab', tab);
+    };
+
+    const renderActiveTab = () => {
+        if (!currentUser) return null;
+        switch (activeTab) {
+            case 'home':
+                return (
+                    <HomeDashboard
+                        sales={sales}
+                        salesTasks={salesTasks}
+                        transactions={transactions}
+                        receivables={filteredReceivables}
+                        accounts={accounts}
+                        hideValues={hideValues}
+                        onToggleHide={toggleHideValues}
+                        onNavigate={navigateTo}
+                        currentUser={currentUser}
+                        onSetDefaultModule={handleSetDefaultModule}
+                        darkMode={isDarkMode}
+                        onNotify={addToast}
+                    />
+                );
+            case 'dashboard':
+                return (
+                    <Dashboard
+                        sales={sales}
+                        salesTasks={salesTasks}
+                        onNewSale={() => setShowSalesForm(true)}
+                        darkMode={isDarkMode}
+                        hideValues={hideValues}
+                        config={dashboardConfig}
+                        onToggleHide={toggleHideValues}
+                        onUpdateConfig={setDashboardConfig}
+                        currentUser={currentUser}
+                        salesTargets={salesTargets}
+                        onUpdateTargets={handleUpdateSalesTargets}
+                        isAdmin={isAdmin}
+                        isDev={isDev}
+                    />
+                );
+            case 'sales':
+                return (
+                    <SalesList
+                        sales={sales}
+                        onEdit={(sale) => {
+                            setEditingSale(sale);
+                            setShowSalesForm(true);
+                        }}
+                        onDelete={handleDeleteSaleInApp}
+                        onNew={() => setShowSalesForm(true)}
+                        onExportTemplate={() => {}}
+                        onClearAll={async () => {
+                            await clearAllSales();
+                            setSales([]);
+                            addToast('INFO', 'Cache local de vendas limpo.');
+                        }}
+                        onRestore={() => setIsBackupModalOpen(true)}
+                        onOpenBulkAdvanced={() => setIsBulkDateModalOpen(true)}
+                        onBillBulk={handleBulkBill}
+                        onDeleteBulk={handleDeleteBulkSales}
+                        onBulkAdd={handleBulkAddSales}
+                        onCreateTask={handleCreateSalesTask}
+                        onRecalculate={handleRecalculateSales}
+                        onNotify={addToast}
+                        darkMode={isDarkMode}
+                        isLocked={salesLockEnabled}
+                    />
+                );
+            case 'pendencias':
+                return (
+                    <BoletoControl
+                        sales={sales}
+                        tasks={salesTasks}
+                        onUpdateTask={handleUpdateSalesTask}
+                        isLocked={salesLockEnabled}
+                    />
+                );
+            case 'commissions':
+                return (
+                    <SettingsHub
+                        rulesBasic={rulesBasic}
+                        rulesNatal={rulesNatal}
+                        reportConfig={reportConfig}
+                        onSaveRules={handleSaveCommissionRulesInApp}
+                        onSaveReportConfig={handleSaveReportConfigInApp}
+                        darkMode={isDarkMode}
+                        onThemeChange={setTheme}
+                        currentUser={currentUser}
+                        onUpdateUser={handleUpdateUserInApp}
+                        sales={sales}
+                        onUpdateSales={handleUpdateSalesInApp}
+                        onNotify={addToast}
+                        isAdmin={isAdmin}
+                        isDev={isDev}
+                        onLogout={handleLogout}
+                        initialTab="COMMISSIONS"
+                        appMode={appMode}
+                    />
+                );
+            case 'campaigns':
+                return <Campaigns currentUser={currentUser} darkMode={isDarkMode} onNotify={addToast} />;
+            case 'clients_hub':
+                return <ClientManagementHub currentUser={currentUser} darkMode={isDarkMode} />;
+            case 'tickets':
+                return <TicketsManager currentUser={currentUser} darkMode={isDarkMode} isAdmin={isAdmin} />;
+            case 'chat':
+                return (
+                    <InternalChatSystem
+                        currentUser={currentUser}
+                        isOpen={true}
+                        onClose={() => navigateTo('home')}
+                        darkMode={isDarkMode}
+                        onNotify={addToast}
+                    />
+                );
+            case 'settings':
+                return (
+                    <SettingsHub
+                        rulesBasic={rulesBasic}
+                        rulesNatal={rulesNatal}
+                        reportConfig={reportConfig}
+                        onSaveRules={handleSaveCommissionRulesInApp}
+                        onSaveReportConfig={handleSaveReportConfigInApp}
+                        darkMode={isDarkMode}
+                        onThemeChange={setTheme}
+                        currentUser={currentUser}
+                        onUpdateUser={handleUpdateUserInApp}
+                        sales={sales}
+                        onUpdateSales={handleUpdateSalesInApp}
+                        onNotify={addToast}
+                        isAdmin={isAdmin}
+                        isDev={isDev}
+                        onLogout={handleLogout}
+                        appMode={appMode}
+                    />
+                );
+            case 'dev_roadmap':
+                return <DevRoadmap />;
+            case 'fin_dashboard':
+                return (
+                    <FinanceDashboard
+                        accounts={accounts}
+                        transactions={transactions}
+                        cards={cards}
+                        receivables={filteredReceivables}
+                        sales={sales}
+                        goals={goals}
+                        darkMode={isDarkMode}
+                        hideValues={hideValues}
+                        config={dashboardConfig}
+                        onToggleHide={toggleHideValues}
+                        onUpdateConfig={setDashboardConfig}
+                        onNavigate={(tab) => navigateTo(tab, 'FINANCE')}
+                    />
+                );
+            case 'fin_transactions':
+                return (
+                    <FinanceTransactionsList
+                        transactions={transactions}
+                        accounts={accounts}
+                        categories={categories}
+                        onDelete={handleDeleteTransaction}
+                        onPay={handleSetTransactionPaid}
+                        darkMode={isDarkMode}
+                    />
+                );
+            case 'fin_receivables':
+                return (
+                    <FinanceReceivables
+                        receivables={filteredReceivables}
+                        onUpdate={handleUpdateFinanceReceivables}
+                        sales={sales}
+                        accounts={accounts}
+                        darkMode={isDarkMode}
+                    />
+                );
+            case 'fin_distribution':
+                return (
+                    <FinanceDistribution
+                        receivables={filteredReceivables}
+                        accounts={accounts}
+                        onDistribute={handleDistributeReceivable}
+                        darkMode={isDarkMode}
+                    />
+                );
+            case 'fin_manager':
+                return (
+                    <FinanceManager
+                        accounts={accounts}
+                        cards={cards}
+                        transactions={transactions}
+                        onUpdate={handleUpdateFinanceManager}
+                        onPayInvoice={handlePayInvoice}
+                        darkMode={isDarkMode}
+                        onNotify={addToast}
+                    />
+                );
+            case 'fin_categories':
+                return <FinanceCategories categories={categories} onUpdate={handleUpdateFinanceCategories} darkMode={isDarkMode} />;
+            case 'fin_goals':
+                return <FinanceGoals goals={goals} onUpdate={handleUpdateFinanceGoals} darkMode={isDarkMode} />;
+            case 'fin_challenges':
+                return (
+                    <FinanceChallenges
+                        challenges={challenges}
+                        cells={cells}
+                        onUpdate={handleUpdateFinanceChallenges}
+                        darkMode={isDarkMode}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     if (loading) return <LoadingScreen />;
     if (authView === 'LOGIN') return <Login onLoginSuccess={handleLoginSuccess} onRequestReset={() => setAuthView('REQUEST_RESET')} />;
     if (authView === 'REQUEST_RESET') return <RequestReset onBack={() => setAuthView('LOGIN')} />;
@@ -542,9 +1120,9 @@ const App: React.FC = () => {
             currentUser={currentUser!}
             onLogout={handleLogout}
             onNewSale={() => setShowSalesForm(true)}
-            onNewIncome={() => setShowTxForm(true)}
-            onNewExpense={() => setShowTxForm(true)}
-            onNewTransfer={() => setShowTxForm(true)}
+            onNewIncome={() => { setTxFormType('INCOME'); setShowTxForm(true); }}
+            onNewExpense={() => { setTxFormType('EXPENSE'); setShowTxForm(true); }}
+            onNewTransfer={() => { setTxFormType('TRANSFER'); setShowTxForm(true); }}
             isAdmin={isAdmin}
             isDev={isDev}
             showSnow={showSnow}
@@ -554,11 +1132,43 @@ const App: React.FC = () => {
             onNotify={addToast}
         >
             <Suspense fallback={<ModuleLoader />}>
-                {/* ... seu conteúdo continua igual ... */}
+                {renderActiveTab()}
             </Suspense>
 
             <Suspense fallback={null}>
-                {/* ... seus modais continuam igual ... */}
+                <SalesForm
+                    isOpen={showSalesForm}
+                    onClose={() => {
+                        setShowSalesForm(false);
+                        setEditingSale(null);
+                    }}
+                    onSaved={loadDataForUser}
+                    onSave={handleSaveSaleInApp}
+                    initialData={editingSale}
+                    isLocked={salesLockEnabled}
+                />
+                <FinanceTransactionForm
+                    isOpen={showTxForm}
+                    onClose={() => setShowTxForm(false)}
+                    onSaved={loadDataForUser}
+                    onSave={handleSaveTransactionInApp}
+                    accounts={accounts}
+                    cards={cards}
+                    categories={categories}
+                    initialType={txFormType}
+                />
+                <BackupModal
+                    isOpen={isBackupModalOpen}
+                    mode="BACKUP"
+                    onClose={() => setIsBackupModalOpen(false)}
+                    onSuccess={() => {}}
+                />
+                <BulkDateModal
+                    isOpen={isBulkDateModalOpen}
+                    onClose={() => setIsBulkDateModalOpen(false)}
+                    onConfirm={handleBulkDateUpdate}
+                    darkMode={isDarkMode}
+                />
             </Suspense>
 
             {currentUser && (

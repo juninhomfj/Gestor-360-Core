@@ -6,11 +6,17 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
 Plataforma web modular com **Vendas**, **Finanças**, **Distribuição**, **Recebíveis**, **Configurações** e utilitários.  
-Arquitetura **local-first** (IndexedDB) com **sincronização Cloud Firestore** e tolerância a offline.
+Arquitetura **online-first** (Firestore) com cache local (IndexedDB) e tolerancia a offline.
 
 ---
 
 ## ✨ Principais recursos
+
+### Home
+- Resumo combinado de Vendas e Financas
+- Atalhos para Vendas360 e Financas360
+- Preferencia de abertura (Home ou modulo direto) + botao de privacidade
+
 
 ### Vendas
 - Cadastro e edição de vendas
@@ -24,9 +30,14 @@ Arquitetura **local-first** (IndexedDB) com **sincronização Cloud Firestore** 
 
 ### Operação
 - Cache local (IndexedDB) + sync
+- Chat interno com selecao de usuarios e grupos
 - Modo manutenção e bloqueio de escrita (quando habilitado)
 - Lixeira (restaurar e excluir permanentemente)
-- Áudio de feedback (sucesso/erro/notificações)
+- Audio de feedback (sucesso/erro/notificacoes)
+
+### IA / BI
+- Selecao de provedor (OpenAI ou Gemini)
+- Chave de API armazenada localmente no navegador
 
 ---
 

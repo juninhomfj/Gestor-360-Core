@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { CommissionRule, ProductType, ReportConfig, SystemConfig, AppTheme, User, Sale, AudioType, SalesTargets, UserPermissions } from '../types';
+import { CommissionRule, ProductType, ReportConfig, SystemConfig, AppTheme, User, Sale, AudioType, SalesTargets, UserPermissions, AppMode } from '../types';
 import CommissionEditor from './CommissionEditor';
 import ClientManagementHub from './ClientManagementHub';
-import { Settings as SettingsIcon, Shield, Volume2, Trash2, User as UserIcon, Activity, Hammer, X, ArrowLeft, Users, Save, Bell, Terminal, Eraser, BookOpen, ToggleLeft, ToggleRight, Layout, Info, HardDrive, ShieldAlert, Download, Bug, CheckCircle, AlertTriangle, DollarSign, FlaskConical } from 'lucide-react';
+import { Settings as SettingsIcon, Shield, Volume2, Trash2, User as UserIcon, Activity, Hammer, X, ArrowLeft, Users, Save, Bell, Terminal, Eraser, BookOpen, ToggleLeft, ToggleRight, Layout, Info, HardDrive, ShieldAlert, Download, Bug, CheckCircle, AlertTriangle, DollarSign, FlaskConical, Cpu, KeyRound, Eye, EyeOff, Layers } from 'lucide-react';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import { getSystemConfig, saveSystemConfig, DEFAULT_SYSTEM_CONFIG, canAccess } from '../services/logic';
 import { fileToBase64 } from '../utils/fileHelper';
@@ -39,7 +39,8 @@ interface SettingsHubProps {
   isAdmin: boolean;
   isDev: boolean;
   onLogout: () => void;
-  initialTab?: 'PROFILE' | 'SYSTEM' | 'USERS' | 'WEBHOOKS' | 'COMMISSIONS' | 'ROADMAP' | 'SOUNDS' | 'TRASH' | 'CLIENTS' | 'MESSAGING' | 'LOGS' | 'AUDIT_FULL' | 'ACCESS' | 'DEVTOOLS';
+  appMode: AppMode;
+  initialTab?: 'PROFILE' | 'SYSTEM' | 'USERS' | 'WEBHOOKS' | 'COMMISSIONS' | 'ROADMAP' | 'SOUNDS' | 'TRASH' | 'CLIENTS' | 'MESSAGING' | 'LOGS' | 'AUDIT_FULL' | 'ACCESS' | 'DEVTOOLS' | 'AI_BI';
 }
 
 interface CampaignSimulationRow {
@@ -57,9 +58,9 @@ interface CampaignSimulationRow {
 const SettingsHub: React.FC<SettingsHubProps> = ({ 
   rulesBasic, rulesNatal, reportConfig, onSaveRules, onSaveReportConfig,
   darkMode, onThemeChange, currentUser, onUpdateUser, sales, onUpdateSales, onNotify,
-  isAdmin, isDev, onLogout, initialTab
+  isAdmin, isDev, onLogout, initialTab, appMode
 }) => {
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'SYSTEM' | 'USERS' | 'WEBHOOKS' | 'COMMISSIONS' | 'ROADMAP' | 'SOUNDS' | 'TRASH' | 'CLIENTS' | 'MESSAGING' | 'LOGS' | 'AUDIT_FULL' | 'ACCESS' | 'DEVTOOLS'>(initialTab || 'PROFILE');
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'SYSTEM' | 'USERS' | 'WEBHOOKS' | 'COMMISSIONS' | 'ROADMAP' | 'SOUNDS' | 'TRASH' | 'CLIENTS' | 'MESSAGING' | 'LOGS' | 'AUDIT_FULL' | 'ACCESS' | 'DEVTOOLS' | 'AI_BI'>(initialTab || 'PROFILE');
   const [commissionTab, setCommissionTab] = useState<ProductType>(ProductType.BASICA); 
   const [showMobileContent, setShowMobileContent] = useState(false);
   const [logExporting, setLogExporting] = useState(false);
@@ -90,6 +91,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   const [campaignSimulation, setCampaignSimulation] = useState<CampaignSimulationRow[]>([]);
   const [campaignRunning, setCampaignRunning] = useState(false);
 
+  const [aiProvider, setAiProvider] = useState<'OPENAI' | 'GEMINI'>('OPENAI');
+  const [aiApiKey, setAiApiKey] = useState('');
+  const [aiEnabled, setAiEnabled] = useState(true);
+  const [biEnabled, setBiEnabled] = useState(true);
+  const [showAiKey, setShowAiKey] = useState(false);
+
   useEffect(() => {
       const loadConfig = async () => {
           try {
@@ -117,6 +124,18 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
           }
       };
       loadConfig();
+  }, []);
+
+  useEffect(() => {
+      try {
+          const raw = localStorage.getItem('sys_ai_settings_v1');
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (parsed?.provider) setAiProvider(parsed.provider);
+          if (typeof parsed?.apiKey === 'string') setAiApiKey(parsed.apiKey);
+          if (typeof parsed?.aiEnabled === 'boolean') setAiEnabled(parsed.aiEnabled);
+          if (typeof parsed?.biEnabled === 'boolean') setBiEnabled(parsed.biEnabled);
+      } catch {}
   }, []);
 
   useEffect(() => {
@@ -197,6 +216,17 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
           successSound,
           warningSound
       };
+
+  const handleSaveAiSettings = () => {
+      const payload = {
+          provider: aiProvider,
+          apiKey: aiApiKey,
+          aiEnabled,
+          biEnabled
+      };
+      localStorage.setItem('sys_ai_settings_v1', JSON.stringify(payload));
+      onNotify('SUCCESS', 'Prefer??ncias de IA/BI salvas localmente.');
+  };
       setSystemConfig(newConfig);
       await saveSystemConfig(newConfig);
       onNotify('SUCCESS', 'Configurações de sistema atualizadas!');
@@ -466,18 +496,23 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
        {/* Sidebar Menu */}
        <div className={`w-full md:w-64 shrink-0 flex flex-col gap-1 ${showMobileContent ? 'hidden md:flex' : 'flex'}`}>
            <div className={`max-h-[calc(100vh-8rem)] overflow-y-auto p-4 rounded-2xl border ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'} shadow-sm`}>
-               <h2 className="px-2 mb-4 text-[10px] font-black uppercase tracking-widest text-indigo-500">Perfil & App</h2>
+               <h2 className="px-2 mb-4 text-[10px] font-black uppercase tracking-widest text-indigo-500">Gerais</h2>
                <NavBtn id="PROFILE" icon={UserIcon} label="Meu Perfil" />
-<NavBtn id="SOUNDS" icon={Volume2} label="Sons & Avisos" />
-               <NavBtn id="LOGS" icon={Terminal} label="Logs & Diagnóstico" />
+               <NavBtn id="SOUNDS" icon={Volume2} label="Sons & Avisos" />
+               <NavBtn id="LOGS" icon={Terminal} label="Logs & Diagnostico" />
+               <NavBtn id="AI_BI" icon={Cpu} label="AI & BI" />
                <NavBtn id="SYSTEM" icon={SettingsIcon} label="Sistema (Admin)" show={isAdmin} />
-               
-                       <h2 className="px-2 mb-4 mt-6 text-[10px] font-black uppercase tracking-widest text-indigo-500">Módulos</h2>
-                       <NavBtn id="COMMISSIONS" icon={SettingsIcon} label="Tabelas de Comissão" />
-                       <NavBtn id="CLIENTS" icon={Users} label="Gestão de Clientes" />
-                       <NavBtn id="TRASH" icon={Trash2} label="Lixeira" />
+               <NavBtn id="TRASH" icon={Trash2} label="Lixeira" />
 
-               {(isAdmin || isDev) && (
+               {appMode === 'SALES' && (
+                   <>
+                       <h2 className="px-2 mb-4 mt-6 text-[10px] font-black uppercase tracking-widest text-indigo-500">Modulo Atual</h2>
+                       <NavBtn id="COMMISSIONS" icon={SettingsIcon} label="Tabelas de Comissao" />
+                       <NavBtn id="CLIENTS" icon={Users} label="Gestao de Clientes" />
+                   </>
+               )}
+
+{(isAdmin || isDev) && (
                    <>
                        <div className="my-6 border-t dark:border-slate-800 border-gray-100"></div>
                        <h2 className="px-2 mb-4 text-[10px] font-black uppercase tracking-widest text-amber-500">Administração</h2>
@@ -508,6 +543,87 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                {activeTab === 'WEBHOOKS' && (isAdmin || isDev) && <AdminWebhooks onNotify={onNotify} darkMode={!!darkMode} />}
                {activeTab === 'MESSAGING' && (isAdmin || isDev) && <AdminMessaging currentUser={currentUser} darkMode={!!darkMode} />}
                {activeTab === 'AUDIT_FULL' && (isAdmin || isDev) && <AuditLogExplorer darkMode={!!darkMode} />}
+
+               {activeTab === 'AI_BI' && (
+                    <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm animate-in fade-in slide-in-from-right-2 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
+                        <div className="flex items-center gap-3 mb-8">
+                            <Cpu className="text-indigo-500" size={28}/>
+                            <div>
+                                <h3 className="text-xl font-black">AI & BI</h3>
+                                <p className="text-xs text-gray-500">Configure provedor e chave. Armazenamento local (navegador).</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className={`p-5 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950/60' : 'border-gray-200 bg-gray-50'}`}>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Provedor</label>
+                                <select
+                                    value={aiProvider}
+                                    onChange={(e) => setAiProvider(e.target.value as 'OPENAI' | 'GEMINI')}
+                                    className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
+                                >
+                                    <option value="OPENAI">OpenAI</option>
+                                    <option value="GEMINI">Gemini</option>
+                                </select>
+                                <p className="text-[10px] text-gray-400 mt-2">Selecione o provedor principal para recursos de IA/BI.</p>
+                            </div>
+
+                            <div className={`p-5 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950/60' : 'border-gray-200 bg-gray-50'}`}>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Chave de API</label>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1 relative">
+                                        <input
+                                            type={showAiKey ? 'text' : 'password'}
+                                            value={aiApiKey}
+                                            onChange={(e) => setAiApiKey(e.target.value)}
+                                            placeholder="Cole a chave aqui"
+                                            className={`w-full p-3 pr-10 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAiKey(!showAiKey)}
+                                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showAiKey ? <EyeOff size={16}/> : <Eye size={16}/>}
+                                        </button>
+                                    </div>
+                                    <KeyRound className="text-indigo-500" size={18}/>
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-2">A chave nao e enviada para o servidor automaticamente.</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <label className={`p-4 rounded-2xl border flex items-center justify-between ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+                                <span className="text-sm font-bold">IA ativada</span>
+                                <input
+                                    type="checkbox"
+                                    checked={aiEnabled}
+                                    onChange={(e) => setAiEnabled(e.target.checked)}
+                                    className="h-5 w-5 accent-indigo-600"
+                                />
+                            </label>
+                            <label className={`p-4 rounded-2xl border flex items-center justify-between ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+                                <span className="text-sm font-bold">BI ativado</span>
+                                <input
+                                    type="checkbox"
+                                    checked={biEnabled}
+                                    onChange={(e) => setBiEnabled(e.target.checked)}
+                                    className="h-5 w-5 accent-indigo-600"
+                                />
+                            </label>
+                        </div>
+
+                        <div className="mt-8 flex justify-end">
+                            <button
+                                onClick={handleSaveAiSettings}
+                                className="px-8 py-3 rounded-xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700"
+                            >
+                                Salvar IA & BI
+                            </button>
+                        </div>
+                    </div>
+               )}
                {activeTab === 'ACCESS' && (isAdmin || isDev) && (
                     <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm animate-in fade-in slide-in-from-right-2 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
                         <div className="flex items-center gap-3 mb-8">
@@ -578,13 +694,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                
                {activeTab === 'LOGS' && (
                     <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm animate-in fade-in slide-in-from-right-2 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
-                        <div className="flex items-center gap-3 mb-8">
+                        <div className="flex items-center gap-3 mb-6">
                             <Terminal className="text-indigo-500" size={28}/>
                             <h3 className="text-xl font-black">Auditoria de Sistema</h3>
                         </div>
                         <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                            Aqui você pode gerenciar os logs de eventos armazenados no seu navegador (IndexedDB). 
-                            Limpar estes logs ajuda a manter o sistema ágil, mas remove o histórico de diagnóstico local.
+                            Logs locais ficam no seu navegador (IndexedDB). Baixe ou limpe quando precisar.
                         </p>
                         {logStatus && (
                             <div className={`mb-6 p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${logStatus.type === 'success' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
@@ -592,244 +707,20 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 {logStatus.message}
                             </div>
                         )}
-                        <div className="p-6 rounded-2xl bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div>
-                                <h4 className="font-bold text-indigo-900 dark:text-indigo-300">Base de Auditoria Local</h4>
-                                <p className="text-xs text-indigo-700 dark:text-indigo-400 mt-1">Sincronia com nuvem permanece ativa para administradores.</p>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button 
-                                    onClick={handleDownloadLogs}
-                                    disabled={logExporting}
-                                    className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/30 disabled:opacity-60"
-                                >
-                                    <Download size={16}/> {logExporting ? 'Gerando...' : 'Baixar Logs'}
-                                </button>
-                                <button 
-                                    onClick={() => setBugModalOpen(true)}
-                                    className="px-6 py-3 bg-amber-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-amber-700 transition-all shadow-lg shadow-amber-900/30"
-                                >
-                                    <Bug size={16}/> Reportar Bug
-                                </button>
-                                <button 
-                                    onClick={handleClearLogs}
-                                    className="px-6 py-3 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg shadow-red-900/20"
-                                >
-                                    <Eraser size={16}/> Limpar Logs Locais
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-               )}
-
-               {activeTab === 'DEVTOOLS' && isDev && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-2">
-                        <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
-                            <div className="flex items-center gap-3 mb-6">
-                                <FlaskConical className="text-indigo-500" size={28}/>
-                                <div>
-                                    <h3 className="text-xl font-black">Diagnóstico DEV (Sync)</h3>
-                                    <p className="text-xs text-gray-500">Verifica coleções por usuário e registra tempo de resposta.</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap gap-3 items-center">
-                                <button
-                                    onClick={handleRunSyncDiagnostics}
-                                    disabled={syncRunning}
-                                    className="px-6 py-3 rounded-xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest shadow-lg disabled:opacity-60"
-                                >
-                                    {syncRunning ? 'Rodando...' : 'Rodar Diagnóstico de Sync'}
-                                </button>
-                                {syncError && <span className="text-xs text-red-500 font-bold">{syncError}</span>}
-                            </div>
-                            {syncResults && (
-                                <div className="mt-6 overflow-x-auto">
-                                    <table className="min-w-full text-xs border-separate border-spacing-y-2">
-                                        <thead>
-                                            <tr className="text-left text-[10px] uppercase tracking-widest text-gray-400">
-                                                <th>Collection</th>
-                                                <th>Status</th>
-                                                <th>Count</th>
-                                                <th>Tempo (ms)</th>
-                                                <th>Mensagem</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {syncResults.map((row) => (
-                                                <tr key={row.collection} className="bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-xl">
-                                                    <td className="px-3 py-2 font-bold">{row.collection}</td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${row.ok ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                                                            {row.ok ? 'PASS' : 'FAIL'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2">{row.count}</td>
-                                                    <td className="px-3 py-2">{row.ms}</td>
-                                                    <td className="px-3 py-2 text-[10px] text-gray-400">{row.errorMessage || '-'}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
-                            <div className="flex items-center gap-3 mb-6">
-                                <ShieldAlert className="text-amber-500" size={26}/>
-                                <div>
-                                    <h3 className="text-xl font-black">Bloquear vs Ocultar (UI)</h3>
-                                    <p className="text-xs text-gray-500">Permissões simulam bloqueio; hiddenModules controla visibilidade do menu.</p>
-                                </div>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full text-xs border-separate border-spacing-y-2">
-                                    <thead>
-                                        <tr className="text-left text-[10px] uppercase tracking-widest text-gray-400">
-                                            <th>Módulo</th>
-                                            <th>Permissão (modules)</th>
-                                            <th>Hidden (UI)</th>
-                                            <th>Visível (simulação)</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {SYSTEM_MODULES.map((mod) => {
-                                            const hidden = !!devHiddenModules[mod.key];
-                                            const permission = !!devPermissions[mod.key];
-                                            const simulatedUser: User = {
-                                                ...currentUser,
-                                                role: currentUser.role === 'DEV' ? 'USER' : currentUser.role,
-                                                permissions: devPermissions
-                                            };
-                                            const hasAccess = canAccess(simulatedUser, mod.key);
-                                            const moduleEnabled = isModuleEnabled(systemConfig?.modules, mod.key, false);
-                                            const isVisible = hasAccess && moduleEnabled && !hidden;
-                                            return (
-                                                <tr key={mod.key} className="bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-xl">
-                                                    <td className="px-3 py-2 font-bold">{mod.label}</td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${permission ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                                                            {permission ? 'Liberado' : 'Bloqueado'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${hidden ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-600'}`}>
-                                                            {hidden ? 'Oculto' : 'Visível'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${isVisible ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                                                            {isVisible ? 'Sim' : 'Não'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        <div className="flex flex-wrap gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setDevPermissions(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                                                className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase bg-indigo-600 text-white"
-                                                            >
-                                                                Toggle Permissão
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setDevHiddenModules(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                                                className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase bg-amber-500 text-white"
-                                                            >
-                                                                Toggle Hidden
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p className="mt-3 text-[10px] text-gray-500">Hidden remove do menu e cartões; permissões simulam bloqueio para usuários não-DEV.</p>
-                            <div className="mt-6 flex justify-end">
-                                <button
-                                    onClick={handleSaveDevVisibility}
-                                    disabled={devSaving}
-                                    className="px-8 py-3 rounded-xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest shadow-lg disabled:opacity-60"
-                                >
-                                    Salvar Ajustes de Visibilidade
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className={`p-6 sm:p-8 rounded-2xl border shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-100'}`}>
-                            <div className="flex items-center gap-3 mb-6">
-                                <DollarSign className="text-emerald-500" size={26}/>
-                                <div>
-                                    <h3 className="text-xl font-black">Simulador de Campanhas/Metas</h3>
-                                    <p className="text-xs text-gray-500">Executa overlay em memória (margens 1%, 3%, -1%).</p>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                                <div className="md:col-span-1">
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Meta Cesta Básica</label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        className={`w-full p-3 rounded-xl border outline-none ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-gray-200'}`}
-                                        value={devSalesTargets.basic}
-                                        onChange={(e) => setDevSalesTargets(prev => ({ ...prev, basic: Number(e.target.value) }))}
-                                    />
-                                </div>
-                                <div className="flex gap-3 md:col-span-2">
-                                    <button
-                                        onClick={handleSaveDevTargets}
-                                        disabled={devSaving}
-                                        className="px-6 py-3 rounded-xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest shadow-lg disabled:opacity-60"
-                                    >
-                                        Salvar Meta
-                                    </button>
-                                    <button
-                                        onClick={handleRunCampaignSimulation}
-                                        disabled={campaignRunning}
-                                        className="px-6 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black uppercase tracking-widest shadow-lg disabled:opacity-60"
-                                    >
-                                        {campaignRunning ? 'Simulando...' : 'Rodar Simulação'}
-                                    </button>
-                                </div>
-                            </div>
-                            {campaignSimulation.length > 0 && (
-                                <div className="mt-6 overflow-x-auto">
-                                    <table className="min-w-full text-xs border-separate border-spacing-y-2">
-                                        <thead>
-                                            <tr className="text-left text-[10px] uppercase tracking-widest text-gray-400">
-                                                <th>Margem</th>
-                                                <th>Comissão Base</th>
-                                                <th>Comissão Aplicada</th>
-                                                <th>Tag</th>
-                                                <th>Label</th>
-                                                <th>Mensagem</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {campaignSimulation.map((row) => (
-                                                <tr key={row.id} className="bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-xl">
-                                                    <td className="px-3 py-2">{row.margin.toFixed(2)}%</td>
-                                                    <td className="px-3 py-2">{row.baseCommissionValueTotal.toFixed(2)}</td>
-                                                    <td className="px-3 py-2">{row.overlayCommissionValueTotal.toFixed(2)}</td>
-                                                    <td className="px-3 py-2">{row.campaignTag}</td>
-                                                    <td className="px-3 py-2">{row.campaignLabel}</td>
-                                                    <td className="px-3 py-2 text-[10px] text-gray-400">{row.campaignMessage}</td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${row.applied ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                                                            {row.applied ? 'Aplicado' : 'Sem overlay'}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                            <p className="mt-3 text-[10px] text-gray-500">O caso de margem negativa deve permanecer sem overlay.</p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={handleDownloadLogs}
+                                disabled={logExporting}
+                                className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-slate-700 transition-all shadow-lg shadow-slate-900/30 disabled:opacity-60"
+                            >
+                                <Download size={16}/> {logExporting ? 'Gerando...' : 'Baixar Logs'}
+                            </button>
+                            <button
+                                onClick={handleClearLogs}
+                                className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-red-200 transition-all"
+                            >
+                                <Eraser size={16}/> Limpar Logs
+                            </button>
                         </div>
                     </div>
                )}
