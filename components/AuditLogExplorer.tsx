@@ -109,11 +109,11 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                         value={filterLevel}
                         onChange={e => setFilterLevel(e.target.value as any)}
                     >
-                        <option value="ALL">Todos os Níveis</option>
-                        <option value="INFO">Informação</option>
-                        <option value="WARN">Aviso</option>
-                        <option value="ERROR">Erro</option>
-                        <option value="CRASH">Crash Crítico</option>
+                        <option value="ALL">Todos os Niveis (ALL)</option>
+                        <option value="INFO">Informacao (INFO)</option>
+                        <option value="WARN">Aviso (WARN)</option>
+                        <option value="ERROR">Erro (ERROR)</option>
+                        <option value="CRASH">Crash Critico (CRASH)</option>
                     </select>
                 </div>
                 <div className="md:col-span-4">

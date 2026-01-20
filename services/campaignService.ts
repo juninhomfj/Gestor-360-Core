@@ -119,7 +119,11 @@ export const getCampaignsByCompany = async (companyId: string): Promise<Commissi
     Logger.info("Campaigns: campanhas carregadas do Firestore.", { companyId, count: campaigns.length });
     return campaigns;
   } catch (error: any) {
-    Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", { message: error?.message });
+    Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
+      message: error?.message,
+      companyId,
+      query: "campaigns where companyId == X orderBy startMonth desc"
+    });
     return await dbGetAll('campaigns', c => c.companyId === companyId);
   }
 };

@@ -898,9 +898,9 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
   }, [activeChatType, activeRoomId, activeChatId, rooms, users, isAdmin]);
 
   const modalContent = (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm md:p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[2000] flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-sm md:p-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] animate-in fade-in">
       <div
-        className={`w-full md:max-w-4xl h-[100dvh] md:h-[80vh] flex overflow-hidden md:rounded-2xl shadow-2xl border ${
+        className={`w-full md:max-w-4xl h-[100dvh] max-h-[100dvh] md:h-[80vh] md:max-h-[80vh] flex flex-col md:flex-row overflow-hidden md:rounded-2xl shadow-2xl border ${
           darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200'
         }`}
       >
@@ -969,7 +969,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           <div className={`p-4 border-b flex justify-between items-center ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white'}`}>
             <div className="flex items-center gap-2">
               <h3 className="font-bold">{title}</h3>
@@ -989,7 +989,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="text-xs text-slate-400">Nenhuma mensagem ainda.</div>
             ) : (

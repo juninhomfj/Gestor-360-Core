@@ -252,7 +252,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
       setSystemConfig(newConfig);
       try {
           await saveSystemConfig(newConfig);
-          onNotify('SUCCESS', 'Configura??es de sistema atualizadas!');
+          onNotify('SUCCESS', 'Configuracoes de sistema atualizadas!');
           Logger.info('Config: Sistema atualizado.', { userId: currentUser.id });
       } catch (error: any) {
           onNotify('ERROR', error?.message || 'Falha ao salvar configura??es do sistema.');
@@ -261,15 +261,15 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
 
   const handleSaveCommissionSettings = async () => {
       if (!isDev) {
-          onNotify('ERROR', 'Somente DEV pode salvar ajustes globais de comiss?o.');
+          onNotify('ERROR', 'Somente DEV pode salvar ajustes globais de comissao.');
           return;
       }
       try {
           await saveSystemConfig(systemConfig);
-          onNotify('SUCCESS', 'Configura??es de comiss?o atualizadas!');
-          Logger.info('Config: Comiss?es atualizadas.', { userId: currentUser.id });
+          onNotify('SUCCESS', 'Configuracoes de comissao atualizadas!');
+          Logger.info('Config: Comissoes atualizadas.', { userId: currentUser.id });
       } catch (error: any) {
-          onNotify('ERROR', error?.message || 'Falha ao salvar configura??es de comiss?o.');
+          onNotify('ERROR', error?.message || 'Falha ao salvar configuracoes de comissao.');
       }
   };
 

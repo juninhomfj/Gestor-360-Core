@@ -1101,6 +1101,41 @@ export const processFinanceImport = async (data: any[][], mapping: ImportMapping
   const uid = auth.currentUser?.uid;
   if (!uid) return;
 
+  const categories = (await dbGetAll("categories", (c) => (c as any).userId === uid)) || [];
+  const accounts = (await dbGetAll("accounts", (a) => (a as any).userId === uid)) || [];
+  const cards = (await dbGetAll("cards", (c) => (c as any).userId === uid)) || [];
+
+  const normalize = (value: any) =>
+    String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "");
+
+  const parseDateValue = (value: any) => {
+    if (!value) return new Date().toISOString().split("T")[0];
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split("T")[0];
+    }
+    if (typeof value === "number") {
+      const parsed = XLSX.SSF ? XLSX.SSF.parse_date_code(value) : null;
+      if (parsed) {
+        const formatted = `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+        return formatted;
+      }
+    }
+    const text = String(value).trim();
+    if (!text) return new Date().toISOString().split("T")[0];
+    const ddmmyyyy = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyy) {
+      const [, dd, mm, yyyy] = ddmmyyyy;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    const parsed = new Date(text);
+    if (Number.isNaN(parsed.getTime())) return new Date().toISOString().split("T")[0];
+    return parsed.toISOString().split("T")[0];
+  };
+
   const transactions: Transaction[] = [];
   const batch = writeBatch(db);
 
@@ -1112,18 +1147,54 @@ export const processFinanceImport = async (data: any[][], mapping: ImportMapping
     const descIdx = mapping["description"];
     const amountIdx = mapping["amount"];
     const typeIdx = mapping["type"];
+    const categoryIdx = mapping["category"];
+    const accountIdx = mapping["account"];
+    const personIdx = mapping["person"];
 
     if (dateIdx === -1 || descIdx === -1 || amountIdx === -1) continue;
 
     const amount = ensureNumber(row[amountIdx]);
+    const typeRaw = typeIdx !== -1 ? String(row[typeIdx] || "") : "";
+    const typeNormalized = normalize(typeRaw);
     const type =
-      typeIdx !== -1 && row[typeIdx]
-        ? String(row[typeIdx]).toUpperCase().includes("REC")
-          ? "INCOME"
-          : "EXPENSE"
-        : amount >= 0
-          ? "INCOME"
-          : "EXPENSE";
+      typeNormalized.includes("rec") || typeNormalized.includes("entr")
+        ? "INCOME"
+        : typeNormalized.includes("desp") || typeNormalized.includes("sai")
+          ? "EXPENSE"
+          : typeNormalized.includes("transf")
+            ? "TRANSFER"
+            : amount >= 0
+              ? "INCOME"
+              : "EXPENSE";
+
+    let categoryId = "uncategorized";
+    if (categoryIdx !== undefined && categoryIdx !== -1) {
+      const rawCategory = row[categoryIdx];
+      const normalized = normalize(rawCategory);
+      const matched = categories.find((c: any) => normalize(c.name) === normalized);
+      if (matched?.id) categoryId = matched.id;
+    }
+
+    let accountId = "";
+    let cardId: string | null = null;
+    if (accountIdx !== undefined && accountIdx !== -1) {
+      const rawAccount = row[accountIdx];
+      const normalized = normalize(rawAccount);
+      const matchedAccount = accounts.find((a: any) => normalize(a.name) === normalized);
+      const matchedCard = cards.find((c: any) => normalize(c.name) === normalized);
+      if (matchedAccount?.id) {
+        accountId = matchedAccount.id;
+      } else if (matchedCard?.id) {
+        cardId = matchedCard.id;
+      }
+    }
+
+    const personType =
+      personIdx !== undefined && personIdx !== -1
+        ? String(row[personIdx] || "").toUpperCase().includes("PJ")
+          ? "PJ"
+          : "PF"
+        : "PF";
 
     const txId = crypto.randomUUID();
     const tx: Transaction = {
@@ -1131,15 +1202,17 @@ export const processFinanceImport = async (data: any[][], mapping: ImportMapping
       description: String(row[descIdx] || "Importado"),
       amount: Math.abs(amount),
       type: type as any,
-      date: row[dateIdx] ? new Date(row[dateIdx]).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      date: parseDateValue(row[dateIdx]),
       isPaid: true,
       provisioned: false,
       isRecurring: false,
       deleted: false,
       createdAt: new Date().toISOString(),
       userId: uid,
-      categoryId: "uncategorized",
-      accountId: ""
+      categoryId,
+      accountId,
+      cardId,
+      personType: personType as any
     };
 
     transactions.push(tx);

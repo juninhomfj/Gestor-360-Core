@@ -4,6 +4,7 @@ import { Receivable, Sale, FinanceAccount, CommissionDeduction } from '../types'
 import { Plus, CheckCircle, Clock, Trash2, Download, AlertTriangle, Edit2, X, DollarSign, Calendar, FileText, AlertCircle } from 'lucide-react';
 import ImportCommissionsModal from './ImportCommissionsModal';
 import { auth } from '../services/firebase';
+import { ensureNumber } from '../services/logic';
 
 interface FinanceReceivablesProps {
   receivables: Receivable[]; 
@@ -47,10 +48,12 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
 
   const handleSaveNew = () => {
       if (!formData.description || !formData.value) return;
+      const parsedValue = ensureNumber(formData.value);
+      if (parsedValue <= 0) return;
       const newItem: Receivable = {
           id: crypto.randomUUID(),
           description: formData.description,
-          value: parseFloat(formData.value),
+          value: parsedValue,
           date: formData.date || new Date().toISOString().split('T')[0],
           status: formData.status as 'PENDING' | 'EFFECTIVE',
           distributed: false,

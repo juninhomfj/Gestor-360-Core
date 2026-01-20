@@ -13,13 +13,13 @@ interface FinanceImportModalProps {
 }
 
 const FINANCE_FIELDS = [
-  { key: 'date', label: 'Data', required: true },
-  { key: 'description', label: 'Descrição', required: true },
-  { key: 'amount', label: 'Valor', required: true },
-  { key: 'type', label: 'Tipo (Receita/Despesa)', required: false }, // Can auto-detect by signal
-  { key: 'category', label: 'Categoria', required: false },
-  { key: 'account', label: 'Conta/Cartão', required: false },
-  { key: 'person', label: 'Pessoa (PF/PJ)', required: false },
+  { key: 'date', label: 'Data', required: true, matches: ['data', 'dt'] },
+  { key: 'description', label: 'Descrição', required: true, matches: ['descricao', 'hist', 'historico'] },
+  { key: 'amount', label: 'Valor', required: true, matches: ['valor', 'amount'] },
+  { key: 'type', label: 'Tipo (Receita/Despesa)', required: false, matches: ['tipo', 'natureza'] },
+  { key: 'category', label: 'Categoria', required: false, matches: ['categoria', 'category'] },
+  { key: 'account', label: 'Conta/Cartão', required: false, matches: ['conta', 'cartao', 'account', 'card'] },
+  { key: 'person', label: 'Pessoa (PF/PJ)', required: false, matches: ['pessoa', 'pf', 'pj'] },
 ];
 
 const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose, fileData, onConfirm, darkMode }) => {
@@ -38,12 +38,21 @@ const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose
         setPreviewRow([]);
       }
 
+      const normalizeHeader = (value: string) =>
+        value
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '');
+
       // Auto-guess
       const initialMap: ImportMapping = {};
       FINANCE_FIELDS.forEach(field => {
-        const index = headerRow.findIndex(h => 
-          h && h.toLowerCase().includes(field.label.toLowerCase().split(' ')[0])
-        );
+        const index = headerRow.findIndex(h => {
+          if (!h) return false;
+          const normalized = normalizeHeader(h);
+          return field.matches?.some(match => normalized.includes(normalizeHeader(match)));
+        });
         if (index !== -1) initialMap[field.key] = index;
         else initialMap[field.key] = -1;
       });
