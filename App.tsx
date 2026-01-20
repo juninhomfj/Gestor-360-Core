@@ -1317,6 +1317,8 @@ const App: React.FC = () => {
                     onSave={handleSaveSaleInApp}
                     initialData={editingSale}
                     isLocked={salesLockEnabled}
+                    rulesBasic={rulesBasic}
+                    rulesNatal={rulesNatal}
                 />
                 <FinanceTransactionForm
                     isOpen={showTxForm}
