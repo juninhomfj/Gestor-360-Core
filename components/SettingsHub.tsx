@@ -98,9 +98,20 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   const [showAiKey, setShowAiKey] = useState(false);
 
   const handleResetSales = async () => {
-    if (!isDev && !isAdmin) return;
-    const password = window.prompt('Digite sua senha para continuar.');
-    if (!password) return;
+    if (!isDev) {
+      onNotify('ERROR', 'Apenas DEV pode executar este reset.');
+      return;
+    }
+    const resetPassword = import.meta.env.VITE_RESET_SALES_PASSWORD as string | undefined;
+    if (!resetPassword) {
+      onNotify('ERROR', 'Senha de reset nao configurada no .env.');
+      return;
+    }
+    const password = window.prompt('Digite a senha de reset para continuar.');
+    if (!password || password !== resetPassword) {
+      onNotify('ERROR', 'Senha invalida.');
+      return;
+    }
     const token = window.prompt('Digite RESETAR para apagar todas as vendas e manter apenas um seed inativo.');
     if (token !== 'RESETAR') return;
     const confirmed = window.confirm('Ultima confirmacao: deseja apagar vendas, clientes e dependencias?');
@@ -110,7 +121,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
       onUpdateSales([]);
       onNotify('SUCCESS', 'Vendas resetadas. Apenas o seed inativo foi mantido.');
     } catch (e: any) {
-      onNotify('ERROR', 'Falha ao resetar vendas. Verifique permissões.');
+      onNotify('ERROR', 'Falha ao resetar vendas. Verifique permissoes.');
     }
   };
 

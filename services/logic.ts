@@ -1246,7 +1246,7 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
   const uid = auth.currentUser?.uid;
   if (!uid) throw new Error("Unauthenticated");
 
-  await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables"]);
+  await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables", "transactions"]);
 
   const nowIso = new Date().toISOString();
   const date = nowIso.split("T")[0];
@@ -1254,27 +1254,27 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
     id: seed?.id || crypto.randomUUID(),
     userId: uid,
     client: seed?.client || "SEED (INATIVO)",
-    quantity: seed?.quantity ?? 1,
-    type: seed?.type || ProductType.NATAL,
+    quantity: seed?.quantity ?? 12,
+    type: seed?.type || ProductType.BASICA,
     status: seed?.status || "FATURADO",
-    valueProposed: seed?.valueProposed ?? 0,
-    valueSold: seed?.valueSold ?? 0,
-    marginPercent: seed?.marginPercent ?? 0,
+    valueProposed: seed?.valueProposed ?? 250,
+    valueSold: seed?.valueSold ?? 264.6,
+    marginPercent: seed?.marginPercent ?? 42.05,
     quoteDate: seed?.quoteDate || date,
     completionDate: seed?.completionDate || date,
     date: seed?.date || date,
     isBilled: seed?.isBilled ?? true,
     hasNF: seed?.hasNF ?? false,
-    observations: seed?.observations || "Seed soft deleted",
-    trackingCode: seed?.trackingCode || "SEED",
-    commissionBaseTotal: seed?.commissionBaseTotal ?? 0,
-    commissionValueTotal: seed?.commissionValueTotal ?? 0,
-    commissionRateUsed: seed?.commissionRateUsed ?? 0,
+    observations: seed?.observations || "Seed soft deleted (exemplo)",
+    trackingCode: seed?.trackingCode || "SEED-EXEMPLO",
+    commissionBaseTotal: seed?.commissionBaseTotal ?? 3000,
+    commissionValueTotal: seed?.commissionValueTotal ?? 150,
+    commissionRateUsed: seed?.commissionRateUsed ?? 0.05,
     createdAt: seed?.createdAt || nowIso,
     updatedAt: nowIso,
     deleted: true,
     deletedAt: nowIso,
-    paymentMethod: seed?.paymentMethod || ""
+    paymentMethod: seed?.paymentMethod || "a vista"
   };
 
   await dbPut("sales", seedSale);

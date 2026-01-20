@@ -12,12 +12,30 @@ interface AdminMessagingProps {
 }
 
 const TEMPLATES = [
-    { id: 'welcome', label: 'Boas-vindas', icon: <Sparkles size={16}/>, content: 'Seja bem-vindo ao Gestor360.
-Explore os modulos de vendas e financas para otimizar sua rotina.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXIzcHgzeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYC0LajbaPoEADu/giphy.gif' },
-    { id: 'update', label: 'Nova versao', icon: <Rocket size={16}/>, content: 'Novidades no ar.
-Acabamos de liberar uma versao com melhorias no financeiro e notificacoes mais rapidas.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxfO0P5D7mE/giphy.gif' },
-    { id: 'tip', label: 'Dica do dia', icon: <Info size={16}/>, content: 'Dica rapida.
-Unifique clientes duplicados em Configuracoes > Gestao de Clientes para limpar seus relatorios.', image: '' }
+    {
+        id: 'welcome',
+        label: 'Boas-vindas',
+        icon: <Sparkles size={16} />,
+        content: `Seja bem-vindo ao Gestor360.
+Explore os modulos de vendas e financas para otimizar sua rotina.`,
+        image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXIzcHgzeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYC0LajbaPoEADu/giphy.gif'
+    },
+    {
+        id: 'update',
+        label: 'Nova versao',
+        icon: <Rocket size={16} />,
+        content: `Novidades no ar.
+Acabamos de liberar uma versao com melhorias no financeiro e notificacoes mais rapidas.`,
+        image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxfO0P5D7mE/giphy.gif'
+    },
+    {
+        id: 'tip',
+        label: 'Dica do dia',
+        icon: <Info size={16} />,
+        content: `Dica rapida.
+Unifique clientes duplicados em Configuracoes > Gestao de Clientes para limpar seus relatorios.`,
+        image: ''
+    }
 ];
 
 const PERMISSION_GROUPS = [
