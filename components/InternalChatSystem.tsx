@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera, Pencil, Trash2, Check, X as CloseIcon } from 'lucide-react';
+import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera, Pencil, Trash2 } from 'lucide-react';
 
 import { User, InternalMessage } from '../types';
 import {
