@@ -233,8 +233,11 @@ const SalesList: React.FC<SalesListProps> = ({
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
       return value.toISOString().split('T')[0];
     }
-    if (typeof value === 'number') {
-      const parsed = XLSX.SSF ? XLSX.SSF.parse_date_code(value) : null;
+    const numericValue = typeof value === 'number'
+      ? value
+      : (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value)) ? Number(value) : null);
+    if (numericValue !== null) {
+      const parsed = XLSX.SSF ? XLSX.SSF.parse_date_code(numericValue) : null;
       if (parsed) {
         const formatted = `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`;
         return formatted;
@@ -245,6 +248,12 @@ const SalesList: React.FC<SalesListProps> = ({
     const ddmmyyyy = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (ddmmyyyy) {
       const [, dd, mm, yyyy] = ddmmyyyy;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    const ddmmyy = text.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
+    if (ddmmyy) {
+      const [, dd, mm, yy] = ddmmyy;
+      const yyyy = Number(yy) >= 70 ? `19${yy}` : `20${yy}`;
       return `${yyyy}-${mm}-${dd}`;
     }
     const parsed = new Date(text);
