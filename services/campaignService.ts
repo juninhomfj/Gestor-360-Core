@@ -122,15 +122,15 @@ export const getCampaignsByCompany = async (companyId: string): Promise<Commissi
     return campaigns;
   } catch (error: any) {
     const message = error?.message;
-    Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
-      message,
-      companyId,
-      query: "campaigns where companyId == X orderBy startMonth desc"
-    });
     const missingIndex =
       error?.code === 'failed-precondition' ||
       (typeof message === 'string' && message.toLowerCase().includes('requires an index'));
     if (missingIndex) {
+      Logger.info("Campaigns: índice ausente para orderBy; tentando fallback sem ordenação.", {
+        message,
+        companyId,
+        query: "campaigns where companyId == X orderBy startMonth desc"
+      });
       try {
         const fallbackQuery = query(
           collection(db, 'campaigns'),
@@ -154,6 +154,12 @@ export const getCampaignsByCompany = async (companyId: string): Promise<Commissi
           query: "campaigns where companyId == X"
         });
       }
+    } else {
+      Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
+        message,
+        companyId,
+        query: "campaigns where companyId == X orderBy startMonth desc"
+      });
     }
     return await dbGetAll('campaigns', c => c.companyId === companyId);
   }
