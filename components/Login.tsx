@@ -70,12 +70,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
+                        <label htmlFor="login-email" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
                         <div className="relative group">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={18} />
                             <input 
+                                id="login-email"
                                 type="email"
                                 value={identifier}
                                 onChange={e => setIdentifier(e.target.value)}
@@ -88,7 +89,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
 
                     <div className="space-y-2">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Senha de Acesso</label>
+                            <label htmlFor="login-password" className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Senha de Acesso</label>
                             <button 
                                 type="button"
                                 onClick={onRequestReset}
@@ -100,6 +101,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
                         <div className="relative group">
                             <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={18} />
                             <input 
+                                id="login-password"
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
@@ -116,7 +118,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-70 shadow-xl shadow-blue-900/20 border border-blue-400/20 mt-4 group"
                     >
                         {isLoading ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <div
+                                role="status"
+                                aria-live="polite"
+                                aria-label="Carregando"
+                                className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                            ></div>
                         ) : (
                             <>Acessar Plataforma <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>
                         )}

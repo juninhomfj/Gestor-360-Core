@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Sale, ProductType, Client, SaleStatus } from '../types';
+import { Sale, ProductType, Client, SaleStatus, CommissionRule } from '../types';
 import { getStoredTable, computeCommissionValues, getClients, createClientAutomatically, createReceivableFromSale, getSystemConfig, DEFAULT_SYSTEM_CONFIG } from '../services/logic';
 import { X, Calculator, AlertCircle, Truck, DollarSign, Clock, Users, Plus, Check } from 'lucide-react';
 import { auth } from '../services/firebase';
@@ -13,6 +13,8 @@ interface Props {
   onSave?: (sale: Sale) => Promise<void>;
   initialData?: Sale | null;
   isLocked?: boolean;
+  rulesBasic?: CommissionRule[];
+  rulesNatal?: CommissionRule[];
 }
 
 const SalesForm: React.FC<Props> = ({
@@ -21,7 +23,9 @@ const SalesForm: React.FC<Props> = ({
   onSaved,
   onSave,
   initialData,
-  isLocked
+  isLocked,
+  rulesBasic = [],
+  rulesNatal = []
 }) => {
   const [availableClients, setAvailableClients] = useState<Client[]>([]);
   const [clientName, setClientName] = useState('');
@@ -108,18 +112,38 @@ const SalesForm: React.FC<Props> = ({
     }
   }, [paymentMethods, paymentMethod]);
 
+  const activeRules = useMemo(
+    () => (productType === ProductType.NATAL ? rulesNatal : rulesBasic),
+    [productType, rulesBasic, rulesNatal]
+  );
+
   useEffect(() => {
+    let isActive = true;
     const calc = async () => {
+      const fallbackRules = activeRules?.length ? activeRules : [];
+      const { commissionBase: baseCached, commissionValue: valCached, rateUsed: rateCached } =
+        computeCommissionValues(quantity, valueProposed, margin, fallbackRules);
+      if (fallbackRules.length > 0) {
+        setCommissionBase(baseCached);
+        setCommissionValue(valCached);
+        setCommissionRate(rateCached);
+      }
+
       const rules = await getStoredTable(productType);
+      if (!isActive) return;
+      const resolvedRules = rules.length > 0 ? rules : fallbackRules;
       const { commissionBase: base, commissionValue: val, rateUsed } =
-        computeCommissionValues(quantity, valueProposed, margin, rules);
+        computeCommissionValues(quantity, valueProposed, margin, resolvedRules);
 
       setCommissionBase(base);
       setCommissionValue(val);
       setCommissionRate(rateUsed);
     };
     calc();
-  }, [quantity, valueProposed, margin, productType]);
+    return () => {
+      isActive = false;
+    };
+  }, [quantity, valueProposed, margin, productType, activeRules]);
 
   const filteredClients = useMemo(() => {
       if (!clientName) return [];

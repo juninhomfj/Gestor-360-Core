@@ -103,15 +103,18 @@ export const isMonthWithinRange = (month: string, startMonth: string, endMonth: 
 
 export const getCampaignsByCompany = async (companyId: string): Promise<CommissionCampaign[]> => {
   try {
-    const q = query(
-      collection(db, 'campaigns'),
-      where('companyId', '==', companyId),
-      orderBy('startMonth', 'desc')
-    );
-    const snap = await getDocsFromServer(q);
-    const campaigns = snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign));
-    if (campaigns.length === 0) {
+    const baseQuery = query(collection(db, 'campaigns'), where('companyId', '==', companyId));
+    const sortedQuery = query(baseQuery, orderBy('startMonth', 'desc'));
+    let snap = await getDocsFromServer(sortedQuery);
+    let campaigns = snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign));
+    if (
+      campaigns.length === 0 &&
+      !(snap as any)?.metadata?.fromCache
+    ) {
       Logger.info("Campaigns: nenhuma campanha encontrada no Firestore.", { companyId });
+      return [];
+    }
+    if (campaigns.length === 0) {
       return [];
     }
     await dbBulkPutSkipPending('campaigns', campaigns);

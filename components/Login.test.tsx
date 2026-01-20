@@ -19,10 +19,11 @@ vi.mock('./Logo', () => ({
 }));
 
 vi.mock('./BrazilFlag', () => ({
-    // Ensure it's a default export that's a valid React component
-    __esModule: true, // This is important for modules with default exports
-    default: (props: any) => <div data-testid="brazil-flag-icon" {...props} />,
-  }));
+  __esModule: true,
+  default: ({ showSoundToggle: _showSoundToggle, ...props }: any) => (
+    <div data-testid="brazil-flag-icon" {...props} />
+  ),
+}));
   
 
 // Import the mocked login function after mocking the module

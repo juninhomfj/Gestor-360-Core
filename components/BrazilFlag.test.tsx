@@ -1,23 +1,25 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import BrazilFlag from './BrazilFlag';
 import { AudioService } from '../services/audioService';
 import confetti from 'canvas-confetti';
 
 // Mock AudioService
-jest.mock('../services/audioService', () => ({
+vi.mock('../services/audioService', () => ({
   AudioService: {
-    play: jest.fn(),
+    play: vi.fn(),
   },
 }));
 
 // Mock canvas-confetti
-jest.mock('canvas-confetti', () => jest.fn());
+vi.mock('canvas-confetti', () => ({
+  default: vi.fn(),
+}));
 
 describe('BrazilFlag', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders Brazil flag SVG', () => {
@@ -63,7 +65,7 @@ describe('BrazilFlag', () => {
 
   test('applies custom className', () => {
     render(<BrazilFlag className="custom-test-class" />);
-    const container = screen.getByTitle('Orgulhosamente Brasileiro (Clique!)').closest('div');
+    const container = screen.getByTitle('Orgulhosamente Brasileiro (Clique!)').parentElement;
     expect(container).toHaveClass('custom-test-class');
   });
 });
