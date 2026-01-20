@@ -13,27 +13,48 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import InternalChatSystem from './components/InternalChatSystem';
 
+const LAZY_RELOAD_KEY = 'sys_lazy_reload_once';
+const MODULE_IMPORT_ERROR_PATTERN = /Importing a module script failed|Failed to fetch dynamically imported module|ChunkLoadError|Loading chunk/i;
+
+const lazyWithRetry = <T,>(loader: () => Promise<{ default: T }>) =>
+    lazy(() =>
+        loader()
+            .then((module) => {
+                sessionStorage.removeItem(LAZY_RELOAD_KEY);
+                return module;
+            })
+            .catch((error) => {
+                const message = error instanceof Error ? error.message : String(error);
+                const hasRetried = sessionStorage.getItem(LAZY_RELOAD_KEY) === 'true';
+                if (MODULE_IMPORT_ERROR_PATTERN.test(message) && !hasRetried) {
+                    sessionStorage.setItem(LAZY_RELOAD_KEY, 'true');
+                    window.location.reload();
+                }
+                return Promise.reject(error);
+            })
+    );
+
 // Importação Dinâmica
-const HomeDashboard = lazy(() => import('./components/HomeDashboard'));
-const SalesForm = lazy(() => import('./components/SalesForm'));
-const SalesList = lazy(() => import('./components/SalesList'));
-const BoletoControl = lazy(() => import('./components/BoletoControl'));
-const FinanceDashboard = lazy(() => import('./components/FinanceDashboard'));
-const FinanceTransactionsList = lazy(() => import('./components/FinanceTransactionsList'));
-const FinanceTransactionForm = lazy(() => import('./components/FinanceTransactionForm'));
-const FinanceReceivables = lazy(() => import('./components/FinanceReceivables'));
-const FinanceDistribution = lazy(() => import('./components/FinanceDistribution'));
-const FinanceManager = lazy(() => import('./components/FinanceManager'));
-const FinanceCategories = lazy(() => import('./components/FinanceCategories'));
-const FinanceGoals = lazy(() => import('./components/FinanceGoals'));
-const FinanceChallenges = lazy(() => import('./components/FinanceChallenges'));
-const SettingsHub = lazy(() => import('./components/SettingsHub'));
-const DevRoadmap = lazy(() => import('./components/DevRoadmap'));
-const BackupModal = lazy(() => import('./components/BackupModal'));
-const BulkDateModal = lazy(() => import('./components/BulkDateModal'));
-const ClientManagementHub = lazy(() => import('./components/ClientManagementHub'));
-const TicketsManager = lazy(() => import('./components/TicketsManager'));
-const Campaigns = lazy(() => import('./components/Campaigns'));
+const HomeDashboard = lazyWithRetry(() => import('./components/HomeDashboard'));
+const SalesForm = lazyWithRetry(() => import('./components/SalesForm'));
+const SalesList = lazyWithRetry(() => import('./components/SalesList'));
+const BoletoControl = lazyWithRetry(() => import('./components/BoletoControl'));
+const FinanceDashboard = lazyWithRetry(() => import('./components/FinanceDashboard'));
+const FinanceTransactionsList = lazyWithRetry(() => import('./components/FinanceTransactionsList'));
+const FinanceTransactionForm = lazyWithRetry(() => import('./components/FinanceTransactionForm'));
+const FinanceReceivables = lazyWithRetry(() => import('./components/FinanceReceivables'));
+const FinanceDistribution = lazyWithRetry(() => import('./components/FinanceDistribution'));
+const FinanceManager = lazyWithRetry(() => import('./components/FinanceManager'));
+const FinanceCategories = lazyWithRetry(() => import('./components/FinanceCategories'));
+const FinanceGoals = lazyWithRetry(() => import('./components/FinanceGoals'));
+const FinanceChallenges = lazyWithRetry(() => import('./components/FinanceChallenges'));
+const SettingsHub = lazyWithRetry(() => import('./components/SettingsHub'));
+const DevRoadmap = lazyWithRetry(() => import('./components/DevRoadmap'));
+const BackupModal = lazyWithRetry(() => import('./components/BackupModal'));
+const BulkDateModal = lazyWithRetry(() => import('./components/BulkDateModal'));
+const ClientManagementHub = lazyWithRetry(() => import('./components/ClientManagementHub'));
+const TicketsManager = lazyWithRetry(() => import('./components/TicketsManager'));
+const Campaigns = lazyWithRetry(() => import('./components/Campaigns'));
 
 import {
     User, Sale, AppMode, AppTheme, FinanceAccount, Transaction, CreditCard,
