@@ -182,7 +182,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
             details: log.details,
             userAgent: log.userAgent
         }));
-        return `Analise o ticket e responda com:\n1) causa provavel\n2) passos de reproduzir\n3) sugestao tecnica de correcoes\n\nTicket:\n${JSON.stringify(summary, null, 2)}\n\nLogs:\n${JSON.stringify(logs, null, 2)}`;
+        return `Analise o ticket e responda com:\nTL;DR: resumo em 1-2 linhas no topo.\n1) causa provavel\n2) passos de reproduzir\n3) sugestao tecnica de correcoes\n\nTicket:\n${JSON.stringify(summary, null, 2)}\n\nLogs:\n${JSON.stringify(logs, null, 2)}`;
     };
     const callOpenAi = async (apiKey: string, prompt: string) => {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
