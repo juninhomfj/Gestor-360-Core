@@ -36,6 +36,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
     const [showList, setShowList] = useState(true);
+    const [showLogDetails, setShowLogDetails] = useState(false);
 
     useEffect(() => {
         refreshTickets();
@@ -106,6 +107,20 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
 
     const selectedTicket = filteredTickets.find(t => t.id === selectedTicketId) || tickets.find(t => t.id === selectedTicketId) || null;
     const mobileCanClose = isMobile && selectedTicket && selectedTicket.status !== 'CLOSED';
+    const formatLogDetail = (details: any) => {
+        if (!details) return '';
+        if (typeof details === 'string') return details;
+        try {
+            return JSON.stringify(details, null, 2);
+        } catch {
+            return String(details);
+        }
+    };
+    const getLogMeta = (details: any) => {
+        if (!details || typeof details !== 'object') return '';
+        const code = (details.code || details.status || details.error?.code || details.error?.status || details.name) as string | undefined;
+        return code ? `Codigo: ${code}` : '';
+    };
 
     const handleAssign = async (assigneeId?: string) => {
         if (!selectedTicket) return;
@@ -312,12 +327,33 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-gray-200 bg-gray-50'}`}>
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logs anexados</p>
+                                    {selectedTicket.logs && selectedTicket.logs.length > 0 && (
+                                        <button
+                                            onClick={() => setShowLogDetails(!showLogDetails)}
+                                            className="mt-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
+                                        >
+                                            {showLogDetails ? 'Ocultar detalhes' : 'Mostrar detalhes completos'}
+                                        </button>
+                                    )}
                                     {selectedTicket.logs && selectedTicket.logs.length > 0 ? (
-                                        <ul className="mt-3 space-y-2 text-xs">
-                                            {selectedTicket.logs.slice(0, 6).map(log => (
+                                        <ul className="mt-3 space-y-3 text-xs">
+                                            {selectedTicket.logs.map(log => (
                                                 <li key={log.timestamp} className="flex flex-col gap-1 border-b border-slate-800/40 pb-2">
                                                     <span className="font-bold">[{log.level}] {log.message}</span>
                                                     <span className={`${mutedText}`}>{new Date(log.timestamp).toLocaleString()}</span>
+                                                    {getLogMeta(log.details) && (
+                                                        <span className={`${mutedText}`}>{getLogMeta(log.details)}</span>
+                                                    )}
+                                                    {showLogDetails && (
+                                                        <pre className="mt-2 p-2 rounded-lg bg-black/30 text-[10px] text-slate-200 whitespace-pre-wrap break-words">
+                                                            {formatLogDetail({
+                                                                details: log.details,
+                                                                userAgent: log.userAgent,
+                                                                userId: log.userId,
+                                                                userName: log.userName
+                                                            })}
+                                                        </pre>
+                                                    )}
                                                 </li>
                                             ))}
                                         </ul>
