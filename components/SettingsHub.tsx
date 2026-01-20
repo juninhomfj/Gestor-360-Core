@@ -96,6 +96,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   const [aiEnabled, setAiEnabled] = useState(true);
   const [biEnabled, setBiEnabled] = useState(true);
   const [showAiKey, setShowAiKey] = useState(false);
+  const [aiDailyLimit, setAiDailyLimit] = useState(20);
 
   const handleResetSales = async () => {
     if (!isDev) {
@@ -163,6 +164,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
           if (typeof parsed?.apiKey === 'string') setAiApiKey(parsed.apiKey);
           if (typeof parsed?.aiEnabled === 'boolean') setAiEnabled(parsed.aiEnabled);
           if (typeof parsed?.biEnabled === 'boolean') setBiEnabled(parsed.biEnabled);
+          if (typeof parsed?.aiDailyLimit === 'number') setAiDailyLimit(parsed.aiDailyLimit);
       } catch {}
   }, []);
 
@@ -236,7 +238,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
           provider: aiProvider,
           apiKey: aiApiKey,
           aiEnabled,
-          biEnabled
+          biEnabled,
+          aiDailyLimit
       };
       localStorage.setItem('sys_ai_settings_v1', JSON.stringify(payload));
       onNotify('SUCCESS', 'Preferencias de IA/BI salvas localmente.');
@@ -657,6 +660,18 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     className="h-5 w-5 accent-indigo-600"
                                 />
                             </label>
+                        </div>
+                        <div className="mt-4">
+                            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Limite diario por usuario</label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={500}
+                                value={aiDailyLimit}
+                                onChange={(e) => setAiDailyLimit(Number(e.target.value || 1))}
+                                className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
+                            />
+                            <p className="text-[10px] text-gray-400 mt-2">Limita a quantidade de chamadas de IA por usuario/dia.</p>
                         </div>
 
                         <div className="mt-8 flex justify-end">

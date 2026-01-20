@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Ticket, TicketPriority, TicketStatus, User } from '../types';
 import { getTickets, updateTicketAssignee, updateTicketStatus } from '../services/tickets';
 import { listUsers } from '../services/auth';
-import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy, Sparkles, Loader2 } from 'lucide-react';
 
 interface TicketsManagerProps {
     currentUser: User;
@@ -38,6 +38,9 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [showList, setShowList] = useState(true);
     const [showLogDetails, setShowLogDetails] = useState(false);
     const [copyStatus, setCopyStatus] = useState<string | null>(null);
+    const [aiOutput, setAiOutput] = useState<string | null>(null);
+    const [aiError, setAiError] = useState<string | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
 
     useEffect(() => {
         refreshTickets();
@@ -121,6 +124,135 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         if (!details || typeof details !== 'object') return '';
         const code = (details.code || details.status || details.error?.code || details.error?.status || details.name) as string | undefined;
         return code ? `Codigo: ${code}` : '';
+    };
+    const getAiSettings = () => {
+        const envProvider = (import.meta as any).env?.VITE_AI_PROVIDER as string | undefined;
+        const envLimit = Number((import.meta as any).env?.VITE_AI_DAILY_LIMIT || 20);
+        try {
+            const raw = localStorage.getItem('sys_ai_settings_v1');
+            const parsed = raw ? JSON.parse(raw) : null;
+            return {
+                provider: (parsed?.provider || envProvider || 'OPENAI') as 'OPENAI' | 'GEMINI',
+                apiKey: parsed?.apiKey as string | undefined,
+                aiEnabled: typeof parsed?.aiEnabled === 'boolean' ? parsed.aiEnabled : true,
+                dailyLimit: Number.isFinite(parsed?.aiDailyLimit) ? parsed.aiDailyLimit : envLimit
+            };
+        } catch {
+            return { provider: (envProvider || 'OPENAI') as 'OPENAI' | 'GEMINI', apiKey: undefined, aiEnabled: true, dailyLimit: envLimit };
+        }
+    };
+    const getApiKey = (provider: 'OPENAI' | 'GEMINI', settings: any) => {
+        if (settings?.apiKey) return settings.apiKey;
+        if (provider === 'OPENAI') return (import.meta as any).env?.VITE_OPENAI_API_KEY as string | undefined;
+        return (import.meta as any).env?.VITE_GEMINI_API_KEY as string | undefined;
+    };
+    const getUsageKey = () => `ai_usage_${currentUser.id || currentUser.uid}`;
+    const canUseAi = (limit: number) => {
+        const key = getUsageKey();
+        const today = new Date().toISOString().slice(0, 10);
+        try {
+            const raw = localStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : null;
+            if (!parsed || parsed.date !== today) return { ok: true, count: 0, today };
+            return { ok: parsed.count < limit, count: parsed.count, today };
+        } catch {
+            return { ok: true, count: 0, today };
+        }
+    };
+    const bumpUsage = (today: string, count: number) => {
+        const key = getUsageKey();
+        localStorage.setItem(key, JSON.stringify({ date: today, count: count + 1 }));
+    };
+    const buildAiPrompt = (ticket: Ticket) => {
+        const summary = {
+            id: ticket.id,
+            title: ticket.title,
+            module: ticket.module,
+            priority: ticket.priority,
+            status: ticket.status,
+            createdAt: ticket.createdAt,
+            createdBy: ticket.createdByName,
+            description: ticket.description
+        };
+        const logs = (ticket.logs || []).map((log) => ({
+            timestamp: log.timestamp,
+            level: log.level,
+            message: log.message,
+            details: log.details,
+            userAgent: log.userAgent
+        }));
+        return `Analise o ticket e responda com:\n1) causa provavel\n2) passos de reproduzir\n3) sugestao tecnica de correcoes\n\nTicket:\n${JSON.stringify(summary, null, 2)}\n\nLogs:\n${JSON.stringify(logs, null, 2)}`;
+    };
+    const callOpenAi = async (apiKey: string, prompt: string) => {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.2,
+                max_tokens: 600
+            })
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Falha ao chamar OpenAI');
+        }
+        const data = await response.json();
+        return data?.choices?.[0]?.message?.content || 'Sem resposta.';
+    };
+    const callGemini = async (apiKey: string, prompt: string) => {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.2, maxOutputTokens: 600 }
+            })
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Falha ao chamar Gemini');
+        }
+        const data = await response.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta.';
+    };
+    const handleAiDebug = async () => {
+        if (!selectedTicket) return;
+        setAiOutput(null);
+        setAiError(null);
+        const settings = getAiSettings();
+        if (!settings.aiEnabled) {
+            setAiError('IA desativada nas configuracoes.');
+            return;
+        }
+        const apiKey = getApiKey(settings.provider, settings);
+        if (!apiKey) {
+            setAiError('Chave de IA nao configurada.');
+            return;
+        }
+        const limit = Number(settings.dailyLimit || 20);
+        const usage = canUseAi(limit);
+        if (!usage.ok) {
+            setAiError('Limite diario de IA atingido.');
+            return;
+        }
+        const prompt = buildAiPrompt(selectedTicket);
+        setAiLoading(true);
+        try {
+            const text = settings.provider === 'GEMINI'
+                ? await callGemini(apiKey, prompt)
+                : await callOpenAi(apiKey, prompt);
+            setAiOutput(text);
+            bumpUsage(usage.today, usage.count);
+        } catch (err: any) {
+            setAiError(err?.message || 'Falha ao consultar IA.');
+        } finally {
+            setAiLoading(false);
+        }
     };
     const buildLogExport = (ticket: Ticket) => {
         const payload = {
@@ -409,6 +541,24 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                         </ul>
                                     ) : (
                                         <p className={`mt-2 text-xs ${mutedText}`}>Nenhum log anexado.</p>
+                                    )}
+                                </div>
+                                <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-gray-200 bg-gray-50'}`}>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Depurar na IA</p>
+                                    <p className={`mt-2 text-xs ${mutedText}`}>Gera um diagnostico com base no ticket e nos logs.</p>
+                                    <button
+                                        onClick={handleAiDebug}
+                                        disabled={aiLoading}
+                                        className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg disabled:opacity-60"
+                                    >
+                                        {aiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                        Depurar na IA
+                                    </button>
+                                    {aiError && <p className="mt-3 text-[11px] text-rose-400 font-semibold">{aiError}</p>}
+                                    {aiOutput && (
+                                        <pre className="mt-3 p-3 rounded-xl bg-black/40 text-[11px] text-slate-200 whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
+                                            {aiOutput}
+                                        </pre>
                                     )}
                                 </div>
                                 <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-gray-200 bg-gray-50'}`}>
