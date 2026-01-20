@@ -1173,7 +1173,7 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
   const uid = auth.currentUser?.uid;
   if (!uid) throw new Error("Unauthenticated");
 
-  await atomicClearUserTables(uid, ["sales"]);
+  await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables"]);
 
   const nowIso = new Date().toISOString();
   const date = nowIso.split("T")[0];

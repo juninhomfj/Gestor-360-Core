@@ -99,8 +99,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
 
   const handleResetSales = async () => {
     if (!isDev && !isAdmin) return;
+    const password = window.prompt('Digite sua senha para continuar.');
+    if (!password) return;
     const token = window.prompt('Digite RESETAR para apagar todas as vendas e manter apenas um seed inativo.');
     if (token !== 'RESETAR') return;
+    const confirmed = window.confirm('Ultima confirmacao: deseja apagar vendas, clientes e dependencias?');
+    if (!confirmed) return;
     try {
       await resetSalesToSoftDeletedSeed();
       onUpdateSales([]);
@@ -788,6 +792,23 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     <p>Estes controles afetam a visibilidade dos módulos para <b>todos os usuários</b> do sistema, exceto Desenvolvedores.</p>
                                 </div>
                             </div>
+
+                            {(isDev || isAdmin) && (
+                                <div className="p-6 rounded-3xl border border-red-500/40 bg-red-500/10">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 text-red-500">
+                                        <ShieldAlert size={14} /> Reset de Vendas (DEV)
+                                    </h4>
+                                    <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                                        Apaga vendas, clientes e dependências (pendências e recebíveis) do usuário e recria apenas um seed com soft delete ativo.
+                                    </p>
+                                    <button
+                                        onClick={handleResetSales}
+                                        className="px-5 py-3 rounded-xl bg-red-600 text-white text-xs font-black uppercase tracking-widest"
+                                    >
+                                        Resetar Vendas
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 dark:text-slate-100">
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
