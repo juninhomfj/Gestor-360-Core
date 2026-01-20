@@ -1168,6 +1168,49 @@ export const atomicClearUserTables = async (userId: string, tables: string[]) =>
   }
 };
 
+export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise<string> => {
+  await validateSalesWriteAccess();
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Unauthenticated");
+
+  await atomicClearUserTables(uid, ["sales"]);
+
+  const nowIso = new Date().toISOString();
+  const date = nowIso.split("T")[0];
+  const seedSale: Sale = {
+    id: seed?.id || crypto.randomUUID(),
+    userId: uid,
+    client: seed?.client || "SEED (INATIVO)",
+    quantity: seed?.quantity ?? 1,
+    type: seed?.type || ProductType.NATAL,
+    status: seed?.status || "FATURADO",
+    valueProposed: seed?.valueProposed ?? 0,
+    valueSold: seed?.valueSold ?? 0,
+    marginPercent: seed?.marginPercent ?? 0,
+    quoteDate: seed?.quoteDate || date,
+    completionDate: seed?.completionDate || date,
+    date: seed?.date || date,
+    isBilled: seed?.isBilled ?? true,
+    hasNF: seed?.hasNF ?? false,
+    observations: seed?.observations || "Seed soft deleted",
+    trackingCode: seed?.trackingCode || "SEED",
+    commissionBaseTotal: seed?.commissionBaseTotal ?? 0,
+    commissionValueTotal: seed?.commissionValueTotal ?? 0,
+    commissionRateUsed: seed?.commissionRateUsed ?? 0,
+    createdAt: seed?.createdAt || nowIso,
+    updatedAt: nowIso,
+    deleted: true,
+    deletedAt: nowIso,
+    paymentMethod: seed?.paymentMethod || ""
+  };
+
+  await dbPut("sales", seedSale);
+  await safeSetDoc("sales", seedSale.id, seedSale as any, { merge: true }, seedSale as any, "UPDATE");
+  Logger.warn("Audit: Vendas resetadas com seed soft deleted.", { userId: uid, seedId: seedSale.id });
+
+  return seedSale.id;
+};
+
 export const clearNotifications = async (userId: string, source: string) => {
   await validateWriteAccess();
   const colRef = collection(db, "notifications");

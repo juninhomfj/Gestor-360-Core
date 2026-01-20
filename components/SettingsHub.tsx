@@ -5,7 +5,7 @@ import CommissionEditor from './CommissionEditor';
 import ClientManagementHub from './ClientManagementHub';
 import { Settings as SettingsIcon, Shield, Volume2, Trash2, User as UserIcon, Activity, Hammer, X, ArrowLeft, Users, Save, Bell, Terminal, Eraser, BookOpen, ToggleLeft, ToggleRight, Layout, Info, HardDrive, ShieldAlert, Download, Bug, CheckCircle, AlertTriangle, DollarSign, FlaskConical, Cpu, KeyRound, Eye, EyeOff, Layers } from 'lucide-react';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
-import { getSystemConfig, saveSystemConfig, DEFAULT_SYSTEM_CONFIG, canAccess } from '../services/logic';
+import { getSystemConfig, saveSystemConfig, DEFAULT_SYSTEM_CONFIG, canAccess, resetSalesToSoftDeletedSeed } from '../services/logic';
 import { fileToBase64 } from '../utils/fileHelper';
 import { Logger } from '../services/logger';
 import BackupModal from './BackupModal';
@@ -96,6 +96,19 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   const [aiEnabled, setAiEnabled] = useState(true);
   const [biEnabled, setBiEnabled] = useState(true);
   const [showAiKey, setShowAiKey] = useState(false);
+
+  const handleResetSales = async () => {
+    if (!isDev && !isAdmin) return;
+    const token = window.prompt('Digite RESETAR para apagar todas as vendas e manter apenas um seed inativo.');
+    if (token !== 'RESETAR') return;
+    try {
+      await resetSalesToSoftDeletedSeed();
+      onUpdateSales([]);
+      onNotify('SUCCESS', 'Vendas resetadas. Apenas o seed inativo foi mantido.');
+    } catch (e: any) {
+      onNotify('ERROR', 'Falha ao resetar vendas. Verifique permissões.');
+    }
+  };
 
   useEffect(() => {
       const loadConfig = async () => {
