@@ -21,7 +21,8 @@ import {
   dbGetAll,
   initDB,
   dbDelete,
-  dbGet
+  dbGet,
+  dbClearStore
 } from "../storage/db";
 import { sanitizeForFirestore } from "../utils/firestoreUtils";
 import * as XLSX from "xlsx";
@@ -1253,6 +1254,23 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
   if (!uid) throw new Error("Unauthenticated");
 
   await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables", "transactions"]);
+  const localClearTables = [
+    "sales",
+    "clients",
+    "sales_tasks",
+    "receivables",
+    "transactions",
+    "accounts",
+    "cards",
+    "categories",
+    "goals",
+    "challenges",
+    "challenge_cells",
+    "sync_queue"
+  ] as const;
+  for (const table of localClearTables) {
+    await dbClearStore(table as any);
+  }
 
   const nowIso = new Date().toISOString();
   const date = nowIso.split("T")[0];
