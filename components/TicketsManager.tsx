@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Ticket, TicketPriority, TicketStatus, User } from '../types';
 import { getTickets, updateTicketAssignee, updateTicketStatus } from '../services/tickets';
 import { listUsers } from '../services/auth';
-import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy, Sparkles, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy, Sparkles, Loader2, Download } from 'lucide-react';
 
 interface TicketsManagerProps {
     currentUser: User;
@@ -41,6 +41,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [aiOutput, setAiOutput] = useState<string | null>(null);
     const [aiError, setAiError] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
+    const [aiCopyStatus, setAiCopyStatus] = useState<string | null>(null);
 
     useEffect(() => {
         refreshTickets();
@@ -253,6 +254,37 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         } finally {
             setAiLoading(false);
         }
+    };
+    const handleCopyAi = async () => {
+        if (!aiOutput || !selectedTicket) return;
+        const payload = JSON.stringify({
+            ticketId: selectedTicket.id,
+            output: aiOutput
+        }, null, 2);
+        try {
+            await navigator.clipboard.writeText(payload);
+            setAiCopyStatus('Copiado!');
+            setTimeout(() => setAiCopyStatus(null), 2000);
+        } catch {
+            setAiCopyStatus('Falha ao copiar.');
+            setTimeout(() => setAiCopyStatus(null), 2000);
+        }
+    };
+    const handleDownloadAi = () => {
+        if (!aiOutput || !selectedTicket) return;
+        const payload = JSON.stringify({
+            ticketId: selectedTicket.id,
+            output: aiOutput
+        }, null, 2);
+        const blob = new Blob([payload], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ticket_ai_${selectedTicket.id}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
     const buildLogExport = (ticket: Ticket) => {
         const payload = {
@@ -556,9 +588,26 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                     </button>
                                     {aiError && <p className="mt-3 text-[11px] text-rose-400 font-semibold">{aiError}</p>}
                                     {aiOutput && (
-                                        <pre className="mt-3 p-3 rounded-xl bg-black/40 text-[11px] text-slate-200 whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
-                                            {aiOutput}
-                                        </pre>
+                                        <>
+                                            <div className="mt-3 flex flex-wrap items-center gap-3">
+                                                <button
+                                                    onClick={handleCopyAi}
+                                                    className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300"
+                                                >
+                                                    <Copy size={12} /> Copiar IA
+                                                </button>
+                                                <button
+                                                    onClick={handleDownloadAi}
+                                                    className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
+                                                >
+                                                    <Download size={12} /> Baixar IA
+                                                </button>
+                                                {aiCopyStatus && <span className="text-[10px] text-slate-400">{aiCopyStatus}</span>}
+                                            </div>
+                                            <pre className="mt-2 p-3 rounded-xl bg-black/40 text-[11px] text-slate-200 whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
+                                                {aiOutput}
+                                            </pre>
+                                        </>
                                     )}
                                 </div>
                                 <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-gray-200 bg-gray-50'}`}>
