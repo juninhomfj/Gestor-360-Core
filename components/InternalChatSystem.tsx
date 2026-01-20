@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera, Pencil, Trash2 } from 'lucide-react';
+import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera, Pencil, Trash2, MoreVertical, Archive, ArchiveRestore, CheckCircle2 } from 'lucide-react';
 
 import { User, InternalMessage } from '../types';
 import {
@@ -10,6 +10,8 @@ import {
   subscribeToMessages,
   listRooms,
   createRoom,
+  updateMessageContent,
+  softDeleteMessage,
   ChatRoom
 } from '../services/internalChat';
 import { getTicketStats } from '../services/logic';
@@ -251,6 +253,9 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
   const [videoRecordingTime, setVideoRecordingTime] = useState(0);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
+  const [isChatMenuOpen, setIsChatMenuOpen] = useState(false);
+  const [archivedMessageIds, setArchivedMessageIds] = useState<Set<string>>(new Set());
+  const [showArchived, setShowArchived] = useState(false);
 
   const [ticketCount, setTicketCount] = useState(0);
   const [isFallbackMode, setIsFallbackMode] = useState(false);
@@ -294,13 +299,50 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
   const videoStartRef = useRef<number | null>(null);
   const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const chatMenuRef = useRef<HTMLDivElement | null>(null);
 
   const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'DEV';
+  const archiveStorageKey = useMemo(() => `chat_archived_${currentUser.id}`, [currentUser.id]);
 
   const isPermissionDenied = (err: any) => {
     const code = String(err?.code || '');
     const msg = String(err?.message || '');
     return code === 'permission-denied' || msg.includes('Missing or insufficient permissions');
+  };
+
+  const loadArchivedFromStorage = () => {
+    try {
+      const raw = localStorage.getItem(archiveStorageKey);
+      if (!raw) return new Set<string>();
+      const parsed = JSON.parse(raw) as string[];
+      return new Set(parsed || []);
+    } catch {
+      return new Set<string>();
+    }
+  };
+
+  const persistArchivedToStorage = (next: Set<string>) => {
+    localStorage.setItem(archiveStorageKey, JSON.stringify(Array.from(next)));
+  };
+
+  const isArchivedForMe = (messageId: string) => archivedMessageIds.has(messageId);
+
+  const archiveForMe = (messageId: string) => {
+    setArchivedMessageIds((prev) => {
+      const next = new Set(prev);
+      next.add(messageId);
+      persistArchivedToStorage(next);
+      return next;
+    });
+  };
+
+  const unarchiveForMe = (messageId: string) => {
+    setArchivedMessageIds((prev) => {
+      const next = new Set(prev);
+      next.delete(messageId);
+      persistArchivedToStorage(next);
+      return next;
+    });
   };
 
   // Mantém a rolagem no fim quando chegam mensagens.
@@ -310,6 +352,22 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [isOpen, messages.length]);
+
+  useEffect(() => {
+    setArchivedMessageIds(loadArchivedFromStorage());
+  }, [archiveStorageKey]);
+
+  useEffect(() => {
+    if (!isChatMenuOpen) return;
+    const handleOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (chatMenuRef.current?.contains(target)) return;
+      setIsChatMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [isChatMenuOpen]);
 
   const loadData = async () => {
     try {
@@ -818,6 +876,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
 
   const canEditMessage = (msg: InternalMessage) => {
     if (msg.deleted) return false;
+    if (msg.type === 'SYSTEM') return false;
     const canModerate = canViewDeleted();
     const isOwner = msg.senderId === currentUser.id;
     const hasMedia = Boolean(msg.mediaType || msg.mediaUrl || (msg as any).image);
@@ -826,6 +885,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
 
   const canDeleteMessage = (msg: InternalMessage) => {
     if (msg.deleted) return false;
+    if (msg.type === 'SYSTEM') return false;
     const canModerate = canViewDeleted();
     const isOwner = msg.senderId === currentUser.id;
     return isOwner || canModerate;
@@ -861,6 +921,56 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
       onNotify('SUCCESS', 'Mensagem removida.');
     } catch (err: any) {
       onNotify('ERROR', err?.message || 'Falha ao remover mensagem.');
+    }
+  };
+
+  const handleArchiveConversationForMe = () => {
+    if (!messages.length) return;
+    const next = new Set(archivedMessageIds);
+    messages.forEach((msg) => {
+      next.add(msg.id);
+    });
+    persistArchivedToStorage(next);
+    setArchivedMessageIds(next);
+    onNotify('INFO', 'Conversa arquivada para voce.');
+  };
+
+  const handleRestoreArchivedForMe = () => {
+    if (!messages.length) return;
+    const next = new Set(archivedMessageIds);
+    messages.forEach((msg) => {
+      next.delete(msg.id);
+    });
+    persistArchivedToStorage(next);
+    setArchivedMessageIds(next);
+    onNotify('INFO', 'Arquivadas restauradas para voce.');
+  };
+
+  const handleArchiveConversationForAll = async () => {
+    if (!isAdmin || !messages.length) return;
+    if (!window.confirm('Arquivar esta conversa para todos?')) return;
+    try {
+      await Promise.all(
+        messages.filter((msg) => !msg.deleted).map((msg) => softDeleteMessage(msg.id))
+      );
+      setMessages((prev) => prev.map((m) => ({ ...m, deleted: true })));
+      onNotify('SUCCESS', 'Conversa arquivada para todos.');
+    } catch (err: any) {
+      onNotify('ERROR', err?.message || 'Falha ao arquivar para todos.');
+    }
+  };
+
+  const handleHideConversationForAll = async () => {
+    if (!isAdmin || !messages.length) return;
+    if (!window.confirm('Ocultar esta conversa para todos?')) return;
+    try {
+      await Promise.all(
+        messages.filter((msg) => !msg.deleted).map((msg) => softDeleteMessage(msg.id))
+      );
+      setMessages((prev) => prev.map((m) => ({ ...m, deleted: true })));
+      onNotify('SUCCESS', 'Conversa oculta para todos.');
+    } catch (err: any) {
+      onNotify('ERROR', err?.message || 'Falha ao ocultar para todos.');
     }
   };
 
@@ -984,9 +1094,80 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                 </span>
               )}
             </div>
-            <button onClick={onClose}>
-              <X size={24} />
-            </button>
+            <div className="relative flex items-center gap-2">
+              <button
+                onClick={() => setIsChatMenuOpen((prev) => !prev)}
+                className="p-2 rounded-full hover:bg-slate-800/60"
+              >
+                <MoreVertical size={20} />
+              </button>
+              {isChatMenuOpen && (
+                <div
+                  ref={chatMenuRef}
+                  className={`absolute right-0 top-10 z-[2100] w-56 rounded-xl border shadow-xl p-2 text-xs ${
+                    darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      setShowArchived((prev) => !prev);
+                      setIsChatMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800/40"
+                  >
+                    {showArchived ? 'Ocultar arquivadas' : 'Ver arquivadas'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleArchiveConversationForMe();
+                      setIsChatMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800/40"
+                  >
+                    <Archive size={14} className="inline mr-2" />
+                    Arquivar conversa (para mim)
+                  </button>
+                  {showArchived && (
+                    <button
+                      onClick={() => {
+                        handleRestoreArchivedForMe();
+                        setIsChatMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800/40"
+                    >
+                      <ArchiveRestore size={14} className="inline mr-2" />
+                      Restaurar arquivadas (para mim)
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <>
+                      <div className="my-2 border-t border-slate-800/40" />
+                      <button
+                        onClick={() => {
+                          handleArchiveConversationForAll();
+                          setIsChatMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800/40 text-amber-400"
+                      >
+                        Arquivar conversa (para todos)
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleHideConversationForAll();
+                          setIsChatMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800/40 text-rose-400"
+                      >
+                        Ocultar conversa (para todos)
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-800/60">
+                <X size={24} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
@@ -995,18 +1176,29 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
             ) : (
               messages.map((msg) => {
                 const allowDeleted = canViewDeleted();
-                if (msg.deleted && !allowDeleted) return null;
+                const archivedForMe = isArchivedForMe(msg.id);
+                const canSeeDeleted = allowDeleted && showArchived;
+
+                if (msg.deleted && !canSeeDeleted) return null;
+                if (showArchived) {
+                  if (!archivedForMe && !canSeeDeleted) return null;
+                  if (!archivedForMe && canSeeDeleted && !msg.deleted) return null;
+                } else if (archivedForMe) {
+                  return null;
+                }
+
                 const isOwn = msg.senderId === currentUser.id;
                 const isEditing = editingMessageId === msg.id;
                 const showEdit = canEditMessage(msg);
                 const showDelete = canDeleteMessage(msg);
+                const isSystemMessage = msg.type === 'SYSTEM';
 
                 return (
                   <div key={msg.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
                     <div
                       className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
                         isOwn ? 'bg-blue-600 text-white' : 'bg-slate-800 text-white'
-                      }`}
+                      } ${archivedForMe ? 'opacity-60' : ''}`}
                     >
                       {msg.deleted ? (
                         <p className="text-xs italic text-slate-300">Mensagem removida</p>
@@ -1025,17 +1217,35 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                                 rows={3}
                                 value={editingContent}
                                 onChange={(e) => setEditingContent(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    cancelEditMessage();
+                                  }
+                                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                                    e.preventDefault();
+                                    saveEditMessage(msg);
+                                  }
+                                }}
                                 spellCheck
                               />
                               <div className="flex items-center justify-end gap-2">
                                 <button
-                                  onClick={cancelEditMessage}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    cancelEditMessage();
+                                  }}
                                   className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-700 text-white"
                                 >
                                   Cancelar
                                 </button>
                                 <button
-                                  onClick={() => saveEditMessage(msg)}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    saveEditMessage(msg);
+                                  }}
                                   className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase bg-emerald-500 text-white"
                                 >
                                   Salvar
@@ -1084,7 +1294,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                             />
                           )}
 
-                          {!isEditing && (showEdit || showDelete) && (
+                          {!isEditing && (showEdit || showDelete || isSystemMessage || (showArchived && archivedForMe)) && (
                             <div className="mt-2 flex items-center justify-end gap-2 text-[10px] font-black uppercase">
                               {showEdit && (
                                 <button
@@ -1100,6 +1310,22 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                                   className="px-2 py-1 rounded-full bg-rose-600 text-white flex items-center gap-1"
                                 >
                                   <Trash2 size={12} /> Excluir
+                                </button>
+                              )}
+                              {isSystemMessage && !archivedForMe && (
+                                <button
+                                  onClick={() => archiveForMe(msg.id)}
+                                  className="px-2 py-1 rounded-full bg-emerald-500 text-white flex items-center gap-1"
+                                >
+                                  <CheckCircle2 size={12} /> Concluir
+                                </button>
+                              )}
+                              {showArchived && archivedForMe && (
+                                <button
+                                  onClick={() => unarchiveForMe(msg.id)}
+                                  className="px-2 py-1 rounded-full bg-slate-700 text-white flex items-center gap-1"
+                                >
+                                  <ArchiveRestore size={12} /> Restaurar
                                 </button>
                               )}
                             </div>

@@ -31,8 +31,34 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
     try {
         // Captura logs recentes para anexar ao ticket
         const logs = await Logger.getLogs(200);
+        const displayMode = window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser';
+        const snapshot = {
+            url: window.location.href,
+            pathname: window.location.pathname,
+            appMode: localStorage.getItem('sys_last_mode') || 'unknown',
+            activeTab: localStorage.getItem('sys_last_tab') || 'unknown',
+            theme: localStorage.getItem('sys_theme') || 'unknown',
+            screen: `${window.innerWidth}x${window.innerHeight}`,
+            devicePixelRatio: window.devicePixelRatio,
+            isOnline: navigator.onLine,
+            language: navigator.language,
+            platform: navigator.platform,
+            displayMode,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            userId: currentUser?.id || currentUser?.uid,
+            role: currentUser?.role || 'unknown'
+        };
+        logs.unshift({
+            timestamp: Date.now(),
+            level: 'INFO',
+            message: 'Ticket snapshot',
+            details: snapshot,
+            userAgent: navigator.userAgent,
+            userId: currentUser?.id || currentUser?.uid,
+            userName: currentUser?.name
+        });
         
-        const content = `[TICKET DE ERRO - Módulo: ${module}]\n\n${description}`;
+        const content = `[TICKET DE ERRO - Modulo: ${module}]\n\n${description}`;
 
         await createTicket({
             title: `Erro em ${module}`,
@@ -133,17 +159,23 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Módulo Afetado</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">MóModulo Afetado</label>
                             <select 
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={module}
                                 onChange={e => setModule(e.target.value)}
                             >
-                                <option>Dashboard</option>
-                                <option>Vendas (Cálculos)</option>
-                                <option>Finanças (Extrato)</option>
-                                <option>WhatsApp Marketing</option>
-                                <option>Contas & Perfil</option>
+                                <option>Home / Dashboard</option>
+                                <option>Vendas</option>
+                                <option>Financeiro</option>
+                                <option>Recebiveis</option>
+                                <option>Distribuicao</option>
+                                <option>Importacoes</option>
+                                <option>Chat Interno</option>
+                                <option>Tickets</option>
+                                <option>Configuracoes</option>
+                                <option>Perfil e Usuarios</option>
+                                <option>Notificacoes</option>
                                 <option>Outro</option>
                             </select>
                         </div>

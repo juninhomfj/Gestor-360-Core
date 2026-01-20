@@ -478,6 +478,7 @@ export interface LogEntry {
   userAgent: string;
   userId?: string;
   userName?: string;
+  deleted?: boolean;
 }
 
 export type AudioType = 'NOTIFICATION' | 'ALERT' | 'SUCCESS' | 'WARNING';

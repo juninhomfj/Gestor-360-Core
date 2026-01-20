@@ -56,9 +56,9 @@ const DevRoadmap: React.FC = () => {
       setIsRefreshing(false);
   };
 
-  const handleClearLogs = async () => {
-      if (confirm("Deseja apagar todos os logs de auditoria locais? Esta ação não afeta os logs na nuvem.")) {
-          await Logger.clearLogs();
+  const handleSoftDeleteLogs = async () => {
+      if (confirm("Arquivar logs locais e da nuvem? (soft delete)")) {
+          await Logger.softDeleteLogsGlobal();
           await loadLogs();
       }
   };
@@ -104,7 +104,7 @@ const DevRoadmap: React.FC = () => {
                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
                         <Cpu className="text-emerald-500 animate-pulse" /> Engenharia Root
                     </h2>
-                    <p className="text-slate-400 mt-2 text-xs font-mono uppercase tracking-widest">Painel de Diagnóstico & Auditoria</p>
+                    <p className="text-slate-400 mt-2 text-xs font-mono uppercase tracking-widest">Painel de Diagnostico & Auditoria</p>
                 </div>
                 <div className="flex gap-2">
                     <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-black border border-emerald-500/30">v2.5.5 STABLE</span>
@@ -113,19 +113,19 @@ const DevRoadmap: React.FC = () => {
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-            <TabBtn id="CLOUD" label="Nuvem & Saúde" icon={<Cloud size={14}/>} active={activeTab} onClick={setActiveTab} />
+            <TabBtn id="CLOUD" label="Nuvem & Saude" icon={<Cloud size={14}/>} active={activeTab} onClick={setActiveTab} />
             <TabBtn id="DATABASE" label="Tabelas Local" icon={<Database size={14}/>} active={activeTab} onClick={setActiveTab} />
             <TabBtn id="LOGS" label="Logs de Auditoria" icon={<Terminal size={14}/>} active={activeTab} onClick={setActiveTab} />
-            <TabBtn id="ROADMAP" label="Versão" icon={<CheckCircle2 size={14}/>} active={activeTab} onClick={setActiveTab} />
+            <TabBtn id="ROADMAP" label="Versao" icon={<CheckCircle2 size={14}/>} active={activeTab} onClick={setActiveTab} />
         </div>
 
         {activeTab === 'CLOUD' && (
             <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-bottom-4">
                     <StatusCard icon={<Cloud/>} title="Status API" value="CONECTADO" sub="Firestore Direct" color="blue" />
-                    <StatusCard icon={<ArrowDownLeft/>} title="Reads (Sessão)" value={traffic.reads} sub={`Last: ${traffic.last}`} color="emerald" />
-                    <StatusCard icon={<ArrowUpRight/>} title="Writes (Sessão)" value={traffic.writes} sub="Atomic Sync" color="amber" />
-                    <StatusCard icon={<Shield/>} title="Segurança" value="App Check" sub="ReCaptcha Active" color="purple" />
+                    <StatusCard icon={<ArrowDownLeft/>} title="Reads (Sessao)" value={traffic.reads} sub={`Last: ${traffic.last}`} color="emerald" />
+                    <StatusCard icon={<ArrowUpRight/>} title="Writes (Sessao)" value={traffic.writes} sub="Atomic Sync" color="amber" />
+                    <StatusCard icon={<Shield/>} title="Seguranca" value="App Check" sub="ReCaptcha Active" color="purple" />
                 </div>
 
                 <div className="bg-slate-900/50 rounded-2xl border border-slate-800 p-6">
@@ -142,7 +142,7 @@ const DevRoadmap: React.FC = () => {
                                 <div>
                                     <p className="text-xs font-bold text-slate-400">Cloud Health (Firestore)</p>
                                     <p className={`font-black ${workerStatus === 'ONLINE' ? 'text-emerald-400' : 'text-slate-300'}`}>
-                                        {workerStatus === 'ONLINE' ? 'OPERACIONAL' : workerStatus === 'OFFLINE' ? 'INACESSÍVEL' : 'VERIFICANDO...'}
+                                        {workerStatus === 'ONLINE' ? 'OPERACIONAL' : workerStatus === 'OFFLINE' ? 'INACESSIVEL' : 'VERIFICANDO...'}
                                     </p>
                                 </div>
                             </div>
@@ -158,7 +158,7 @@ const DevRoadmap: React.FC = () => {
                             <div>
                                 <p className="text-xs font-bold text-slate-400">Tempo de Resposta</p>
                                 <p className="font-black text-white">~ 240ms</p>
-                                <p className="text-[10px] text-slate-500 mt-1">Latência média do Firestore.</p>
+                                <p className="text-[10px] text-slate-500 mt-1">Latencia media do Firestore.</p>
                             </div>
                         </div>
                     </div>
@@ -174,11 +174,11 @@ const DevRoadmap: React.FC = () => {
                         <h3 className="font-bold text-white">Eventos de Sistema</h3>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
-                        <button onClick={handleClearLogs} className="flex-1 sm:flex-none px-4 py-2 bg-red-600/20 text-red-500 border border-red-500/30 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all">
-                            <Eraser size={14}/> Limpar Logs Locais
+                        <button onClick={handleSoftDeleteLogs} className="flex-1 sm:flex-none px-4 py-2 bg-red-600/20 text-red-500 border border-red-500/30 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all">
+                            <Eraser size={14}/> Arquivar Logs
                         </button>
                         <button onClick={() => Logger.downloadLogs()} className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2">
-                            <Download size={14}/> Exportar Diagnóstico
+                            <Download size={14}/> Exportar Diagnostico
                         </button>
                         <button onClick={loadLogs} className="p-2 bg-slate-800 rounded-lg"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
                     </div>
@@ -243,7 +243,7 @@ const DevRoadmap: React.FC = () => {
                             <button onClick={() => copyToClipboard(JSON.stringify(selectedRow, null, 2))} className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20"><Copy size={16}/></button>
                         </div>
                         <pre className="flex-1 text-[10px] text-emerald-400 font-mono overflow-auto custom-scrollbar">
-                            {selectedRow ? JSON.stringify(selectedRow, null, 2) : "// Selecione um registro à esquerda..."}
+                            {selectedRow ? JSON.stringify(selectedRow, null, 2) : "// Selecione um registro  esquerda..."}
                         </pre>
                     </div>
                 </div>
@@ -252,10 +252,10 @@ const DevRoadmap: React.FC = () => {
         
         {activeTab === 'ROADMAP' && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-6">
-                <RoadmapItem done title="PWA Assets Optimization" desc="Ícones mascaráveis e manifest expandido para conformidade total Android/iOS." />
-                <RoadmapItem done title="Firebase App Check" desc="Proteção da camada de dados via ReCaptcha V3 contra requisições externas." />
+                <RoadmapItem done title="PWA Assets Optimization" desc="cones mascarveis e manifest expandido para conformidade total Android/iOS." />
+                <RoadmapItem done title="Firebase App Check" desc="Proteo da camada de dados via ReCaptcha V3 contra requisies externas." />
                 <RoadmapItem done title="Backend Health Check" desc="Monitoramento em tempo real do Worker de mensagens no Render.com." />
-                <RoadmapItem done title="Firestore Direct Sync" desc="Persistência atômica garantindo que nenhuma venda seja perdida em conexões instáveis." />
+                <RoadmapItem done title="Firestore Direct Sync" desc="Persistncia atmica garantindo que nenhuma venda seja perdida em conexes instveis." />
             </div>
         )}
     </div>

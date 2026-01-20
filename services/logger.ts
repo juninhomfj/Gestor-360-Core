@@ -1,7 +1,7 @@
 import { dbPut, dbGetAll, initDB } from '../storage/db';
 import { LogEntry, LogLevel } from '../types';
 import { db, auth } from './firebase';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, serverTimestamp, updateDoc, getDocs, query, where } from 'firebase/firestore';
 
 const LOG_STORE = 'audit_log';
 
@@ -55,7 +55,8 @@ export const Logger = {
                 screen: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : '0x0',
                 appMode: localStorage.getItem('sys_last_mode') || 'unknown'
             }),
-            userAgent: ua.substring(0, 100)
+            userAgent: ua.substring(0, 100),
+            deleted: false
         };
 
         try {
@@ -101,7 +102,10 @@ export const Logger = {
     async getLogs(limitVal = 200): Promise<LogEntry[]> {
         try {
             const allLogs = await dbGetAll(LOG_STORE);
-            return allLogs.sort((a: LogEntry, b: LogEntry) => b.timestamp - a.timestamp).slice(0, limitVal);
+            return allLogs
+                .filter((log: LogEntry) => !log.deleted)
+                .sort((a: LogEntry, b: LogEntry) => b.timestamp - a.timestamp)
+                .slice(0, limitVal);
         } catch (e) { return []; }
     },
 
@@ -111,6 +115,36 @@ export const Logger = {
             await dbInst.clear(LOG_STORE);
             return true;
         } catch (e) { return false; }
+    },
+
+    async softDeleteLogsLocal() {
+        try {
+            const dbInst = await initDB();
+            const logs = await dbInst.getAll(LOG_STORE);
+            const tx = dbInst.transaction(LOG_STORE, 'readwrite');
+            const store = tx.objectStore(LOG_STORE);
+            logs.forEach((log: LogEntry) => {
+                store.put({ ...log, deleted: true });
+            });
+            await tx.done;
+            return true;
+        } catch (e) { return false; }
+    },
+
+    async softDeleteLogsCloud() {
+        try {
+            if (!auth.currentUser) return false;
+            const uid = auth.currentUser.uid;
+            const snap = await getDocs(query(collection(db, 'audit_log'), where('userId', '==', uid)));
+            await Promise.all(snap.docs.map((docRef) => updateDoc(docRef.ref, { deleted: true })));
+            return true;
+        } catch (e) { return false; }
+    },
+
+    async softDeleteLogsGlobal() {
+        const localOk = await this.softDeleteLogsLocal();
+        const cloudOk = await this.softDeleteLogsCloud();
+        return localOk || cloudOk;
     },
 
     async downloadLogs() {

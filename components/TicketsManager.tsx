@@ -34,9 +34,17 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [isLoading, setIsLoading] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+    const [showList, setShowList] = useState(true);
 
     useEffect(() => {
         refreshTickets();
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     useEffect(() => {
@@ -51,7 +59,10 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         try {
             const data = await getTickets();
             setTickets(data);
-            if (!selectedTicketId && data.length > 0) setSelectedTicketId(data[0].id);
+            if (!selectedTicketId && data.length > 0) {
+                setSelectedTicketId(data[0].id);
+                setShowList(false);
+            }
         } catch (error) {
             console.error('[Tickets] Falha ao carregar tickets', error);
             setErrorMessage('Não foi possível carregar os tickets. Tente novamente.');
@@ -94,6 +105,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     }, [tickets, statusFilter, priorityFilter, search, sortBy]);
 
     const selectedTicket = filteredTickets.find(t => t.id === selectedTicketId) || tickets.find(t => t.id === selectedTicketId) || null;
+    const mobileCanClose = isMobile && selectedTicket && selectedTicket.status !== 'CLOSED';
 
     const handleAssign = async (assigneeId?: string) => {
         if (!selectedTicket) return;
@@ -168,8 +180,8 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className={`xl:col-span-1 border rounded-3xl ${themeCard} overflow-hidden`}>
+            <div className={`grid grid-cols-1 xl:grid-cols-3 gap-6 ${isMobile ? 'min-h-[60vh]' : ''}`}>
+                <div className={`xl:col-span-1 border rounded-3xl ${themeCard} overflow-hidden ${isMobile && !showList ? 'hidden' : ''}`}>
                     <div className="p-4 border-b border-slate-800/40">
                         <h3 className="text-sm font-black uppercase tracking-widest">Tickets</h3>
                     </div>
@@ -192,7 +204,10 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                             filteredTickets.map(ticket => (
                                 <button
                                     key={ticket.id}
-                                    onClick={() => setSelectedTicketId(ticket.id)}
+                                    onClick={() => {
+                                        setSelectedTicketId(ticket.id);
+                                        if (isMobile) setShowList(false);
+                                    }}
                                     className={`w-full text-left px-5 py-4 border-b border-slate-800/30 transition-colors ${selectedTicketId === ticket.id ? 'bg-indigo-500/10' : ''}`}
                                 >
                                     <div className="flex items-center justify-between">
@@ -214,7 +229,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                     </div>
                 </div>
 
-                <div className={`xl:col-span-2 border rounded-3xl ${themeCard} p-6 space-y-6`}>
+                <div className={`xl:col-span-2 border rounded-3xl ${themeCard} p-6 space-y-6 ${isMobile && showList ? 'hidden' : ''}`}>
                     {errorMessage ? (
                         <div className="text-center text-sm text-rose-500">{errorMessage}</div>
                     ) : !selectedTicket ? (
@@ -223,6 +238,14 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                         </div>
                     ) : (
                         <>
+                            {isMobile && (
+                                <button
+                                    onClick={() => setShowList(true)}
+                                    className="mb-2 text-xs font-black uppercase tracking-widest text-indigo-500"
+                                >
+                                    Voltar para lista
+                                </button>
+                            )}
                             <div className="flex flex-col gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-black uppercase">{statusLabels[selectedTicket.status]}</span>
@@ -322,6 +345,17 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                     )}
                 </div>
             </div>
+
+            {mobileCanClose && (
+                <div className="fixed bottom-20 left-0 right-0 px-4 z-[120]">
+                    <button
+                        onClick={() => handleStatusChange('CLOSED')}
+                        className="w-full py-4 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-lg"
+                    >
+                        Concluir Ticket
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Send, Image as ImageIcon, Link as LinkIcon, Gift, Rocket, Info, Sparkles, X, CheckCircle, Bell, Loader2 } from 'lucide-react';
 import { User, InternalMessage } from '../types';
 import { sendMessage } from '../services/internalChat';
 import { sendPushNotification } from '../services/pushService';
+import { listUsers } from '../services/auth';
 
 interface AdminMessagingProps {
     currentUser: User;
@@ -11,16 +12,80 @@ interface AdminMessagingProps {
 }
 
 const TEMPLATES = [
-    { id: 'welcome', label: 'Boas-vindas', icon: <Sparkles size={16}/>, content: 'Seja bem-vindo ao Gestor360! 🚀\nEstamos felizes em ter você conosco. Explore os módulos de vendas e finanças para otimizar sua rotina.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXIzcHgzeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYC0LajbaPoEADu/giphy.gif' },
-    { id: 'update', label: 'Nova Versão', icon: <Rocket size={16}/>, content: 'Novidades no Ar! 🛠️\nAcabamos de liberar a v2.5.2 com melhorias no módulo financeiro e notificações push mais rápidas.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxfO0P5D7mE/giphy.gif' },
-    { id: 'tip', label: 'Dica do Dia', icon: <Info size={16}/>, content: 'Você sabia? 💡\nVocê pode unificar clientes duplicados na aba Configurações > Gestão de Clientes para limpar seus relatórios.', image: '' }
+    { id: 'welcome', label: 'Boas-vindas', icon: <Sparkles size={16}/>, content: 'Seja bem-vindo ao Gestor360.
+Explore os modulos de vendas e financas para otimizar sua rotina.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXIzcHgzeHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0MYC0LajbaPoEADu/giphy.gif' },
+    { id: 'update', label: 'Nova versao', icon: <Rocket size={16}/>, content: 'Novidades no ar.
+Acabamos de liberar uma versao com melhorias no financeiro e notificacoes mais rapidas.', image: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxfO0P5D7mE/giphy.gif' },
+    { id: 'tip', label: 'Dica do dia', icon: <Info size={16}/>, content: 'Dica rapida.
+Unifique clientes duplicados em Configuracoes > Gestao de Clientes para limpar seus relatorios.', image: '' }
 ];
+
+const PERMISSION_GROUPS = [
+    { key: 'sales', label: 'Vendas' },
+    { key: 'finance', label: 'Financas' },
+    { key: 'settings', label: 'Configuracoes' },
+    { key: 'chat', label: 'Chat' },
+    { key: 'logs', label: 'Logs' },
+    { key: 'dev', label: 'Dev' }
+];
+
 
 const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }) => {
     const [message, setMessage] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [status, setStatus] = useState<string | null>(null);
+    const [users, setUsers] = useState<User[]>([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [searchUsers, setSearchUsers] = useState('');
+    const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+    const [selectedRoles, setSelectedRoles] = useState<User['role'][]>([]);
+    const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+    const [newOnly, setNewOnly] = useState(false);
+    const [newDays, setNewDays] = useState(7);
+    const [useChat, setUseChat] = useState(true);
+    const [useEmail, setUseEmail] = useState(false);
+    const emailEnabled = false;
+
+    useEffect(() => {
+        setIsLoadingUsers(true);
+        listUsers()
+            .then(setUsers)
+            .catch(() => setUsers([]))
+            .finally(() => setIsLoadingUsers(false));
+    }, []);
+
+    const filteredUsers = useMemo(() => {
+        const term = searchUsers.trim().toLowerCase();
+        const cutoff = Date.now() - newDays * 24 * 60 * 60 * 1000;
+        return users.filter((u) => {
+            if (term) {
+                const blob = `${u.name || ''} ${u.email || ''} ${u.username || ''}`.toLowerCase();
+                if (!blob.includes(term)) return false;
+            }
+            if (selectedRoles.length && !selectedRoles.includes(u.role)) return false;
+            if (selectedPermissions.length) {
+                const hasAny = selectedPermissions.some((key) => (u.permissions as any)?.[key]);
+                if (!hasAny) return false;
+            }
+            if (newOnly) {
+                const createdAt = Date.parse(u.createdAt || '');
+                if (!Number.isFinite(createdAt)) return false;
+                if (createdAt < cutoff) return false;
+            }
+            return true;
+        });
+    }, [users, searchUsers, selectedRoles, selectedPermissions, newOnly, newDays]);
+
+    const resolvedRecipients = useMemo(() => {
+        if (selectedUserIds.length) {
+            return users.filter((u) => selectedUserIds.includes(u.id));
+        }
+        if (selectedRoles.length || selectedPermissions.length || newOnly || searchUsers.trim()) {
+            return filteredUsers;
+        }
+        return [];
+    }, [users, selectedUserIds, selectedRoles, selectedPermissions, newOnly, searchUsers, filteredUsers]);
 
     const handleApplyTemplate = (t: any) => {
         setMessage(t.content);
@@ -33,11 +98,34 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
         setStatus("Sincronizando com a Nuvem...");
 
         try {
-            // 1. Envia Broadcast no Chat Interno
-            await sendMessage(currentUser, message, 'BROADCAST', 'BROADCAST', imageUrl);
+            if (!useChat && !useEmail) {
+                setStatus("Selecione um canal para envio.");
+                setIsSending(false);
+                return;
+            }
 
-            // 2. Dispara Push Geral (Simulado para todos que possuem token)
-            await sendPushNotification('ADMIN_GROUP', '📢 Comunicado Gestor360', message.substring(0, 100));
+            const hasTargeting = resolvedRecipients.length > 0;
+            if (useChat) {
+                if (hasTargeting) {
+                    await Promise.all(
+                        resolvedRecipients.map((recipient) =>
+                            sendMessage(currentUser, message, 'BROADCAST', recipient.id, imageUrl)
+                        )
+                    );
+                } else {
+                    await sendMessage(currentUser, message, 'BROADCAST', 'BROADCAST', imageUrl);
+                }
+            }
+
+            if (useEmail) {
+                if (!emailEnabled) {
+                    setStatus("Email nao configurado. Informe o provedor para ativar.");
+                } else {
+                    // Placeholder: email provider integration
+                }
+            }
+
+            await sendPushNotification('ADMIN_GROUP', 'Comunicado Gestor360', message.substring(0, 100));
 
             setStatus("Mensagem enviada com sucesso!");
             setTimeout(() => setStatus(null), 3000);
@@ -58,19 +146,126 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                 </div>
                 <div>
                     <h3 className="text-xl font-black">Central de Comunicados</h3>
-                    <p className="text-xs text-gray-500">Mantenha os usuários atualizados com estilo.</p>
+                    <p className="text-xs text-gray-500">Mantenha os usuarios atualizados com estilo.</p>
                 </div>
             </div>
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Modelos Rápidos</label>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Modelos Rapidos</label>
                     <div className="flex gap-2 overflow-x-auto pb-2">
                         {TEMPLATES.map(t => (
                             <button key={t.id} onClick={() => handleApplyTemplate(t)} className="flex items-center gap-2 px-4 py-2 rounded-xl border transition-all whitespace-nowrap text-sm font-bold btn-soft">
                                 {t.icon} {t.label}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl border field-contrast space-y-3">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Canais</label>
+                        <label className="flex items-center gap-2 text-xs font-bold">
+                            <input type="checkbox" checked={useChat} onChange={(e) => setUseChat(e.target.checked)} />
+                            Chat interno
+                        </label>
+                        <label className="flex items-center gap-2 text-xs font-bold">
+                            <input type="checkbox" checked={useEmail} onChange={(e) => setUseEmail(e.target.checked)} />
+                            Email
+                        </label>
+                        {!emailEnabled && useEmail && (
+                            <p className="text-[10px] text-amber-500">Email nao configurado. Informe o provedor para ativar.</p>
+                        )}
+                    </div>
+
+                    <div className="p-4 rounded-xl border field-contrast space-y-3">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Filtros</label>
+                        <div className="flex flex-wrap gap-2">
+                            {(['USER', 'ADMIN', 'DEV'] as User['role'][]).map((role) => (
+                                <button
+                                    key={role}
+                                    onClick={() => setSelectedRoles((prev) => prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role])}
+                                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${selectedRoles.includes(role) ? 'bg-indigo-600 text-white' : 'bg-slate-800/50 text-slate-200'}`}
+                                >
+                                    {role}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {PERMISSION_GROUPS.map((perm) => (
+                                <button
+                                    key={perm.key}
+                                    onClick={() => setSelectedPermissions((prev) => prev.includes(perm.key) ? prev.filter((p) => p !== perm.key) : [...prev, perm.key])}
+                                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${selectedPermissions.includes(perm.key) ? 'bg-emerald-600 text-white' : 'bg-slate-800/50 text-slate-200'}`}
+                                >
+                                    {perm.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="flex items-center gap-2 text-xs font-bold">
+                                <input type="checkbox" checked={newOnly} onChange={(e) => setNewOnly(e.target.checked)} />
+                                Apenas novos
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                value={newDays}
+                                onChange={(e) => setNewDays(Number(e.target.value || 1))}
+                                className="w-16 px-2 py-1 rounded-lg border text-xs field-contrast"
+                            />
+                            <span className="text-[10px] text-slate-400">dias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-xl border field-contrast space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Destinatarios</label>
+                        <span className="text-[10px] text-slate-400">Selecionados: {resolvedRecipients.length || users.length}</span>
+                    </div>
+                    <input
+                        className="w-full p-2.5 rounded-lg outline-none text-sm field-contrast"
+                        placeholder="Buscar usuarios por nome ou email"
+                        value={searchUsers}
+                        onChange={(e) => setSearchUsers(e.target.value)}
+                    />
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => setSelectedUserIds(filteredUsers.map((u) => u.id))}
+                            className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800/60 text-white"
+                        >
+                            Selecionar filtrados
+                        </button>
+                        <button
+                            onClick={() => setSelectedUserIds([])}
+                            className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800/60 text-white"
+                        >
+                            Limpar selecao
+                        </button>
+                    </div>
+                    <div className="max-h-40 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {isLoadingUsers ? (
+                            <div className="text-xs text-slate-400">Carregando usuarios...</div>
+                        ) : (
+                            filteredUsers.map((u) => (
+                                <label key={u.id} className="flex items-center gap-2 text-xs">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedUserIds.includes(u.id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedUserIds((prev) => [...prev, u.id]);
+                                            } else {
+                                                setSelectedUserIds((prev) => prev.filter((id) => id !== u.id));
+                                            }
+                                        }}
+                                    />
+                                    <span className="font-bold">{u.name || u.email}</span>
+                                    <span className="text-[10px] text-slate-400">{u.role}</span>
+                                </label>
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -115,7 +310,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                         className="px-10 py-4 btn-secondary text-xs disabled:opacity-50 flex items-center gap-3"
                     >
                         {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18}/>}
-                        Disparar para Todos
+                        Disparar comunicado
                     </button>
                 </div>
             </div>
