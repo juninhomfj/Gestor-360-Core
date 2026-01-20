@@ -116,15 +116,19 @@ const Dashboard: React.FC<DashboardProps> = ({
       if (!s.date) return false;
       const d = new Date(s.date);
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  }).reduce((acc, curr) => acc + curr.commissionValueTotal, 0);
+  }).reduce((acc, curr) => acc + (curr.commissionValueTotal || 0), 0);
 
   const basicQtyMonth = basicSalesMonth.reduce((acc, curr) => acc + curr.quantity, 0);
   const basicCommissionMonth = basicSalesMonth.reduce((acc, curr) => acc + curr.commissionValueTotal, 0);
   
+  const natalYears = activeSales
+    .filter(s => s.type === ProductType.NATAL && !!s.date)
+    .map(s => new Date(s.date as string).getFullYear());
+  const natalYear = natalYears.length ? Math.max(...natalYears) : currentYear;
   const natalSalesYear = activeSales.filter(s => {
     if (!s.date) return false;
     const d = new Date(s.date);
-    return s.type === ProductType.NATAL && d.getFullYear() === currentYear;
+    return s.type === ProductType.NATAL && d.getFullYear() === natalYear;
   });
   const natalQtyYear = natalSalesYear.reduce((acc, curr) => acc + curr.quantity, 0);
   const natalCommissionYear = natalSalesYear.reduce((acc, curr) => acc + curr.commissionValueTotal, 0);
@@ -141,7 +145,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         uniqueClients: 0
       };
     }
-    const totalRevenue = activeSales.reduce((acc, sale) => acc + (sale.valueSold || 0), 0);
+    const totalRevenue = activeSales.reduce((acc, sale) => acc + (sale.valueSold || 0) * (sale.quantity || 0), 0);
     const avgTicket = totalRevenue / activeSales.length;
     const avgMargin = activeSales.reduce((acc, sale) => acc + (sale.marginPercent || 0), 0) / activeSales.length;
     const billedCount = activeSales.filter(sale => !!sale.date).length;
@@ -272,7 +276,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className={`grid grid-cols-1 ${showNatalCard ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'} gap-6`}>
             <StatCard title={`Comissão Estimada (${capitalizedMonth})`} value={formatCurrency(totalCommissionMonth, hideValues)} sub="Previsão de recebimento mensal" icon={<DollarSign size={24} />} color="bg-indigo-600" darkMode={darkMode} />
             <StatCard title={`Cesta Básica (${capitalizedMonth})`} value={formatCurrency(basicCommissionMonth, hideValues)} sub={`${basicQtyMonth} cestas vendidas no mês`} icon={<ShoppingBasket size={24} />} color="bg-emerald-500" darkMode={darkMode} />
-            {showNatalCard && <StatCard title={`Natal (${currentYear})`} value={formatCurrency(natalCommissionYear, hideValues)} sub={`${natalQtyYear} cestas (Acumulado Ano)`} icon={<Gift size={24} />} color="bg-red-500" darkMode={darkMode} />}
+            {showNatalCard && <StatCard title={`Natal (${natalYear})`} value={formatCurrency(natalCommissionYear, hideValues)} sub={`${natalQtyYear} cestas (Acumulado Ano)`} icon={<Gift size={24} />} color="bg-red-500" darkMode={darkMode} />}
           </div>
       )}
 

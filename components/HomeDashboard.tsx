@@ -67,7 +67,7 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const summary = useMemo(() => {
     const activeSales = sales.filter((s) => !s.deleted);
     const salesMonth = activeSales.filter((s) => (s.date || s.completionDate || '').startsWith(monthKey));
-    const salesTotal = salesMonth.reduce((acc, s) => acc + (s.valueSold || 0), 0);
+    const salesTotal = salesMonth.reduce((acc, s) => acc + (s.valueSold || 0) * (s.quantity || 0), 0);
     const commissionTotal = salesMonth.reduce((acc, s) => acc + (s.commissionValueTotal || 0), 0);
     const openTasks = salesTasks.filter((t) => t.status === 'OPEN').length;
     const pendingSales = activeSales.filter((s) => !s.date).length;

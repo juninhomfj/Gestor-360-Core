@@ -215,9 +215,13 @@ const SalesList: React.FC<SalesListProps> = ({
       .replace(/\s/g, '')
       .trim();
     let normalized = raw;
-    if (raw.includes(',') && raw.includes('.')) {
+    const lastComma = raw.lastIndexOf(',');
+    const lastDot = raw.lastIndexOf('.');
+    if (lastComma > lastDot) {
       normalized = raw.replace(/\./g, '').replace(',', '.');
-    } else if (raw.includes(',')) {
+    } else if (lastDot > lastComma) {
+      normalized = raw.replace(/,/g, '');
+    } else if (lastComma !== -1) {
       normalized = raw.replace(',', '.');
     }
     const parsed = Number(normalized);
@@ -248,6 +252,12 @@ const SalesList: React.FC<SalesListProps> = ({
     return parsed.toISOString().split('T')[0];
   };
   
+  const parsePercent = (value: any) => {
+    const parsed = parseNumber(value);
+    if (parsed > 0 && parsed < 1) return parsed * 100;
+    return parsed;
+  };
+
   const normalizePaymentMethod = (value: any) => {
     const raw = String(value || '').trim();
     if (!raw) return '';
@@ -544,7 +554,7 @@ const SalesList: React.FC<SalesListProps> = ({
                     const completionValue = parseDateValue(obj.completionDate);
                     const valueProposed = parseNumber(obj.valueProposed) || parseNumber(obj.budget);
                     const valueSold = parseNumber(obj.valueSold);
-                    const margin = parseNumber(obj.margin);
+                    const margin = parsePercent(obj.margin);
 
                     return {
                         client: obj.client || 'Lead Importado',
