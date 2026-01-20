@@ -1025,6 +1025,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                                 rows={3}
                                 value={editingContent}
                                 onChange={(e) => setEditingContent(e.target.value)}
+                                spellCheck
                               />
                               <div className="flex items-center justify-end gap-2">
                                 <button
@@ -1251,6 +1252,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Digite..."
                 onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSend()}
+                spellCheck
               />
 
               <input
