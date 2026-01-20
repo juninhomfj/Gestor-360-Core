@@ -427,7 +427,13 @@ export const computeCommissionValues = (
   const rule = (rules || []).find(
     (r) => margin >= (r.minPercent || 0) && (r.maxPercent === null || margin <= (r.maxPercent || 0))
   );
-  const rateUsed = rule ? (rule.commissionRate || 0) : 0;
+  if (!rule) {
+    Logger.warn("Audit: Nenhuma faixa de comissão encontrada para a margem informada.", {
+      margin,
+      rulesCount: rules?.length ?? 0
+    });
+  }
+  const rateUsed = rule ? ensureNumber(rule.commissionRate, 0) : 0;
   return { commissionBase, commissionValue: commissionBase * rateUsed, rateUsed };
 };
 
