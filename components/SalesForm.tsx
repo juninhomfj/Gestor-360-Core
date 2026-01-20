@@ -213,32 +213,33 @@ const SalesForm: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const inputClasses = "w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-gray-900 dark:text-white placeholder:text-gray-400";
+  const inputClasses = "w-full p-3 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-slate-100 placeholder:text-slate-400";
+  const isNatal = productType === ProductType.NATAL;
 
   const modalContent = (
     <div 
-        className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 md:p-4 overflow-y-auto"
+        className="fixed inset-0 z-[1000] flex items-start md:items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 md:p-6 overflow-y-auto"
         onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-5xl max-h-[95vh] shadow-2xl flex flex-col border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto dark:text-slate-100">
+      <div className="bg-slate-950 rounded-2xl md:rounded-3xl w-full max-w-5xl max-h-[92vh] shadow-2xl flex flex-col border border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto text-slate-100">
         
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950 shrink-0 dark:text-slate-100">
+        <div className="p-5 md:p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl">
+            <div className={`p-2 rounded-xl ${isNatal ? 'bg-red-900/40 text-red-300' : 'bg-emerald-900/40 text-emerald-300'}`}>
               <Calculator size={22} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+            <h2 className="text-xl font-bold text-white">
               {initialData ? 'Editar Venda' : 'Lançar Nova Venda'}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full text-gray-400 transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto p-5 md:p-8 space-y-8 custom-scrollbar">
           {isLocked && (
-            <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-800 flex items-center gap-3">
+            <div className="p-4 rounded-2xl border border-amber-800/60 bg-amber-900/20 text-amber-200 flex items-center gap-3">
               <AlertCircle size={18} />
               <div>
                 <p className="text-xs font-black uppercase tracking-widest">Modo Somente Leitura</p>
@@ -250,7 +251,7 @@ const SalesForm: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-4">
               <div className="relative">
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1 flex items-center gap-1">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1 flex items-center gap-1">
                     <Users size={12}/> Cliente
                 </label>
                 <input
@@ -261,12 +262,12 @@ const SalesForm: React.FC<Props> = ({
                   onFocus={() => setShowClientList(true)}
                 />
                 {showClientList && filteredClients.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto dark:text-slate-100">
+                    <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto">
                         {filteredClients.map(c => (
                             <button 
                                 key={c.id} 
                                 onClick={() => handleSelectClient(c)}
-                                className="w-full text-left p-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border-b last:border-0 dark:border-slate-700 flex justify-between items-center"
+                                className="group w-full text-left p-3 text-sm hover:bg-emerald-900/20 border-b last:border-0 border-slate-700 flex justify-between items-center text-slate-100"
                             >
                                 <span>{c.name}</span>
                                 <Check size={14} className="text-emerald-500 opacity-0 group-hover:opacity-100"/>
@@ -275,11 +276,11 @@ const SalesForm: React.FC<Props> = ({
                     </div>
                 )}
                 {!selectedClientId && clientName && filteredClients.length === 0 && (
-                    <p className="text-[10px] text-emerald-500 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
+                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Tipo de Produto</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Produto</label>
                 <select
                   className={inputClasses}
                   value={productType}
@@ -290,7 +291,7 @@ const SalesForm: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Forma de Pagamento</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Forma de Pagamento</label>
                 <select
                   className={inputClasses}
                   value={paymentMethod}
@@ -303,9 +304,9 @@ const SalesForm: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Cód. Rastreio / NF</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Cód. Rastreio / NF</label>
                 <div className="relative">
-                   <Truck className="absolute left-3 top-3.5 text-gray-400" size={16} />
+                   <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
                    <input
                     className={`${inputClasses} pl-10`}
                     placeholder="Código de rastreio ou número"
@@ -319,7 +320,7 @@ const SalesForm: React.FC<Props> = ({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Qtd.</label>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Qtd.</label>
                   <input
                     type="number"
                     className={inputClasses}
@@ -328,7 +329,7 @@ const SalesForm: React.FC<Props> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Margem %</label>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Margem %</label>
                   <input
                     type="number"
                     className={inputClasses}
@@ -338,7 +339,7 @@ const SalesForm: React.FC<Props> = ({
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Valor Unitário Proposto (R$)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Orçamento (R$)</label>
                 <input
                   type="number"
                   className={inputClasses}
@@ -347,12 +348,12 @@ const SalesForm: React.FC<Props> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Valor Total Venda / NF (R$)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Total Venda / NF (R$)</label>
                 <div className="relative">
-                   <DollarSign className="absolute left-3 top-3.5 text-gray-400" size={16} />
+                   <DollarSign className="absolute left-3 top-3.5 text-slate-400" size={16} />
                    <input
                     type="number"
-                    className={`${inputClasses} pl-10 border-indigo-200 dark:border-indigo-900/30`}
+                    className={`${inputClasses} pl-10 border-indigo-900/40`}
                     value={valueSold}
                     onChange={e => setValueSold(Number(e.target.value))}
                   />
@@ -363,7 +364,7 @@ const SalesForm: React.FC<Props> = ({
             <div className="space-y-4">
               <div>
                 <label className="flex items-center gap-2 cursor-pointer mb-2 ml-1 group">
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isPendingBilling ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/20' : 'border-gray-300 dark:border-slate-600'}`}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isPendingBilling ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/20' : 'border-slate-600'}`}>
                         <input 
                             type="checkbox" 
                             className="hidden"
@@ -372,12 +373,12 @@ const SalesForm: React.FC<Props> = ({
                         />
                         {isPendingBilling && <Clock size={12} className="text-white" />}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'}`}>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-300' : 'text-slate-400'}`}>
                         Pendente de Faturamento
                     </span>
                 </label>
                 
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 ml-1">Data de Faturamento</label>
+                <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Data de Faturamento</label>
                 <input
                   type="date"
                   className={`${inputClasses} ${isPendingBilling ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
@@ -387,41 +388,18 @@ const SalesForm: React.FC<Props> = ({
                 />
               </div>
               
-              {!isPendingBilling && (
-                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 dark:text-slate-100">
-                    <div className="text-xs">
-                        <p className="font-bold text-slate-600 dark:text-slate-300">Recebíveis via Importação Mensal</p>
-                        <p className="text-slate-500 dark:text-slate-400">Os lançamentos de comissão são feitos por importação do período.</p>
-                    </div>
-                    <label className="flex items-start gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        <input
-                            type="checkbox"
-                            className="mt-0.5 h-4 w-4 accent-emerald-600"
-                            checked={autoCreateReceivable}
-                            onChange={(e) => setAutoCreateReceivable(e.target.checked)}
-                        />
-                        <span>
-                          Criar recebível automaticamente ao faturar esta venda.
-                          <span className="block text-[11px] font-normal text-slate-500 dark:text-slate-400">
-                            Gera um recebível pendente com o valor de comissão calculado.
-                          </span>
-                        </span>
-                    </label>
-                  </div>
-              )}
-
-              <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30' : 'bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30'}`}>
+              <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-900/20 border border-amber-800/60' : 'bg-indigo-900/20 border border-indigo-800/60'}`}>
                   {isPendingBilling ? (
                       <>
                         <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
-                        <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
+                        <p className="text-xs text-amber-200 leading-relaxed font-medium">
                             Venda marcada como pendente. Ela não aparecerá nos gráficos de faturamento mensal até que você defina uma data.
                         </p>
                       </>
                   ) : (
                       <>
                         <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
-                        <p className="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed font-medium">
+                        <p className="text-xs text-indigo-200 leading-relaxed font-medium">
                             Esta data define o mês em que a comissão será contabilizada no seu dashboard.
                         </p>
                       </>
@@ -431,7 +409,7 @@ const SalesForm: React.FC<Props> = ({
           </div>
 
           <div>
-             <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Observações</label>
+             <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
              <textarea 
                className={`${inputClasses} h-24 resize-none`}
                placeholder="Detalhes adicionais do pedido..."
@@ -442,20 +420,20 @@ const SalesForm: React.FC<Props> = ({
           </fieldset>
         </div>
 
-        <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-gray-50 dark:bg-slate-950 shrink-0 dark:text-slate-100">
+        <div className="p-5 md:p-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-900 shrink-0">
           <div className="flex items-center gap-4">
             <div className="text-center md:text-left">
-              <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Base de Comissão</span>
-              <p className="text-lg font-bold text-gray-700 dark:text-gray-300">
+              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Comissão</span>
+              <p className="text-lg font-bold text-slate-100">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(commissionBase)}
               </p>
             </div>
-            <div className="w-px h-8 bg-gray-200 dark:bg-slate-800 dark:text-slate-100"></div>
+            <div className="w-px h-8 bg-slate-800"></div>
             <div className="text-center md:text-left">
-              <span className={`block text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-500' : 'text-emerald-500'}`}>
+              <span className={`block text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-600' : 'text-emerald-600'}`}>
                 {isPendingBilling ? 'Comissão Prevista (Pend.)' : 'Comissão Prevista'}
               </span>
-              <p className={`text-2xl font-black ${isPendingBilling ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              <p className={`text-2xl font-black ${isPendingBilling ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(commissionValue)}
               </p>
             </div>
@@ -464,14 +442,14 @@ const SalesForm: React.FC<Props> = ({
           <div className="flex gap-3 w-full md:w-auto">
             <button 
               onClick={onClose}
-              className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors"
+              className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 transition-colors"
             >
               Cancelar
             </button>
             <button 
               disabled={isLocked}
               onClick={handleSave}
-              className={`flex-1 md:flex-none px-8 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-white ${isPendingBilling ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-900/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`flex-1 md:flex-none px-8 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-white ${isPendingBilling ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-900/20' : (isNatal ? 'bg-red-600 hover:bg-red-700 shadow-red-900/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20')} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               {isPendingBilling ? 'Salvar Pendência' : 'Gravar Venda'}
             </button>

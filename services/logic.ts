@@ -856,26 +856,10 @@ export const readExcelFile = (file: File): Promise<any[][]> => {
 };
 
 export const downloadSalesTemplate = () => {
-  const headers = [
-    "Data Faturamento",
-    "Data Pedido",
-    "Tipo",
-    "Cliente",
-    "Orcamento",
-    "Quantidade",
-    "Valor Proposto",
-    "Valor Venda",
-    "Margem (%)",
-    "Obs",
-    "Rastreio"
-  ];
-  const rows = [["10/12/2025", "10/12/2025", "NATAL", "EXEMPLO CLIENTE LTDA", "140", "12", "250", "264,6", "42,05%", "Venda importada", "255638"]];
-  const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+  const url = "/modelo_importacao_vendas360.xlsx";
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", "modelo_importacao_vendas.csv");
+  link.setAttribute("download", "modelo_importacao_vendas360.xlsx");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

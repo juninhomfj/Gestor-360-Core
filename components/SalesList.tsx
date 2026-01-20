@@ -209,7 +209,11 @@ const SalesList: React.FC<SalesListProps> = ({
   const parseNumber = (value: any) => {
     if (value === null || value === undefined || value === '') return 0;
     if (typeof value === 'number') return value;
-    const raw = String(value).replace('%', '').trim();
+    const raw = String(value)
+      .replace('%', '')
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .trim();
     let normalized = raw;
     if (raw.includes(',') && raw.includes('.')) {
       normalized = raw.replace(/\./g, '').replace(',', '.');
@@ -330,13 +334,13 @@ const SalesList: React.FC<SalesListProps> = ({
             <p className="text-sm text-gray-500">Controle operacional e financeiro.</p>
           </div>
           <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">
-              <button onClick={handleDownloadModel} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-indigo-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Baixar Modelo (Excel/CSV)">
+              <button onClick={handleDownloadModel} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-indigo-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Baixar Modelo (XLSX)">
                   <FileSpreadsheet size={20}/>
               </button>
               <button onClick={onRestore} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-blue-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Backup e Restauração">
                   <Database size={20}/>
               </button>
-              <button disabled={isReadOnly} onClick={handleImportClick} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-emerald-500 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:flex-none dark:text-slate-100" title="Importar Excel/CSV">
+              <button disabled={isReadOnly} onClick={handleImportClick} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-emerald-500 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:flex-none dark:text-slate-100" title="Importar XLSX/CSV">
                   <Upload size={20}/>
               </button>
               <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange}/>
@@ -540,7 +544,8 @@ const SalesList: React.FC<SalesListProps> = ({
                         completionDate: completionValue || new Date().toISOString().split('T')[0],
                         isBilled: !!dateValue,
                         observations: obj.obs || "",
-                        trackingCode: obj.trackingCode || obj.tracking || ""
+                        trackingCode: obj.trackingCode || obj.tracking || "",
+                        paymentMethod: obj.paymentMethod || obj.payment || ""
                     };
                 });
                 onBulkAdd(processed);

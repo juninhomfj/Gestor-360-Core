@@ -23,6 +23,7 @@ Arquitetura **online-first** (Firestore) com cache local (IndexedDB) e toleranci
 - Faturamento em lote
 - Regras de comissão (básica / natal) com assinatura em tempo real
 - Integração com campanhas / overlays de comissão (quando habilitado)
+- Modelo XLSX de importacao: `public/modelo_importacao_vendas360.xlsx`
 
 ### Finanças
 - Contas, transações, categorias, metas, desafios, receíveis

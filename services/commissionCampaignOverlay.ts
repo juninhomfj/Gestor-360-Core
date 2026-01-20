@@ -135,6 +135,7 @@ export const applyAvistaLowMarginRule = (
   config: AvistaLowMarginRuleConfig
 ): CommissionCampaignOverlayResult | null => {
   if (!config.enabled) return null;
+  if (sale.type !== 'BASICA') return null;
   const margin = Number(sale.marginPercent ?? 0);
   if (margin < 0 || margin >= 4) return null;
 

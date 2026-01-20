@@ -16,13 +16,14 @@ const FIELDS = [
   { key: 'completionDate', label: 'Data Pedido', required: false, matches: ['data pedido', 'pedido', 'datapedido'] },
   { key: 'type', label: 'Tipo', required: true, matches: ['tipo', 'produto', 'categoria'] },
   { key: 'client', label: 'Cliente', required: true, matches: ['cliente', 'nome cliente', 'razao'] },
-  { key: 'budget', label: 'Orçamento', required: false, matches: ['orcamento', 'orçamento', 'budget'] },
+  { key: 'budget', label: 'Orcamento', required: false, matches: ['orcamento', 'orcamento', 'budget'] },
   { key: 'quantity', label: 'Quantidade', required: true, matches: ['quantidade', 'qtd'] },
   { key: 'valueProposed', label: 'Valor Proposto', required: true, matches: ['valor proposto', 'proposto', 'preco proposto'] },
   { key: 'valueSold', label: 'Valor Venda', required: true, matches: ['valor venda', 'valor vendido', 'total venda'] },
   { key: 'margin', label: 'Margem (%)', required: true, matches: ['margem', 'margem %', 'margem (%)'] },
   { key: 'obs', label: 'Obs', required: false, matches: ['obs', 'observacao', 'observações'] },
   { key: 'trackingCode', label: 'Rastreio', required: false, matches: ['rastreio', 'tracking', 'rastreamento'] },
+  { key: 'paymentMethod', label: 'Forma de Pagamento', required: false, matches: ['forma de pagamento', 'pagamento', 'payment', 'paymentmethod'] },
 ];
 
 const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, onConfirm, darkMode }) => {
@@ -94,9 +95,10 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
              <div className="text-xs opacity-80">
                  <p className="font-bold mb-1">Dicas de Compatibilidade:</p>
                  <ul className="list-disc list-inside space-y-1">
-                    <li>Aceita .xlsx, .xls e .csv.</li>
-                    <li>No tipo, escreva "Cesta Básica" ou "Natal".</li>
-                    <li>Use o modelo padrão com colunas: Data Faturamento, Data Pedido, Tipo, Cliente, Orçamento, Quantidade, Valor Proposto, Valor Venda, Margem (%), Obs, Rastreio.</li>
+                    <li>Aceita .xlsx, .xls e .csv (preferencia: .xlsx).</li>
+                    <li>No tipo, escreva "BASICA" ou "NATAL".</li>
+                    <li>Valores seguem o padrao BR (virgula para decimais). Ex: 1.234,56 ou 12,5%.</li>
+                    <li>Use o modelo padrão (XLSX) com colunas: Data Faturamento, Data Pedido, Tipo, Cliente, Orcamento, Quantidade, Valor Proposto, Valor Venda, Margem (%), Obs, Rastreio, Forma de Pagamento.</li>
                     <li>Campos com <span className="text-red-500">*</span> são obrigatórios.</li>
                  </ul>
              </div>
