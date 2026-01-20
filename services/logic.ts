@@ -425,7 +425,7 @@ export const computeCommissionValues = (
 ) => {
   const commissionBase = (quantity || 0) * (valueProposed || 0);
   const rule = (rules || []).find(
-    (r) => margin >= (r.minPercent || 0) && (r.maxPercent === null || margin < (r.maxPercent || 0))
+    (r) => margin >= (r.minPercent || 0) && (r.maxPercent === null || margin <= (r.maxPercent || 0))
   );
   const rateUsed = rule ? (rule.commissionRate || 0) : 0;
   return { commissionBase, commissionValue: commissionBase * rateUsed, rateUsed };
