@@ -36,6 +36,7 @@ const SalesForm: React.FC<Props> = ({
   const [valueProposed, setValueProposed] = useState(0);
   const [valueSold, setValueSold] = useState(0);
   const [margin, setMargin] = useState(0);
+  const [quoteNumber, setQuoteNumber] = useState('');
   const [quoteDate, setQuoteDate] = useState('');
   const [closeDate, setCloseDate] = useState('');
   const [billDate, setBillDate] = useState('');
@@ -74,6 +75,7 @@ const SalesForm: React.FC<Props> = ({
         setValueProposed(0);
         setValueSold(0);
         setMargin(0);
+        setQuoteNumber('');
         setBillDate('');
         setObservations('');
         setTrackingCode('');
@@ -90,6 +92,7 @@ const SalesForm: React.FC<Props> = ({
     setValueProposed(initialData.valueProposed);
     setValueSold(initialData.valueSold || 0);
     setMargin(initialData.marginPercent || 0);
+    setQuoteNumber(initialData.quoteNumber || '');
     setQuoteDate(initialData.quoteDate || '');
     setCloseDate(initialData.completionDate || '');
     setBillDate(initialData.date || '');
@@ -197,6 +200,7 @@ const SalesForm: React.FC<Props> = ({
       valueProposed,
       valueSold,
       marginPercent: margin,
+      quoteNumber,
       quoteDate,
       completionDate: closeDate || new Date().toISOString().split('T')[0],
       date: finalBillDate,
@@ -363,7 +367,17 @@ const SalesForm: React.FC<Props> = ({
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Orçamento (R$)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Número do Orçamento</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className={inputClasses}
+                  value={quoteNumber}
+                  onChange={e => setQuoteNumber(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Proposto (R$)</label>
                 <input
                   type="number"
                   className={inputClasses}
