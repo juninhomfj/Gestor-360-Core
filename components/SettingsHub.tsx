@@ -1106,6 +1106,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
 
                {activeTab === 'TRASH' && <TrashBin darkMode={!!darkMode} />}
                {activeTab === 'ROADMAP' && (isAdmin || isDev) && <DevRoadmap />}
+               {activeTab === 'DEVTOOLS' && isDev && <DevRoadmap />}
                {activeTab === 'CLIENTS' && <ClientManagementHub currentUser={currentUser} darkMode={!!darkMode} />}
            </div>
        </div>
