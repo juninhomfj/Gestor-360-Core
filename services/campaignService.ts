@@ -6,7 +6,6 @@ import { Logger } from "./logger";
 import { getSession } from "./auth";
 import { getStoredSales } from "./logic";
 import { safeSetDoc } from "./safeWrites";
-import { safeSetDoc } from "./safeWrites";
 export interface MonthlyBasicBasketProgress {
   target: number;
   current: number;
@@ -119,11 +118,40 @@ export const getCampaignsByCompany = async (companyId: string): Promise<Commissi
     Logger.info("Campaigns: campanhas carregadas do Firestore.", { companyId, count: campaigns.length });
     return campaigns;
   } catch (error: any) {
+    const message = error?.message;
     Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
-      message: error?.message,
+      message,
       companyId,
       query: "campaigns where companyId == X orderBy startMonth desc"
     });
+    const missingIndex =
+      error?.code === 'failed-precondition' ||
+      (typeof message === 'string' && message.toLowerCase().includes('requires an index'));
+    if (missingIndex) {
+      try {
+        const fallbackQuery = query(
+          collection(db, 'campaigns'),
+          where('companyId', '==', companyId)
+        );
+        const fallbackSnap = await getDocsFromServer(fallbackQuery);
+        const campaigns = fallbackSnap.docs
+          .map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign))
+          .sort((a, b) => (b.startMonth || '').localeCompare(a.startMonth || ''));
+        if (campaigns.length === 0) {
+          Logger.info("Campaigns: nenhuma campanha encontrada no Firestore (fallback).", { companyId });
+          return [];
+        }
+        await dbBulkPutSkipPending('campaigns', campaigns);
+        Logger.info("Campaigns: campanhas carregadas do Firestore (fallback).", { companyId, count: campaigns.length });
+        return campaigns;
+      } catch (fallbackError: any) {
+        Logger.warn("Campaigns: fallback sem orderBy falhou.", {
+          message: fallbackError?.message,
+          companyId,
+          query: "campaigns where companyId == X"
+        });
+      }
+    }
     return await dbGetAll('campaigns', c => c.companyId === companyId);
   }
 };
