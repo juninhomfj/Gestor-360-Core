@@ -51,6 +51,10 @@ const SalesForm: React.FC<Props> = ({
   const [commissionValue, setCommissionValue] = useState(0);
   const [commissionBase, setCommissionBase] = useState(0);
   const [showClientList, setShowClientList] = useState(false);
+  const commissionRatePercent = useMemo(() => {
+    if (!commissionRate) return 0;
+    return commissionRate <= 1 ? commissionRate * 100 : commissionRate;
+  }, [commissionRate]);
 
   useEffect(() => {
     if (isOpen) {
@@ -364,6 +368,11 @@ const SalesForm: React.FC<Props> = ({
                     value={margin}
                     onChange={e => setMargin(Number(e.target.value))}
                   />
+                  <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    {commissionRatePercent > 0
+                      ? `Taxa aplicada: ${commissionRatePercent.toFixed(2)}%`
+                      : 'Sem faixa de comissão aplicada'}
+                  </span>
                 </div>
               </div>
               <div>
