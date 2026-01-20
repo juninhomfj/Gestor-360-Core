@@ -6,7 +6,6 @@ import { Logger } from "./logger";
 import { getSession } from "./auth";
 import { getStoredSales } from "./logic";
 import { safeSetDoc } from "./safeWrites";
-import { safeSetDoc } from "./safeWrites";
 export interface MonthlyBasicBasketProgress {
   target: number;
   current: number;
@@ -104,21 +103,54 @@ export const isMonthWithinRange = (month: string, startMonth: string, endMonth: 
 
 export const getCampaignsByCompany = async (companyId: string): Promise<CommissionCampaign[]> => {
   try {
-    const q = query(
-      collection(db, 'campaigns'),
-      where('companyId', '==', companyId),
-      orderBy('startMonth', 'desc')
-    );
-    const snap = await getDocsFromServer(q);
-    const campaigns = snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign));
-    if (campaigns.length === 0) {
+    const baseQuery = query(collection(db, 'campaigns'), where('companyId', '==', companyId));
+    const sortedQuery = query(baseQuery, orderBy('startMonth', 'desc'));
+    let snap = await getDocsFromServer(sortedQuery);
+    let campaigns = snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign));
+    if (
+      campaigns.length === 0 &&
+      !(snap as any)?.metadata?.fromCache
+    ) {
       Logger.info("Campaigns: nenhuma campanha encontrada no Firestore.", { companyId });
+      return [];
+    }
+    if (campaigns.length === 0) {
       return [];
     }
     await dbBulkPutSkipPending('campaigns', campaigns);
     Logger.info("Campaigns: campanhas carregadas do Firestore.", { companyId, count: campaigns.length });
     return campaigns;
   } catch (error: any) {
+    const message = String(error?.message || '');
+    const isIndexError =
+      error?.code === 'failed-precondition' ||
+      message.toLowerCase().includes('requires an index');
+    if (isIndexError) {
+      try {
+        const fallbackQuery = query(collection(db, 'campaigns'), where('companyId', '==', companyId));
+        const fallbackSnap = await getDocsFromServer(fallbackQuery);
+        const campaigns = fallbackSnap.docs
+          .map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as any) } as CommissionCampaign))
+          .sort((a, b) => (b.startMonth || '').localeCompare(a.startMonth || ''));
+        if (campaigns.length === 0) {
+          Logger.info("Campaigns: nenhuma campanha encontrada no Firestore.", { companyId });
+          return [];
+        }
+        await dbBulkPutSkipPending('campaigns', campaigns);
+        Logger.info("Campaigns: campanhas carregadas do Firestore (sem ordenação no servidor).", {
+          companyId,
+          count: campaigns.length
+        });
+        return campaigns;
+      } catch (fallbackError: any) {
+        Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
+          message: fallbackError?.message,
+          companyId,
+          query: "campaigns where companyId == X"
+        });
+        return await dbGetAll('campaigns', c => c.companyId === companyId);
+      }
+    }
     Logger.warn("Campaigns: falha ao buscar campanhas do Firestore.", {
       message: error?.message,
       companyId,
