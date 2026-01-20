@@ -228,6 +228,7 @@ export interface Sale {
   valueProposed: number;
   valueSold: number;
   marginPercent: number;
+  quoteNumber?: string;
   quoteDate?: string;
   completionDate?: string;
   date?: string;
