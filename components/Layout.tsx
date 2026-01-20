@@ -314,9 +314,23 @@ const Layout: React.FC<LayoutProps> = ({
             <NotificationCenter 
                 notifications={notifications} 
                 onNotificationClick={(notif) => {
-                    if (notif.source === 'SALES') navigate('dashboard');
-                    else if (notif.source === 'FINANCE') navigate('fin_dashboard');
-                    else navigate('home');
+                    if (notif.id?.startsWith('chat:')) {
+                        navigate('chat');
+                        return;
+                    }
+                    if (notif.id?.startsWith('ticket:')) {
+                        navigate('tickets');
+                        return;
+                    }
+                    if (notif.source === 'SALES') {
+                        navigate('dashboard');
+                        return;
+                    }
+                    if (notif.source === 'FINANCE') {
+                        navigate('fin_dashboard');
+                        return;
+                    }
+                    navigate('home');
                 }} 
                 onClearAll={onClearAllNotifications} 
             />
