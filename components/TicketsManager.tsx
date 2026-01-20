@@ -247,7 +247,12 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
             const text = settings.provider === 'GEMINI'
                 ? await callGemini(apiKey, prompt)
                 : await callOpenAi(apiKey, prompt);
-            setAiOutput(text);
+            let normalized = (text || '').trim();
+            if (!/^TL;DR:/i.test(normalized)) {
+                const firstLine = normalized.split('\n').find((line) => line.trim()) || 'Resumo indisponivel.';
+                normalized = `TL;DR: ${firstLine}\n\n${normalized}`;
+            }
+            setAiOutput(normalized);
             bumpUsage(usage.today, usage.count);
         } catch (err: any) {
             setAiError(err?.message || 'Falha ao consultar IA.');
