@@ -125,22 +125,22 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </div>
             <span className="text-xs text-gray-500">{monthKey.replace('-', '/')}</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl p-4 bg-emerald-500/10 border border-emerald-500/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl p-4 bg-emerald-500/10 border border-emerald-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-emerald-500 font-black">Volume</div>
-              <div className="text-lg font-black text-emerald-600">{formatMoney(summary.salesTotal)}</div>
+              <div className="text-base sm:text-lg font-black text-emerald-600 break-words">{formatMoney(summary.salesTotal)}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-indigo-500/10 border border-indigo-500/30">
+            <div className="rounded-2xl p-4 bg-indigo-500/10 border border-indigo-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-indigo-500 font-black">Comissao</div>
-              <div className="text-lg font-black text-indigo-600">{formatMoney(summary.commissionTotal)}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-600 break-words">{formatMoney(summary.commissionTotal)}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-500/30">
+            <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-amber-600 font-black">Pendencias</div>
-              <div className="text-lg font-black text-amber-600">{summary.openTasks}</div>
+              <div className="text-base sm:text-lg font-black text-amber-600 break-words">{summary.openTasks}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-slate-500/10 border border-slate-500/30">
+            <div className="rounded-2xl p-4 bg-slate-500/10 border border-slate-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-black">A faturar</div>
-              <div className="text-lg font-black text-slate-600">{summary.pendingSales}</div>
+              <div className="text-base sm:text-lg font-black text-slate-600 break-words">{summary.pendingSales}</div>
             </div>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -173,22 +173,22 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </div>
             <span className="text-xs text-gray-500">Resumo</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl p-4 bg-blue-500/10 border border-blue-500/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl p-4 bg-blue-500/10 border border-blue-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-blue-500 font-black">Saldo</div>
-              <div className="text-lg font-black text-blue-600">{formatMoney(summary.totalBalance)}</div>
+              <div className="text-base sm:text-lg font-black text-blue-600 break-words">{formatMoney(summary.totalBalance)}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-emerald-500/10 border border-emerald-500/30">
+            <div className="rounded-2xl p-4 bg-emerald-500/10 border border-emerald-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-emerald-500 font-black">A receber</div>
-              <div className="text-lg font-black text-emerald-600">{formatMoney(summary.pendingIncome)}</div>
+              <div className="text-base sm:text-lg font-black text-emerald-600 break-words">{formatMoney(summary.pendingIncome)}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30">
+            <div className="rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-rose-500 font-black">A pagar</div>
-              <div className="text-lg font-black text-rose-600">{formatMoney(summary.pendingExpenses)}</div>
+              <div className="text-base sm:text-lg font-black text-rose-600 break-words">{formatMoney(summary.pendingExpenses)}</div>
             </div>
-            <div className="rounded-2xl p-4 bg-slate-500/10 border border-slate-500/30">
+            <div className="rounded-2xl p-4 bg-slate-500/10 border border-slate-500/30 min-w-0">
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-black">Contas</div>
-              <div className="text-lg font-black text-slate-600">{accounts.length}</div>
+              <div className="text-base sm:text-lg font-black text-slate-600 break-words">{accounts.length}</div>
             </div>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">

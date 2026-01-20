@@ -1193,9 +1193,6 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                       </button>
                     ))}
                   </div>
-                  <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                    Powered by KLIPY
-                  </span>
                 </div>
 
                 <input
@@ -1213,14 +1210,20 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                   {klipyItems.map((item) => {
                     const preview = resolveKlipyPreviewUrl(item);
                     if (!preview.url) return null;
+                    const showWatermark = klipyTab === 'gifs' || klipyTab === 'emojis';
                     return (
                       <button
                         key={item.slug || item.id}
                         onClick={() => handleKlipySelect(item)}
-                        className="rounded-lg overflow-hidden border border-transparent hover:border-emerald-500/60"
+                        className="relative rounded-lg overflow-hidden border border-transparent hover:border-emerald-500/60"
                         title={item.title || item.slug}
                       >
                         <img src={preview.url} alt={item.title || 'Klipy'} className="w-full h-full object-cover" />
+                        {showWatermark && (
+                          <span className="absolute bottom-1 right-1 text-[8px] font-black uppercase tracking-widest text-white/70 drop-shadow">
+                            KLIPY
+                          </span>
+                        )}
                       </button>
                     );
                   })}

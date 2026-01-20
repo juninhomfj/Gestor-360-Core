@@ -299,13 +299,13 @@ const FinanceDashboard: React.FC<FinanceDashboardProps> = ({
 };
 
 const StatMini = ({ icon: Icon, label, value, color, hide, darkMode }: any) => (
-    <div className={`p-5 rounded-3xl border flex items-center gap-4 transition-all hover:translate-y-[-4px] ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
-        <div className={`p-3 rounded-2xl bg-${color}-500/10 text-${color}-500`}>
+    <div className={`p-4 sm:p-5 rounded-3xl border flex items-center gap-4 transition-all hover:translate-y-[-4px] min-w-0 ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-100 shadow-sm'}`}>
+        <div className={`p-3 rounded-2xl bg-${color}-500/10 text-${color}-500 shrink-0`}>
             {Icon}
         </div>
-        <div>
-            <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest">{label}</p>
-            <p className={`text-lg font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>{hide ? '••••••' : value}</p>
+        <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest truncate" title={label}>{label}</p>
+            <p className={`text-base sm:text-lg font-black leading-tight break-words ${darkMode ? 'text-white' : 'text-gray-900'}`}>{hide ? '######' : value}</p>
         </div>
     </div>
 );
@@ -317,9 +317,9 @@ const AuditItem = ({ label, value, status }: { label: string; value: string; sta
         error: 'border-red-200 bg-red-50 text-red-700'
     } as const;
     return (
-        <div className={`rounded-2xl border p-4 ${statusStyles[status]}`}>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{label}</p>
-            <p className="text-sm font-black">{value}</p>
+        <div className={`rounded-2xl border p-4 min-w-0 ${statusStyles[status]}`}>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1 leading-tight break-words">{label}</p>
+            <p className="text-sm font-black leading-tight break-words">{value}</p>
         </div>
     );
 };

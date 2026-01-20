@@ -13,7 +13,6 @@ export interface MonthlyBasicBasketProgress {
   hit: boolean;
 }
 
-let warnedMissingCompany = false;
 let warnedMissingPaymentType = false;
 let warnedMissingGoalTarget = false;
 let warnedMissingQuantityField = false;
@@ -21,10 +20,6 @@ let warnedMissingQuantityField = false;
 export const resolveCompanyId = async (user: User): Promise<string> => {
   const rawCompanyId = (user as any)?.companyId || (user as any)?.companyKey;
   if (rawCompanyId) return String(rawCompanyId);
-  if (!warnedMissingCompany) {
-    warnedMissingCompany = true;
-    Logger.warn("Campaigns: companyId ausente; usando uid como fallback.");
-  }
   return user.uid;
 };
 

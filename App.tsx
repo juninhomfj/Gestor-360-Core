@@ -61,11 +61,12 @@ import { logout, getSession, updateUser, watchAuthChanges } from './services/aut
 import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
-import { sendMessage } from './services/internalChat';
+import { sendMessage, getMessages, subscribeToMessages } from './services/internalChat';
 import { ShieldAlert, LogOut, Loader2 } from 'lucide-react';
 import { SALES_TASK_LABELS } from './utils/salesTasks';
 import { dbBulkPut } from './storage/db';
 import { safeSetDoc } from './services/safeWrites';
+import { getTickets } from './services/tickets';
 
 type AuthView = 'LOGIN' | 'REQUEST_RESET' | 'APP' | 'ERROR' | 'LOADING' | 'BLOCKED';
 
@@ -81,6 +82,7 @@ const isHiddenModule = (user: User | null, mod: string): boolean =>
 
 const App: React.FC = () => {
     const initRun = useRef(false);
+    const activeTabRef = useRef<string>('home');
     const syncWorkerStopRef = useRef<(() => void) | null>(null);
     const emptySalesToastRef = useRef(false);
     const missingSalesIndexToastRef = useRef(false);
@@ -134,6 +136,12 @@ const App: React.FC = () => {
         const id = crypto.randomUUID();
         setSortedToasts(prev => [...prev, { id, type, message }]);
     };
+    const pushNotification = (notif: AppNotification) => {
+        setNotifications(prev => {
+            if (prev.find(n => n.id === notif.id)) return prev;
+            return [notif, ...prev].slice(0, 40);
+        });
+    };
     const isDarkMode = ['glass', 'cyberpunk', 'dark'].includes(theme);
     const toggleHideValues = () => {
         const next = !hideValues;
@@ -158,6 +166,19 @@ const App: React.FC = () => {
         window.addEventListener('app:bug-detected', handler as EventListener);
         return () => window.removeEventListener('app:bug-detected', handler as EventListener);
     }, [currentUser]);
+
+    useEffect(() => {
+        activeTabRef.current = activeTab;
+        if (!currentUser) return;
+        if (activeTab === 'chat') {
+            localStorage.setItem('sys_last_seen_chat', String(Date.now()));
+            setNotifications(prev => prev.filter(n => !n.id.startsWith('chat:')));
+        }
+        if (activeTab === 'tickets') {
+            localStorage.setItem('sys_last_seen_tickets', String(Date.now()));
+            setNotifications(prev => prev.filter(n => !n.id.startsWith('ticket:')));
+        }
+    }, [activeTab, currentUser]);
 
     const removeToast = (id: string) => {
         setSortedToasts(prev => prev.filter(t => t.id !== id));
@@ -267,6 +288,114 @@ const App: React.FC = () => {
             unsubscribe?.();
         };
     }, []);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        let active = true;
+        const bootNotifications = async () => {
+            const lastSeenChat = Number(localStorage.getItem('sys_last_seen_chat') || 0);
+            const lastSeenTickets = Number(localStorage.getItem('sys_last_seen_tickets') || 0);
+            try {
+                const [chatHistory, tickets] = await Promise.all([
+                    getMessages(currentUser.id, isAdmin),
+                    getTickets()
+                ]);
+                if (!active) return;
+                const chatMsgs = (chatHistory?.messages || []).filter(msg =>
+                    !msg.deleted &&
+                    msg.senderId !== currentUser.id &&
+                    new Date(msg.timestamp).getTime() > lastSeenChat
+                );
+                chatMsgs.forEach(msg => {
+                    const preview = msg.content?.trim() || (msg.mediaType ? `Mídia: ${msg.mediaType}` : 'Nova mensagem');
+                    pushNotification({
+                        id: `chat:${msg.id}`,
+                        title: `Nova mensagem de ${msg.senderName || 'Usuário'}`,
+                        message: preview,
+                        type: 'INFO',
+                        source: 'SYSTEM',
+                        date: msg.timestamp,
+                        read: false
+                    });
+                });
+
+                tickets
+                    .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
+                    .forEach(t => {
+                        pushNotification({
+                            id: `ticket:${t.id}`,
+                            title: `Novo ticket: ${t.title}`,
+                            message: t.description || 'Ticket registrado.',
+                            type: 'WARNING',
+                            source: 'SYSTEM',
+                            date: t.createdAt,
+                            read: false
+                        });
+                    });
+            } catch {}
+        };
+
+        bootNotifications();
+        return () => {
+            active = false;
+        };
+    }, [currentUser?.id, isAdmin]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        let unsubscribe: { unsubscribe: () => void } | null = null;
+        let ticketInterval: number | null = null;
+        const start = async () => {
+            try {
+                const channel = await subscribeToMessages(currentUser.id, isAdmin, (msg) => {
+                    if (msg.deleted) return;
+                    if (msg.senderId === currentUser.id) return;
+                    if (activeTabRef.current === 'chat') return;
+                    const preview = msg.content?.trim() || (msg.mediaType ? `Mídia: ${msg.mediaType}` : 'Nova mensagem');
+                    pushNotification({
+                        id: `chat:${msg.id}`,
+                        title: `Nova mensagem de ${msg.senderName || 'Usuário'}`,
+                        message: preview,
+                        type: 'INFO',
+                        source: 'SYSTEM',
+                        date: msg.timestamp,
+                        read: false
+                    });
+                });
+                unsubscribe = channel || null;
+            } catch {}
+
+            const pollTickets = async () => {
+                try {
+                    if (activeTabRef.current === 'tickets') return;
+                    const lastSeenTickets = Number(localStorage.getItem('sys_last_seen_tickets') || 0);
+                    const tickets = await getTickets();
+                    tickets
+                        .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
+                        .forEach(t => {
+                            pushNotification({
+                                id: `ticket:${t.id}`,
+                                title: `Novo ticket: ${t.title}`,
+                                message: t.description || 'Ticket registrado.',
+                                type: 'WARNING',
+                                source: 'SYSTEM',
+                                date: t.createdAt,
+                                read: false
+                            });
+                        });
+                } catch {}
+            };
+
+            await pollTickets();
+            ticketInterval = window.setInterval(pollTickets, 30000);
+        };
+
+        start();
+        return () => {
+            unsubscribe?.unsubscribe?.();
+            if (ticketInterval) window.clearInterval(ticketInterval);
+        };
+    }, [currentUser?.id, isAdmin]);
 
     const handleLoginSuccess = async (user: User) => {
         setCurrentUser(user);

@@ -247,6 +247,19 @@ const SalesList: React.FC<SalesListProps> = ({
     if (Number.isNaN(parsed.getTime())) return null;
     return parsed.toISOString().split('T')[0];
   };
+  
+  const normalizePaymentMethod = (value: any) => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const normalized = raw
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    if (normalized === 'a vista' || normalized === 'avista' || normalized.includes('a vista')) {
+      return 'À vista / Antecipado';
+    }
+    return raw;
+  };
 
   return (
     <div className="space-y-6 relative pb-20">
@@ -545,7 +558,7 @@ const SalesList: React.FC<SalesListProps> = ({
                         isBilled: !!dateValue,
                         observations: obj.obs || "",
                         trackingCode: obj.trackingCode || obj.tracking || "",
-                        paymentMethod: obj.paymentMethod || obj.payment || ""
+                        paymentMethod: normalizePaymentMethod(obj.paymentMethod || obj.payment || "")
                     };
                 });
                 onBulkAdd(processed);

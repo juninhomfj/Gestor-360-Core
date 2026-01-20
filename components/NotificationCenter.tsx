@@ -51,7 +51,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, 
   useEffect(() => {
       // Play sound if notifications increased
       if (count > prevCount) {
-          AudioService.play('NOTIFICATION');
+          AudioService.play('NOTIFY');
       }
       setPrevCount(count);
   }, [count, prevCount]);

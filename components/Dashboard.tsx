@@ -30,12 +30,12 @@ const formatCurrency = (val: number, hidden: boolean) => {
 const StatCard: React.FC<{ title: string; value: string; sub: string; icon: React.ReactNode; color: string; darkMode?: boolean }> = ({ title, value, sub, icon, color, darkMode }) => {
   const bgClass = darkMode ? 'bg-slate-800/60 backdrop-blur-sm border-slate-700/50' : 'bg-white border-gray-100'; 
   return (
-    <div className={`${bgClass} rounded-xl p-6 shadow-sm border flex items-start space-x-4 transition-all hover:shadow-md hover:scale-[1.01]`}>
-        <div className={`p-3 rounded-lg ${color} text-white shadow-lg`}>{icon}</div>
-        <div>
-            <p className={`text-sm font-medium ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{title}</p>
-            <h3 className={`text-2xl font-bold mt-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{value}</h3>
-            <p className={`text-xs mt-1 font-medium ${darkMode ? 'text-slate-500' : 'text-gray-500'}`}>{sub}</p>
+    <div className={`${bgClass} rounded-xl p-4 sm:p-6 shadow-sm border flex items-start gap-3 transition-all hover:shadow-md hover:scale-[1.01] min-w-0`}>
+        <div className={`p-3 rounded-lg ${color} text-white shadow-lg shrink-0`}>{icon}</div>
+        <div className="min-w-0">
+            <p className={`text-xs sm:text-sm font-medium leading-tight break-words ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{title}</p>
+            <h3 className={`text-xl sm:text-2xl font-bold mt-1 leading-tight break-words ${darkMode ? 'text-white' : 'text-gray-900'}`}>{value}</h3>
+            <p className={`text-[11px] sm:text-xs mt-1 font-medium leading-tight break-words ${darkMode ? 'text-slate-500' : 'text-gray-500'}`}>{sub}</p>
         </div>
     </div>
   );
@@ -269,14 +269,14 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {config.showStats && (
-          <div className={`grid grid-cols-1 ${showNatalCard ? 'sm:grid-cols-2 md:grid-cols-3' : 'sm:grid-cols-2'} gap-6`}>
+          <div className={`grid grid-cols-1 ${showNatalCard ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'} gap-6`}>
             <StatCard title={`Comissão Estimada (${capitalizedMonth})`} value={formatCurrency(totalCommissionMonth, hideValues)} sub="Previsão de recebimento mensal" icon={<DollarSign size={24} />} color="bg-indigo-600" darkMode={darkMode} />
             <StatCard title={`Cesta Básica (${capitalizedMonth})`} value={formatCurrency(basicCommissionMonth, hideValues)} sub={`${basicQtyMonth} cestas vendidas no mês`} icon={<ShoppingBasket size={24} />} color="bg-emerald-500" darkMode={darkMode} />
             {showNatalCard && <StatCard title={`Natal (${currentYear})`} value={formatCurrency(natalCommissionYear, hideValues)} sub={`${natalQtyYear} cestas (Acumulado Ano)`} icon={<Gift size={24} />} color="bg-red-500" darkMode={darkMode} />}
           </div>
       )}
 
-      <div className={`grid grid-cols-1 md:grid-cols-5 gap-4`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4`}>
         <StatCard title="Receita Total (Histórico)" value={formatCurrency(advancedIndicators.totalRevenue, hideValues)} sub="Base completa de vendas" icon={<ShoppingBag size={20} />} color="bg-slate-700" darkMode={darkMode} />
         <StatCard title="Ticket Médio" value={formatCurrency(advancedIndicators.avgTicket, hideValues)} sub="Valor médio por venda" icon={<Sparkles size={20} />} color="bg-emerald-500" darkMode={darkMode} />
         <StatCard title="Margem Média" value={`${advancedIndicators.avgMargin.toFixed(1)}%`} sub="Eficiência comercial" icon={<Edit3 size={20} />} color="bg-indigo-600" darkMode={darkMode} />

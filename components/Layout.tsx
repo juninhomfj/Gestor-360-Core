@@ -330,22 +330,6 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-10 pb-32 md:pb-10 custom-scrollbar">
            {children}
 
-           <footer className="mt-10 mb-6">
-             <div className="w-full rounded-2xl border border-white/10 bg-slate-900/70 backdrop-blur flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4 text-slate-200">
-               <div className="flex items-center gap-3">
-                 <img src="/klipy-powered.svg" alt="Powered by KLIPY" className="h-8 w-auto" />
-                 <span className="text-xs font-bold uppercase tracking-widest">Powered by KLIPY</span>
-               </div>
-               <a
-                 href="https://klipy.com"
-                 target="_blank"
-                 rel="noreferrer"
-                 className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors"
-               >
-                 klipy.com
-               </a>
-             </div>
-           </footer>
         </div>
       </main>
 
