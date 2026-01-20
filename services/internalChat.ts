@@ -480,7 +480,9 @@ export const createRoom = async (
     moderators: string[]
 ): Promise<ChatRoom | null> => {
     const supabase = await getSupabase();
-    if (!supabase) return null;
+    if (!supabase) {
+        throw new Error("Supabase não configurado para salas de chat.");
+    }
     try {
         const { data: roomData, error } = await supabase
             .from('rooms')
@@ -508,7 +510,7 @@ export const createRoom = async (
         };
     } catch (e: any) {
         Logger.warn("[Chat] Falha ao criar sala", { error: e?.message });
-        return null;
+        throw e;
     }
 };
 
