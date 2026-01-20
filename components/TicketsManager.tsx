@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Ticket, TicketPriority, TicketStatus, User } from '../types';
 import { getTickets, updateTicketAssignee, updateTicketStatus } from '../services/tickets';
 import { listUsers } from '../services/auth';
-import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy } from 'lucide-react';
 
 interface TicketsManagerProps {
     currentUser: User;
@@ -37,6 +37,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
     const [showList, setShowList] = useState(true);
     const [showLogDetails, setShowLogDetails] = useState(false);
+    const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
     useEffect(() => {
         refreshTickets();
@@ -120,6 +121,46 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         if (!details || typeof details !== 'object') return '';
         const code = (details.code || details.status || details.error?.code || details.error?.status || details.name) as string | undefined;
         return code ? `Codigo: ${code}` : '';
+    };
+    const buildLogExport = (ticket: Ticket) => {
+        const payload = {
+            id: ticket.id,
+            title: ticket.title,
+            module: ticket.module,
+            priority: ticket.priority,
+            status: ticket.status,
+            createdBy: {
+                id: ticket.createdById,
+                name: ticket.createdByName,
+                email: ticket.createdByEmail
+            },
+            createdAt: ticket.createdAt,
+            updatedAt: ticket.updatedAt,
+            closedAt: ticket.closedAt,
+            description: ticket.description,
+            logs: (ticket.logs || []).map((log) => ({
+                timestamp: log.timestamp,
+                level: log.level,
+                message: log.message,
+                details: log.details,
+                userAgent: log.userAgent,
+                userId: log.userId,
+                userName: log.userName
+            }))
+        };
+        return JSON.stringify(payload, null, 2);
+    };
+    const handleCopyLogs = async () => {
+        if (!selectedTicket) return;
+        const payload = buildLogExport(selectedTicket);
+        try {
+            await navigator.clipboard.writeText(payload);
+            setCopyStatus('Copiado!');
+            setTimeout(() => setCopyStatus(null), 2000);
+        } catch {
+            setCopyStatus('Falha ao copiar.');
+            setTimeout(() => setCopyStatus(null), 2000);
+        }
     };
 
     const handleAssign = async (assigneeId?: string) => {
@@ -328,12 +369,21 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                 <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-gray-200 bg-gray-50'}`}>
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logs anexados</p>
                                     {selectedTicket.logs && selectedTicket.logs.length > 0 && (
-                                        <button
-                                            onClick={() => setShowLogDetails(!showLogDetails)}
-                                            className="mt-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
-                                        >
-                                            {showLogDetails ? 'Ocultar detalhes' : 'Mostrar detalhes completos'}
-                                        </button>
+                                        <div className="mt-2 flex flex-wrap items-center gap-3">
+                                            <button
+                                                onClick={() => setShowLogDetails(!showLogDetails)}
+                                                className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
+                                            >
+                                                {showLogDetails ? 'Ocultar detalhes' : 'Mostrar detalhes completos'}
+                                            </button>
+                                            <button
+                                                onClick={handleCopyLogs}
+                                                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300"
+                                            >
+                                                <Copy size={12} /> Copiar detalhes
+                                            </button>
+                                            {copyStatus && <span className="text-[10px] text-slate-400">{copyStatus}</span>}
+                                        </div>
                                     )}
                                     {selectedTicket.logs && selectedTicket.logs.length > 0 ? (
                                         <ul className="mt-3 space-y-3 text-xs">
