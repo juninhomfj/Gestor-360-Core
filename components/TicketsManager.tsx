@@ -250,7 +250,8 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
             let normalized = (text || '').trim();
             if (!/^TL;DR:/i.test(normalized)) {
                 const firstLine = normalized.split('\n').find((line) => line.trim()) || 'Resumo indisponivel.';
-                normalized = `TL;DR: ${firstLine}\n\n${normalized}`;
+                const trimmed = firstLine.length > 200 ? `${firstLine.slice(0, 200)}...` : firstLine;
+                normalized = `TL;DR: ${trimmed}\n\n${normalized}`;
             }
             setAiOutput(normalized);
             bumpUsage(usage.today, usage.count);
