@@ -10,6 +10,7 @@ import SnowOverlay from './components/SnowOverlay';
 import { SYSTEM_MODULES } from './config/modulesCatalog';
 import ReportBugModal from './components/ReportBugModal';
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import InternalChatSystem from './components/InternalChatSystem';
 
 // Importação Dinâmica
@@ -1362,6 +1363,7 @@ const App: React.FC = () => {
 
             {/* ✅ Vercel Analytics (Vite/React) */}
             <Analytics />
+            <SpeedInsights />
         </Layout>
     );
 };
