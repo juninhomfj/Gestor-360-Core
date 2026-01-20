@@ -174,7 +174,7 @@ export type ChatHistoryResult = {
  */
 export const getMessages = async (userId: string, isAdmin: boolean): Promise<ChatHistoryResult> => {
     const all = await dbGetAll('internal_messages');
-    let filtered = all.filter(m => !m.deleted);
+    let filtered = all;
 
     if (!isAdmin) {
         filtered = filtered.filter(m =>
@@ -188,8 +188,7 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
         try {
             const baseQuery = supabase
                 .from('internal_messages')
-                .select('*')
-                .eq('deleted', false);
+                .select('*');
 
             const scopedQuery = isAdmin
                 ? baseQuery
@@ -235,7 +234,6 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
             ? [
                 query(
                     collection(db, "internal_messages"),
-                    where("deleted", "==", false),
                     orderBy("createdAt", "desc"),
                     limit(50)
                 )
@@ -245,7 +243,6 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
                     collection(db, "internal_messages"),
                     // Índice composto: recipientId + deleted + createdAt (desc)
                     where("recipientId", "in", [userId, "BROADCAST"]),
-                    where("deleted", "==", false),
                     orderBy("createdAt", "desc"),
                     limit(50)
                 ),
@@ -253,7 +250,6 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
                     collection(db, "internal_messages"),
                     // Índice composto: senderId + deleted + createdAt (desc)
                     where("senderId", "==", userId),
-                    where("deleted", "==", false),
                     orderBy("createdAt", "desc"),
                     limit(50)
                 )
@@ -415,7 +411,6 @@ export const getRoomMessages = async (roomId: string): Promise<InternalMessage[]
                 .from('internal_messages')
                 .select('*')
                 .eq('room_id', roomId)
-                .eq('deleted', false)
                 .order('timestamp', { ascending: false })
                 .limit(50);
             if (error) throw error;
@@ -431,7 +426,7 @@ export const getRoomMessages = async (roomId: string): Promise<InternalMessage[]
     }
 
     const local = await dbGetAll('internal_messages', (msg) => (msg as InternalMessage).roomId === roomId);
-    return local.filter(msg => !msg.deleted);
+    return local;
 };
 
 export type ChatRoom = {
@@ -560,5 +555,61 @@ export const markMessageRead = async (msgId: string, userId: string) => {
                 );
             } catch (e) {}
         }
+    }
+};
+
+export const updateMessageContent = async (messageId: string, content: string) => {
+    const existing = await dbGet('internal_messages', messageId);
+    if (existing) {
+        await dbPut('internal_messages', { ...existing, content });
+    }
+
+    const supabase = await getSupabase();
+    if (supabase) {
+        const { error } = await supabase
+            .from('internal_messages')
+            .update({ content })
+            .eq('id', messageId);
+        if (error) throw error;
+        return;
+    }
+
+    if (auth.currentUser) {
+        await safeSetDoc(
+            'internal_messages',
+            messageId,
+            { content } as any,
+            { merge: true },
+            { content } as any,
+            'UPDATE'
+        );
+    }
+};
+
+export const softDeleteMessage = async (messageId: string) => {
+    const existing = await dbGet('internal_messages', messageId);
+    if (existing) {
+        await dbPut('internal_messages', { ...existing, deleted: true });
+    }
+
+    const supabase = await getSupabase();
+    if (supabase) {
+        const { error } = await supabase
+            .from('internal_messages')
+            .update({ deleted: true })
+            .eq('id', messageId);
+        if (error) throw error;
+        return;
+    }
+
+    if (auth.currentUser) {
+        await safeSetDoc(
+            'internal_messages',
+            messageId,
+            { deleted: true } as any,
+            { merge: true },
+            { deleted: true } as any,
+            'UPDATE'
+        );
     }
 };

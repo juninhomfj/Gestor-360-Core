@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera } from 'lucide-react';
+import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, GalleryHorizontal, Bug, Sparkles, Play, Pause, Camera, Pencil, Trash2, Check, X as CloseIcon } from 'lucide-react';
 
 import { User, InternalMessage } from '../types';
 import {
@@ -249,6 +249,8 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [isRecordingVideo, setIsRecordingVideo] = useState(false);
   const [videoRecordingTime, setVideoRecordingTime] = useState(0);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   const [ticketCount, setTicketCount] = useState(0);
   const [isFallbackMode, setIsFallbackMode] = useState(false);
@@ -805,6 +807,63 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
     }
   };
 
+  const canViewDeleted = () => {
+    if (isAdmin) return true;
+    if (activeChatType === 'ROOM' && activeRoomId) {
+      const room = rooms.find((r) => r.id === activeRoomId);
+      return room?.role === 'moderator';
+    }
+    return false;
+  };
+
+  const canEditMessage = (msg: InternalMessage) => {
+    if (msg.deleted) return false;
+    const canModerate = canViewDeleted();
+    const isOwner = msg.senderId === currentUser.id;
+    const hasMedia = Boolean(msg.mediaType || msg.mediaUrl || (msg as any).image);
+    return (isOwner || canModerate) && !hasMedia;
+  };
+
+  const canDeleteMessage = (msg: InternalMessage) => {
+    if (msg.deleted) return false;
+    const canModerate = canViewDeleted();
+    const isOwner = msg.senderId === currentUser.id;
+    return isOwner || canModerate;
+  };
+
+  const startEditMessage = (msg: InternalMessage) => {
+    setEditingMessageId(msg.id);
+    setEditingContent(msg.content || '');
+  };
+
+  const cancelEditMessage = () => {
+    setEditingMessageId(null);
+    setEditingContent('');
+  };
+
+  const saveEditMessage = async (msg: InternalMessage) => {
+    const trimmed = editingContent.trim();
+    if (!trimmed) return;
+    try {
+      await updateMessageContent(msg.id, trimmed);
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, content: trimmed } : m)));
+      cancelEditMessage();
+      onNotify('SUCCESS', 'Mensagem atualizada.');
+    } catch (err: any) {
+      onNotify('ERROR', err?.message || 'Falha ao editar mensagem.');
+    }
+  };
+
+  const handleDeleteMessage = async (msg: InternalMessage) => {
+    try {
+      await softDeleteMessage(msg.id);
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, deleted: true } : m)));
+      onNotify('SUCCESS', 'Mensagem removida.');
+    } catch (err: any) {
+      onNotify('ERROR', err?.message || 'Falha ao remover mensagem.');
+    }
+  };
+
   const handleKlipySelect = (item: KlipyItem) => {
     const resolved = resolveKlipyPreviewUrl(item);
     if (!resolved.url) {
@@ -934,59 +993,122 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
             {messages.length === 0 ? (
               <div className="text-xs text-slate-400">Nenhuma mensagem ainda.</div>
             ) : (
-              messages.map((msg) => (
-                <div key={msg.id} className={`flex flex-col ${msg.senderId === currentUser.id ? 'items-end' : 'items-start'}`}>
-                  <div
-                    className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
-                      msg.senderId === currentUser.id ? 'bg-blue-600 text-white' : 'bg-slate-800 text-white'
-                    }`}
-                  >
-                    {msg.type === 'BUG_REPORT' && (
-                      <div className="flex items-center gap-2 mb-2 text-red-400 font-bold text-[10px] uppercase">
-                        <Bug size={14} /> Ticket de Suporte
-                      </div>
-                    )}
-                    <p className="text-sm">{msg.content}</p>
+              messages.map((msg) => {
+                const allowDeleted = canViewDeleted();
+                if (msg.deleted && !allowDeleted) return null;
+                const isOwn = msg.senderId === currentUser.id;
+                const isEditing = editingMessageId === msg.id;
+                const showEdit = canEditMessage(msg);
+                const showDelete = canDeleteMessage(msg);
 
-                    {(msg.mediaUrl || (msg as any).image) && msg.mediaType === 'audio' && (
-                      <AudioBubble
-                        url={msg.mediaUrl || (msg as any).image}
-                        darkMode={darkMode}
-                        audioCtxRef={audioCtxRef}
-                        waveformCacheRef={waveformCacheRef}
-                      />
-                    )}
+                return (
+                  <div key={msg.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
+                        isOwn ? 'bg-blue-600 text-white' : 'bg-slate-800 text-white'
+                      }`}
+                    >
+                      {msg.deleted ? (
+                        <p className="text-xs italic text-slate-300">Mensagem removida</p>
+                      ) : (
+                        <>
+                          {msg.type === 'BUG_REPORT' && (
+                            <div className="flex items-center gap-2 mb-2 text-red-400 font-bold text-[10px] uppercase">
+                              <Bug size={14} /> Ticket de Suporte
+                            </div>
+                          )}
 
-                    {(msg.mediaUrl || (msg as any).image) && msg.mediaType === 'video' && (
-                      <div className="mt-3 w-full">
-                        <div className="relative">
-                          <video
-                            className="rounded-xl w-full max-h-64"
-                            controls
-                            src={msg.mediaUrl || (msg as any).image}
-                          />
-                          <button
-                            onClick={() => openFloatingVideo(msg.mediaUrl || (msg as any).image)}
-                            className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-black uppercase bg-black/70 text-white"
-                          >
-                            Destacar
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                          {isEditing ? (
+                            <div className="flex flex-col gap-2">
+                              <textarea
+                                className="w-full rounded-xl p-2 text-sm text-slate-900"
+                                rows={3}
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                              />
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={cancelEditMessage}
+                                  className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-700 text-white"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={() => saveEditMessage(msg)}
+                                  className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase bg-emerald-500 text-white"
+                                >
+                                  Salvar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.content}</p>
+                          )}
 
-                    {(msg.mediaUrl || (msg as any).image) &&
-                      msg.mediaType !== 'audio' &&
-                      msg.mediaType !== 'video' && (
-                      <img
-                        src={msg.mediaUrl || (msg as any).image}
-                        alt="Mídia"
-                        className="mt-3 rounded-xl max-h-64 object-cover"
-                      />
-                    )}
+                          {(msg.mediaUrl || (msg as any).image) && msg.mediaType === 'audio' && (
+                            <AudioBubble
+                              url={msg.mediaUrl || (msg as any).image}
+                              darkMode={darkMode}
+                              audioCtxRef={audioCtxRef}
+                              waveformCacheRef={waveformCacheRef}
+                            />
+                          )}
+
+                          {(msg.mediaUrl || (msg as any).image) && msg.mediaType === 'video' && (
+                            <div className="mt-3 w-full">
+                              <div className="relative">
+                                <video
+                                  className="rounded-xl w-full max-h-56 object-cover"
+                                  controls
+                                  preload="metadata"
+                                  src={msg.mediaUrl || (msg as any).image}
+                                />
+                                <button
+                                  onClick={() => openFloatingVideo(msg.mediaUrl || (msg as any).image)}
+                                  className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-black uppercase bg-black/70 text-white"
+                                >
+                                  Destacar
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {(msg.mediaUrl || (msg as any).image) &&
+                            msg.mediaType !== 'audio' &&
+                            msg.mediaType !== 'video' && (
+                            <img
+                              src={msg.mediaUrl || (msg as any).image}
+                              alt="M?dia"
+                              className="mt-3 rounded-xl max-h-64 object-cover"
+                            />
+                          )}
+
+                          {!isEditing && (showEdit || showDelete) && (
+                            <div className="mt-2 flex items-center justify-end gap-2 text-[10px] font-black uppercase">
+                              {showEdit && (
+                                <button
+                                  onClick={() => startEditMessage(msg)}
+                                  className="px-2 py-1 rounded-full bg-slate-700 text-white flex items-center gap-1"
+                                >
+                                  <Pencil size={12} /> Editar
+                                </button>
+                              )}
+                              {showDelete && (
+                                <button
+                                  onClick={() => handleDeleteMessage(msg)}
+                                  className="px-2 py-1 rounded-full bg-rose-600 text-white flex items-center gap-1"
+                                >
+                                  <Trash2 size={12} /> Excluir
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
