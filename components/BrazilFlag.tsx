@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AudioService } from '../services/audioService';
 
 
 interface BrazilFlagProps {
@@ -74,7 +75,13 @@ const BrazilFlag: React.FC<BrazilFlagProps> = ({ className = '', showSoundToggle
             onClick={handleBrazilClick}
             title="Orgulhosamente Brasileiro (Clique!)"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 504" className="w-full h-full drop-shadow-sm rounded-[2px]">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 720 504"
+                role="img"
+                aria-label="Bandeira do Brasil"
+                className="w-full h-full drop-shadow-sm rounded-[2px]"
+            >
                 <rect width="720" height="504" fill="#009c3b" />
                 <path d="M72,252 L360,36 L648,252 L360,468 Z" fill="#ffdf00" />
                 <circle cx="360" cy="252" r="126" fill="#002776" />

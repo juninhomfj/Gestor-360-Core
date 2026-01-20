@@ -31,5 +31,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     envDir,
     envPrefix: ["VITE_"],
+    test: {
+      environment: "jsdom",
+      globals: true,
+      setupFiles: "./vitest.setup.ts"
+    }
   };
 });

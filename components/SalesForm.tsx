@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Sale, ProductType, Client, SaleStatus } from '../types';
+import { Sale, ProductType, Client, SaleStatus, CommissionRule } from '../types';
 import { getStoredTable, computeCommissionValues, getClients, createClientAutomatically, createReceivableFromSale, getSystemConfig, DEFAULT_SYSTEM_CONFIG } from '../services/logic';
 import { X, Calculator, AlertCircle, Truck, DollarSign, Clock, Users, Plus, Check } from 'lucide-react';
 import { auth } from '../services/firebase';
@@ -13,6 +13,8 @@ interface Props {
   onSave?: (sale: Sale) => Promise<void>;
   initialData?: Sale | null;
   isLocked?: boolean;
+  rulesBasic?: CommissionRule[];
+  rulesNatal?: CommissionRule[];
 }
 
 const SalesForm: React.FC<Props> = ({
@@ -21,7 +23,9 @@ const SalesForm: React.FC<Props> = ({
   onSaved,
   onSave,
   initialData,
-  isLocked
+  isLocked,
+  rulesBasic = [],
+  rulesNatal = []
 }) => {
   const [availableClients, setAvailableClients] = useState<Client[]>([]);
   const [clientName, setClientName] = useState('');
@@ -32,6 +36,7 @@ const SalesForm: React.FC<Props> = ({
   const [valueProposed, setValueProposed] = useState(0);
   const [valueSold, setValueSold] = useState(0);
   const [margin, setMargin] = useState(0);
+  const [quoteNumber, setQuoteNumber] = useState('');
   const [quoteDate, setQuoteDate] = useState('');
   const [closeDate, setCloseDate] = useState('');
   const [billDate, setBillDate] = useState('');
@@ -70,6 +75,7 @@ const SalesForm: React.FC<Props> = ({
         setValueProposed(0);
         setValueSold(0);
         setMargin(0);
+        setQuoteNumber('');
         setBillDate('');
         setObservations('');
         setTrackingCode('');
@@ -86,6 +92,7 @@ const SalesForm: React.FC<Props> = ({
     setValueProposed(initialData.valueProposed);
     setValueSold(initialData.valueSold || 0);
     setMargin(initialData.marginPercent || 0);
+    setQuoteNumber(initialData.quoteNumber || '');
     setQuoteDate(initialData.quoteDate || '');
     setCloseDate(initialData.completionDate || '');
     setBillDate(initialData.date || '');
@@ -108,18 +115,38 @@ const SalesForm: React.FC<Props> = ({
     }
   }, [paymentMethods, paymentMethod]);
 
+  const activeRules = useMemo(
+    () => (productType === ProductType.NATAL ? rulesNatal : rulesBasic),
+    [productType, rulesBasic, rulesNatal]
+  );
+
   useEffect(() => {
+    let isActive = true;
     const calc = async () => {
+      const fallbackRules = activeRules?.length ? activeRules : [];
+      const { commissionBase: baseCached, commissionValue: valCached, rateUsed: rateCached } =
+        computeCommissionValues(quantity, valueProposed, margin, fallbackRules);
+      if (fallbackRules.length > 0) {
+        setCommissionBase(baseCached);
+        setCommissionValue(valCached);
+        setCommissionRate(rateCached);
+      }
+
       const rules = await getStoredTable(productType);
+      if (!isActive) return;
+      const resolvedRules = rules.length > 0 ? rules : fallbackRules;
       const { commissionBase: base, commissionValue: val, rateUsed } =
-        computeCommissionValues(quantity, valueProposed, margin, rules);
+        computeCommissionValues(quantity, valueProposed, margin, resolvedRules);
 
       setCommissionBase(base);
       setCommissionValue(val);
       setCommissionRate(rateUsed);
     };
     calc();
-  }, [quantity, valueProposed, margin, productType]);
+    return () => {
+      isActive = false;
+    };
+  }, [quantity, valueProposed, margin, productType, activeRules]);
 
   const filteredClients = useMemo(() => {
       if (!clientName) return [];
@@ -173,6 +200,7 @@ const SalesForm: React.FC<Props> = ({
       valueProposed,
       valueSold,
       marginPercent: margin,
+      quoteNumber,
       quoteDate,
       completionDate: closeDate || new Date().toISOString().split('T')[0],
       date: finalBillDate,
@@ -339,7 +367,17 @@ const SalesForm: React.FC<Props> = ({
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Orçamento (R$)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Número do Orçamento</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className={inputClasses}
+                  value={quoteNumber}
+                  onChange={e => setQuoteNumber(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Proposto (R$)</label>
                 <input
                   type="number"
                   className={inputClasses}
