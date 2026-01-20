@@ -253,6 +253,10 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                 const trimmed = firstLine.length > 200 ? `${firstLine.slice(0, 200)}...` : firstLine;
                 normalized = `TL;DR: ${trimmed}\n\n${normalized}`;
             }
+            const maxLen = 1200;
+            if (normalized.length > maxLen) {
+                normalized = `${normalized.slice(0, maxLen)}...\n\n(Resumo truncado para manter leitura facil)`;
+            }
             setAiOutput(normalized);
             bumpUsage(usage.today, usage.count);
         } catch (err: any) {
