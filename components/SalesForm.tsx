@@ -51,6 +51,7 @@ const SalesForm: React.FC<Props> = ({
   const [commissionValue, setCommissionValue] = useState(0);
   const [commissionBase, setCommissionBase] = useState(0);
   const [showClientList, setShowClientList] = useState(false);
+  const parseNumericInput = (value: string) => (value == "" ? 0 : Number(value));
   const commissionRatePercent = useMemo(() => {
     if (!commissionRate) return 0;
     return commissionRate <= 1 ? commissionRate * 100 : commissionRate;
@@ -356,8 +357,8 @@ const SalesForm: React.FC<Props> = ({
                   <input
                     type="number"
                     className={inputClasses}
-                    value={quantity}
-                    onChange={e => setQuantity(Number(e.target.value))}
+                    value={quantity === 0 ? "" : quantity}
+                    onChange={e => setQuantity(parseNumericInput(e.target.value))}
                   />
                 </div>
                 <div>
@@ -365,8 +366,8 @@ const SalesForm: React.FC<Props> = ({
                   <input
                     type="number"
                     className={inputClasses}
-                    value={margin}
-                    onChange={e => setMargin(Number(e.target.value))}
+                    value={margin === 0 ? "" : margin}
+                    onChange={e => setMargin(parseNumericInput(e.target.value))}
                   />
                   <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
                     {commissionRatePercent > 0
@@ -390,8 +391,8 @@ const SalesForm: React.FC<Props> = ({
                 <input
                   type="number"
                   className={inputClasses}
-                  value={valueProposed}
-                  onChange={e => setValueProposed(Number(e.target.value))}
+                  value={valueProposed === 0 ? "" : valueProposed}
+                  onChange={e => setValueProposed(parseNumericInput(e.target.value))}
                 />
               </div>
               <div>
@@ -401,8 +402,8 @@ const SalesForm: React.FC<Props> = ({
                    <input
                     type="number"
                     className={`${inputClasses} pl-10 border-indigo-900/40`}
-                    value={valueSold}
-                    onChange={e => setValueSold(Number(e.target.value))}
+                    value={valueSold === 0 ? "" : valueSold}
+                    onChange={e => setValueSold(parseNumericInput(e.target.value))}
                   />
                 </div>
               </div>
