@@ -241,3 +241,12 @@ export const dbDelete = async <StoreName extends keyof Gestor360DB>(
     console.error(`[DB] Error in dbDelete from ${String(storeName)}:`, e);
   }
 };
+
+export const dbClearStore = async <StoreName extends keyof Gestor360DB>(storeName: StoreName) => {
+  try {
+    const db = await initDB();
+    await db.clear(storeName as any);
+  } catch (e) {
+    console.error(`[DB] Error in dbClearStore for ${String(storeName)}:`, e);
+  }
+};

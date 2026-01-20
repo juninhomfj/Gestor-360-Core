@@ -21,7 +21,8 @@ import {
   dbGetAll,
   initDB,
   dbDelete,
-  dbGet
+  dbGet,
+  dbClearStore
 } from "../storage/db";
 import { sanitizeForFirestore } from "../utils/firestoreUtils";
 import * as XLSX from "xlsx";
@@ -427,7 +428,13 @@ export const computeCommissionValues = (
   const rule = (rules || []).find(
     (r) => margin >= (r.minPercent || 0) && (r.maxPercent === null || margin <= (r.maxPercent || 0))
   );
-  const rateUsed = rule ? (rule.commissionRate || 0) : 0;
+  if (!rule) {
+    Logger.warn("Audit: Nenhuma faixa de comissão encontrada para a margem informada.", {
+      margin,
+      rulesCount: rules?.length ?? 0
+    });
+  }
+  const rateUsed = rule ? ensureNumber(rule.commissionRate, 0) : 0;
   return { commissionBase, commissionValue: commissionBase * rateUsed, rateUsed };
 };
 
@@ -1247,6 +1254,23 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
   if (!uid) throw new Error("Unauthenticated");
 
   await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables", "transactions"]);
+  const localClearTables = [
+    "sales",
+    "clients",
+    "sales_tasks",
+    "receivables",
+    "transactions",
+    "accounts",
+    "cards",
+    "categories",
+    "goals",
+    "challenges",
+    "challenge_cells",
+    "sync_queue"
+  ] as const;
+  for (const table of localClearTables) {
+    await dbClearStore(table as any);
+  }
 
   const nowIso = new Date().toISOString();
   const date = nowIso.split("T")[0];
