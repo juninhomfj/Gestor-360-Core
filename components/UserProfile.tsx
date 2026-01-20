@@ -70,8 +70,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
       setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
       setTimeout(() => setMessage(null), 3000);
     } catch (error: any) {
+      const msg = String(error?.message || '').toLowerCase();
+      const isPermission = error?.code === 'permission-denied' || msg.includes('missing or insufficient permissions');
       console.error("Erro ao salvar perfil:", error);
-      setMessage({ type: 'error', text: 'Erro ao salvar alterações.' });
+      setMessage({
+        type: 'error',
+        text: isPermission ? 'Sem permiss?o para atualizar o perfil. Verifique regras/perfil.' : 'Erro ao salvar altera??es.'
+      });
     } finally {
       setIsSaving(false);
     }

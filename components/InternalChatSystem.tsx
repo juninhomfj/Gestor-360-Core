@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, Sticker, GalleryHorizontal, Bug } from 'lucide-react';
+import { Send, Image as ImageIcon, X, Users, BarChart, Plus, Mic, Sticker, GalleryHorizontal, Bug, Sparkles } from 'lucide-react';
 
 import { User, InternalMessage } from '../types';
 import {
@@ -15,6 +15,7 @@ import {
 import { getTicketStats } from '../services/logic';
 import { listUsers } from '../services/auth';
 import { fileToBase64 } from '../utils/fileHelper';
+import { klipySearch, klipyTrending, resolveKlipyPreviewUrl, KlipyItem } from '../services/klipy';
 
 interface InternalChatSystemProps {
   currentUser: User;
@@ -52,6 +53,15 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
 
   const [ticketCount, setTicketCount] = useState(0);
   const [isFallbackMode, setIsFallbackMode] = useState(false);
+
+  const [klipyOpen, setKlipyOpen] = useState(false);
+  const [klipyTab, setKlipyTab] = useState<'gifs' | 'stickers' | 'emojis'>('gifs');
+  const [klipyItems, setKlipyItems] = useState<KlipyItem[]>([]);
+  const [klipyQuery, setKlipyQuery] = useState('');
+  const [klipyLoading, setKlipyLoading] = useState(false);
+  const [klipyError, setKlipyError] = useState<string | null>(null);
+  const [klipyHasNext, setKlipyHasNext] = useState(false);
+  const [klipyPage, setKlipyPage] = useState(1);
 
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
@@ -238,6 +248,10 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
       setSelectedMedia({ url: dataUrl, type: 'audio' });
       return;
     }
+    if (file.type.startsWith('video/')) {
+      setSelectedMedia({ url: dataUrl, type: 'video' });
+      return;
+    }
     if (file.type === 'image/gif') {
       setSelectedMedia({ url: dataUrl, type: 'gif' });
       return;
@@ -248,6 +262,35 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
     }
     setSelectedMedia({ url: dataUrl, type: 'other' });
   };
+
+  const loadKlipy = async (page = 1, append = false) => {
+    if (!currentUser?.id) return;
+    setKlipyLoading(true);
+    setKlipyError(null);
+    try {
+      const result = klipyQuery.trim()
+        ? await klipySearch(klipyTab, currentUser.id, klipyQuery.trim(), page)
+        : await klipyTrending(klipyTab, currentUser.id, page);
+      setKlipyHasNext(result.hasNext);
+      setKlipyPage(result.page);
+      setKlipyItems((prev) => (append ? [...prev, ...result.items] : result.items));
+    } catch (err: any) {
+      setKlipyItems([]);
+      setKlipyError(err?.message || 'Falha ao carregar conteúdo do Klipy.');
+    } finally {
+      setKlipyLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!klipyOpen) return;
+    const delay = klipyQuery.trim() ? 350 : 0;
+    const handle = setTimeout(() => {
+      loadKlipy(1, false);
+    }, delay);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [klipyOpen, klipyTab, klipyQuery]);
 
   const handleRoomCreate = async () => {
     if (!roomName.trim()) return;
@@ -281,6 +324,26 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
         onNotify('ERROR', 'Falha ao criar grupo.');
       }
     }
+  };
+
+  const handleKlipySelect = (item: KlipyItem) => {
+    const resolved = resolveKlipyPreviewUrl(item);
+    if (!resolved.url) {
+      onNotify('ERROR', 'Falha ao carregar mídia do Klipy.');
+      return;
+    }
+    const isVideo = resolved.format === 'mp4' || resolved.format === 'webm';
+    const mediaType: InternalMessage['mediaType'] =
+      klipyTab === 'gifs'
+        ? isVideo
+          ? 'video'
+          : 'gif'
+        : klipyTab === 'stickers'
+          ? 'sticker'
+          : 'image';
+    setSelectedMedia({ url: resolved.url, type: mediaType });
+    setKlipyOpen(false);
+    setKlipyQuery('');
   };
 
   if (!isOpen) return null;
@@ -410,7 +473,13 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                       <audio className="mt-3 w-full" controls src={msg.mediaUrl || (msg as any).image} />
                     )}
 
-                    {(msg.mediaUrl || (msg as any).image) && msg.mediaType !== 'audio' && (
+                    {(msg.mediaUrl || (msg as any).image) && msg.mediaType === 'video' && (
+                      <video className="mt-3 w-full rounded-xl" controls src={msg.mediaUrl || (msg as any).image} />
+                    )}
+
+                    {(msg.mediaUrl || (msg as any).image) &&
+                      msg.mediaType !== 'audio' &&
+                      msg.mediaType !== 'video' && (
                       <img
                         src={msg.mediaUrl || (msg as any).image}
                         alt="Mídia"
@@ -439,6 +508,72 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
               </div>
             )}
 
+            {klipyOpen && (
+              <div className={`mb-3 p-3 rounded-xl border ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200'}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div className="flex gap-2">
+                    {(['gifs', 'stickers', 'emojis'] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setKlipyTab(tab)}
+                        className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${klipyTab === tab ? 'bg-emerald-600 text-white' : darkMode ? 'bg-slate-800 text-slate-300' : 'bg-gray-100 text-gray-600'}`}
+                      >
+                        {tab === 'gifs' ? 'GIFs' : tab === 'stickers' ? 'Stickers' : 'Emojis'}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                    Powered by KLIPY
+                  </span>
+                </div>
+
+                <input
+                  className={`w-full p-2.5 rounded-lg outline-none text-sm ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}
+                  placeholder="Search KLIPY"
+                  value={klipyQuery}
+                  onChange={(e) => setKlipyQuery(e.target.value)}
+                />
+
+                {klipyError && (
+                  <div className="mt-2 text-xs text-red-400 font-semibold">{klipyError}</div>
+                )}
+
+                <div className="mt-3 grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-56 overflow-y-auto">
+                  {klipyItems.map((item) => {
+                    const preview = resolveKlipyPreviewUrl(item);
+                    if (!preview.url) return null;
+                    return (
+                      <button
+                        key={item.slug || item.id}
+                        onClick={() => handleKlipySelect(item)}
+                        className="rounded-lg overflow-hidden border border-transparent hover:border-emerald-500/60"
+                        title={item.title || item.slug}
+                      >
+                        <img src={preview.url} alt={item.title || 'Klipy'} className="w-full h-full object-cover" />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {klipyLoading && (
+                  <div className="mt-2 text-xs text-slate-400">Carregando...</div>
+                )}
+
+                {!klipyLoading && klipyItems.length === 0 && (
+                  <div className="mt-2 text-xs text-slate-400">Nenhum resultado encontrado.</div>
+                )}
+
+                {klipyHasNext && !klipyLoading && (
+                  <button
+                    onClick={() => loadKlipy(klipyPage + 1, true)}
+                    className="mt-3 w-full px-3 py-2 rounded-lg text-xs font-black uppercase tracking-widest bg-emerald-600 text-white"
+                  >
+                    Carregar mais
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2">
               <input
                 className={`flex-1 p-3 rounded-xl outline-none ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}
@@ -450,7 +585,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
 
               <input
                 type="file"
-                accept="image/*,audio/*"
+                accept="image/*,audio/*,video/*"
                 ref={fileInputRef}
                 className="hidden"
                 onChange={(e) => {
@@ -466,6 +601,14 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                 title="Sticker mode"
               >
                 <Sticker size={20} />
+              </button>
+
+              <button
+                onClick={() => setKlipyOpen((prev) => !prev)}
+                className={`p-3 rounded-xl ${klipyOpen ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-200'}`}
+                title="Klipy"
+              >
+                <Sparkles size={20} />
               </button>
 
               <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-slate-700 text-white rounded-xl" title="Anexar">

@@ -215,6 +215,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   };
 
   const handleSaveSystemSettings = async () => {
+      if (!isDev) {
+          onNotify('ERROR', 'Somente DEV pode salvar configura??es globais do sistema.');
+          return;
+      }
       const newConfig: any = { 
           ...systemConfig, 
           notificationSounds: {
@@ -229,15 +233,27 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
       };
 
       setSystemConfig(newConfig);
-      await saveSystemConfig(newConfig);
-      onNotify('SUCCESS', 'Configurações de sistema atualizadas!');
-      Logger.info('Config: Sistema atualizado.', { userId: currentUser.id });
+      try {
+          await saveSystemConfig(newConfig);
+          onNotify('SUCCESS', 'Configura??es de sistema atualizadas!');
+          Logger.info('Config: Sistema atualizado.', { userId: currentUser.id });
+      } catch (error: any) {
+          onNotify('ERROR', error?.message || 'Falha ao salvar configura??es do sistema.');
+      }
   };
 
   const handleSaveCommissionSettings = async () => {
-      await saveSystemConfig(systemConfig);
-      onNotify('SUCCESS', 'Configurações de comissão atualizadas!');
-      Logger.info('Config: Comissões atualizadas.', { userId: currentUser.id });
+      if (!isDev) {
+          onNotify('ERROR', 'Somente DEV pode salvar ajustes globais de comiss?o.');
+          return;
+      }
+      try {
+          await saveSystemConfig(systemConfig);
+          onNotify('SUCCESS', 'Configura??es de comiss?o atualizadas!');
+          Logger.info('Config: Comiss?es atualizadas.', { userId: currentUser.id });
+      } catch (error: any) {
+          onNotify('ERROR', error?.message || 'Falha ao salvar configura??es de comiss?o.');
+      }
   };
 
   const handleRunSyncDiagnostics = async () => {
