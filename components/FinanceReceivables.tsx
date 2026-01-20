@@ -423,18 +423,20 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                                         {badge.label}
                                     </button>
                                 </td>
-                                <td className="px-4 py-3 text-center flex justify-center gap-2">
-                                    {r.status === 'PENDING' && (
-                                        <button onClick={() => openEffectiveModal(r)} className="text-emerald-500 hover:text-emerald-400 p-1.5 rounded hover:bg-emerald-500/10 transition-colors" title="Efetivar Rápido">
-                                            <CheckCircle size={16} />
+                                <td className="px-4 py-3 text-center">
+                                    <div className="flex justify-center gap-2">
+                                        {r.status === 'PENDING' && (
+                                            <button onClick={() => openEffectiveModal(r)} className="text-emerald-500 hover:text-emerald-400 p-1.5 rounded hover:bg-emerald-500/10 transition-colors" title="Efetivar Rápido">
+                                                <CheckCircle size={16} />
+                                            </button>
+                                        )}
+                                        <button onClick={() => openEditModal(r)} className="text-blue-400 hover:text-blue-500 p-1.5 rounded hover:bg-blue-50/10 transition-colors" title="Editar">
+                                            <Edit2 size={16} />
                                         </button>
-                                    )}
-                                    <button onClick={() => openEditModal(r)} className="text-blue-400 hover:text-blue-500 p-1.5 rounded hover:bg-blue-50/10 transition-colors" title="Editar">
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button onClick={() => handleDelete(r.id)} className="text-gray-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50/10 transition-colors" title="Excluir">
-                                        <Trash2 size={16} />
-                                    </button>
+                                        <button onClick={() => handleDelete(r.id)} className="text-gray-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50/10 transition-colors" title="Excluir">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         );

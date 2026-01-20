@@ -21,7 +21,8 @@ import {
   dbGetAll,
   initDB,
   dbDelete,
-  dbGet
+  dbGet,
+  dbClearStore
 } from "../storage/db";
 import { sanitizeForFirestore } from "../utils/firestoreUtils";
 import * as XLSX from "xlsx";
@@ -424,10 +425,32 @@ export const computeCommissionValues = (
   rules: CommissionRule[]
 ) => {
   const commissionBase = (quantity || 0) * (valueProposed || 0);
-  const rule = (rules || []).find(
-    (r) => margin >= (r.minPercent || 0) && (r.maxPercent === null || margin <= (r.maxPercent || 0))
-  );
-  const rateUsed = rule ? (rule.commissionRate || 0) : 0;
+  const normalizedRules = (rules || []).map((r) => {
+    const minValue = r.minPercent === null ? Number.NEGATIVE_INFINITY : r.minPercent;
+    const maxValue = r.maxPercent === null ? Number.POSITIVE_INFINITY : r.maxPercent;
+    return { rule: r, minValue, maxValue };
+  });
+  const sortedRules = normalizedRules.sort((a, b) => a.minValue - b.minValue);
+  const overlap = sortedRules.find((item, index) => {
+    if (index === 0) return false;
+    const prev = sortedRules[index - 1];
+    return item.minValue <= prev.maxValue;
+  });
+  if (overlap) {
+    Logger.error("Audit: Faixas de comissão conflitantes encontradas. Verifique duplicidades ou sobreposição.", {
+      margin,
+      rulesCount: rules?.length ?? 0
+    });
+    return { commissionBase, commissionValue: 0, rateUsed: 0 };
+  }
+  const rule = sortedRules.find((r) => margin >= r.minValue && margin <= r.maxValue)?.rule;
+  if (!rule) {
+    Logger.warn("Audit: Nenhuma faixa de comissão encontrada para a margem informada.", {
+      margin,
+      rulesCount: rules?.length ?? 0
+    });
+  }
+  const rateUsed = rule ? ensureNumber(rule.commissionRate, 0) : 0;
   return { commissionBase, commissionValue: commissionBase * rateUsed, rateUsed };
 };
 
@@ -474,27 +497,34 @@ export const subscribeToCommissionRules = (
         const docData = docSnap.data();
         if (Array.isArray(docData?.tiers)) {
           docData.tiers.forEach((t: any, idx: number) => {
+            const minValue = t.min ?? t.minPercent;
+            const maxValue = t.max ?? t.maxPercent;
             rules.push({
               id: `${docSnap.id}_${idx}`,
-              minPercent: ensureNumber(t.min ?? t.minPercent),
-              maxPercent: t.max === null ? null : ensureNumber(t.max ?? t.maxPercent),
+              minPercent: minValue === null || minValue === undefined ? null : ensureNumber(minValue),
+              maxPercent: maxValue === null || maxValue === undefined ? null : ensureNumber(maxValue),
               commissionRate: ensureNumber(t.rate ?? t.commissionRate),
               isActive: true
             });
           });
         } else {
+          const minValue = docData.min ?? docData.minPercent;
+          const maxValue = docData.max ?? docData.maxPercent;
           rules.push({
             id: docSnap.id,
-            minPercent: ensureNumber(docData.min ?? docData.minPercent),
-            maxPercent:
-              docData.max === null || docData.maxPercent === null ? null : ensureNumber(docData.max ?? docData.maxPercent),
+            minPercent: minValue === null || minValue === undefined ? null : ensureNumber(minValue),
+            maxPercent: maxValue === null || maxValue === undefined ? null : ensureNumber(maxValue),
             commissionRate: ensureNumber(docData.rate ?? docData.commissionRate),
             isActive: true
           });
         }
       });
 
-      callback(rules.sort((a, b) => a.minPercent - b.minPercent));
+      callback(
+        rules.sort(
+          (a, b) => (a.minPercent ?? Number.NEGATIVE_INFINITY) - (b.minPercent ?? Number.NEGATIVE_INFINITY)
+        )
+      );
     },
     (error: any) => {
       console.error("[Logic] Tabela de comissão erro no onSnapshot:", error);
@@ -525,27 +555,32 @@ export const getStoredTable = async (type: ProductType): Promise<CommissionRule[
         const docData = docSnap.data();
         if (Array.isArray(docData?.tiers)) {
           docData.tiers.forEach((t: any, idx: number) => {
+            const minValue = t.min ?? t.minPercent;
+            const maxValue = t.max ?? t.maxPercent;
             rules.push({
               id: `${docSnap.id}_${idx}`,
-              minPercent: ensureNumber(t.min ?? t.minPercent),
-              maxPercent: t.max === null ? null : ensureNumber(t.max ?? t.maxPercent),
+              minPercent: minValue === null || minValue === undefined ? null : ensureNumber(minValue),
+              maxPercent: maxValue === null || maxValue === undefined ? null : ensureNumber(maxValue),
               commissionRate: ensureNumber(t.rate ?? t.commissionRate),
               isActive: true
             });
           });
         } else {
+          const minValue = docData.min ?? docData.minPercent;
+          const maxValue = docData.max ?? docData.maxPercent;
           rules.push({
             id: docSnap.id,
-            minPercent: ensureNumber(docData.min ?? docData.minPercent),
-            maxPercent:
-              docData.max === null || docData.maxPercent === null ? null : ensureNumber(docData.max ?? docData.maxPercent),
+            minPercent: minValue === null || minValue === undefined ? null : ensureNumber(minValue),
+            maxPercent: maxValue === null || maxValue === undefined ? null : ensureNumber(maxValue),
             commissionRate: ensureNumber(docData.rate ?? docData.commissionRate),
             isActive: true
           });
         }
       });
 
-      const normalized = rules.sort((a, b) => a.minPercent - b.minPercent);
+      const normalized = rules.sort(
+        (a, b) => (a.minPercent ?? Number.NEGATIVE_INFINITY) - (b.minPercent ?? Number.NEGATIVE_INFINITY)
+      );
       await dbBulkPut(storeName as any, normalized);
       return normalized;
     }
@@ -558,7 +593,12 @@ export const getStoredTable = async (type: ProductType): Promise<CommissionRule[
   }
 
   const cached = await dbGetAll(storeName as any);
-  return (cached || []).filter((r: any) => r.isActive).sort((a: any, b: any) => a.minPercent - b.minPercent);
+  return (cached || [])
+    .filter((r: any) => r.isActive)
+    .sort(
+      (a: any, b: any) =>
+        (a.minPercent ?? Number.NEGATIVE_INFINITY) - (b.minPercent ?? Number.NEGATIVE_INFINITY)
+    );
 };
 
 export const saveCommissionRules = async (type: ProductType, rules: CommissionRule[]) => {
@@ -578,7 +618,7 @@ export const saveCommissionRules = async (type: ProductType, rules: CommissionRu
         createdAt: serverTimestamp(),
         createdAtLocal: new Date().toISOString(),
         createdBy: auth.currentUser?.uid,
-        min: Number(rule.minPercent),
+        min: rule.minPercent === null ? null : Number(rule.minPercent),
         max: rule.maxPercent === null ? null : Number(rule.maxPercent),
         rate: Number(rule.commissionRate)
       })
@@ -1247,6 +1287,23 @@ export const resetSalesToSoftDeletedSeed = async (seed?: Partial<Sale>): Promise
   if (!uid) throw new Error("Unauthenticated");
 
   await atomicClearUserTables(uid, ["sales", "clients", "sales_tasks", "receivables", "transactions"]);
+  const localClearTables = [
+    "sales",
+    "clients",
+    "sales_tasks",
+    "receivables",
+    "transactions",
+    "accounts",
+    "cards",
+    "categories",
+    "goals",
+    "challenges",
+    "challenge_cells",
+    "sync_queue"
+  ] as const;
+  for (const table of localClearTables) {
+    await dbClearStore(table as any);
+  }
 
   const nowIso = new Date().toISOString();
   const date = nowIso.split("T")[0];
