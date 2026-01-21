@@ -5,8 +5,9 @@ const lockPath = new URL("../commission.lock", import.meta.url);
 const targetPath = new URL("../services/logic.ts", import.meta.url);
 
 const hashFile = async (url) => {
-  const content = await readFile(url);
-  return createHash("sha256").update(content).digest("hex");
+  const content = await readFile(url, "utf8");
+  const normalized = content.replace(/\r\n/g, "\n");
+  return createHash("sha256").update(normalized).digest("hex");
 };
 
 try {
