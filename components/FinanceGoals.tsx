@@ -87,14 +87,14 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 className={`text-3xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Metas Financeiras</h1>
             <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Acompanhe seus objetivos</p>
         </div>
         <button 
             onClick={() => openForm()}
-            className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-blue-500/20 flex items-center font-medium"
+            className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-blue-500/20 flex items-center font-medium w-full sm:w-auto"
         >
             <Plus size={20} className="mr-2" /> Nova Meta
         </button>
@@ -108,7 +108,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                       <div>
                           <label className={`text-sm mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Nome</label>
                           <input 
-                            className={`w-full border rounded p-2 ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`} 
+                            className={`w-full border rounded p-2 ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`} 
                             value={name}
                             onChange={e => setName(e.target.value)}
                           />
@@ -118,7 +118,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                           <input 
                             type="number"
                             step="0.01"
-                            className={`w-full border rounded p-2 ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`} 
+                            className={`w-full border rounded p-2 ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`} 
                             value={targetValue}
                             onChange={e => setTargetValue(e.target.value)}
                           />
@@ -185,7 +185,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                                       <input 
                                         type="number" 
                                         placeholder="Valor" aria-label="Valor" 
-                                        className={`border rounded px-2 w-full ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                        className={`border rounded px-2 w-full ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                                         value={amountToAdd}
                                         onChange={e => setAmountToAdd(e.target.value)}
                                       />

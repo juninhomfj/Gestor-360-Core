@@ -85,7 +85,7 @@ const FinanceDistribution: React.FC<FinanceDistributionProps> = ({ receivables, 
   };
 
   const bgClass = darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-800';
-  const inputClass = darkMode ? 'bg-black border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900';
+  const inputClass = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   return (
     <div className="space-y-6">
