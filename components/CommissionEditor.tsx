@@ -200,13 +200,18 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
           <div className="flex gap-2">
             {!readOnly && isAdminOrDev && (
                 <>
-                    <label className="p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl text-gray-500 transition-all">
+                    <label
+                        className="p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl text-gray-500 transition-all"
+                        title="Importar tabela JSON"
+                    >
                         <Upload size={20} />
                         <input type="file" className="hidden" accept=".json" onChange={handleImportJson} />
                     </label>
                     <button
                         onClick={handleExportJson}
                         className="p-3 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl text-gray-500 transition-all"
+                        title="Exportar tabela JSON"
+                        aria-label="Exportar tabela JSON"
                     >
                         <Download size={20} />
                     </button>
@@ -236,6 +241,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                     value={rule.minPercent} 
                                     onChange={(e) => handleFieldChange(rule.id, 'minPercent', parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
+                                    aria-label="Margem mínima"
+                                    title="Margem mínima"
                                 />
                             </td>
                             <td className="p-4">
@@ -246,6 +253,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                     value={rule.maxPercent === null ? '' : rule.maxPercent} 
                                     onChange={(e) => handleFieldChange(rule.id, 'maxPercent', e.target.value === '' ? null : parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
+                                    aria-label="Margem máxima"
+                                    title="Margem máxima"
                                 />
                             </td>
                             <td className="p-4">
@@ -256,6 +265,9 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                         value={rule.commissionRate === 0 ? "" : rule.commissionRate} 
                                         onChange={(e) => handleFieldChange(rule.id, 'commissionRate', parseNumericInput(e.target.value))}
                                         disabled={readOnly || !isAdminOrDev}
+                                        aria-label="Comissão percentual"
+                                        title="Comissão percentual"
+                                        placeholder="0"
                                     />
                                     <span className="text-[10px] font-black text-gray-400">%</span>
                                 </div>
@@ -265,6 +277,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                     <button 
                                         onClick={() => deactivateRow(rule.id)}
                                         className="p-2 text-red-400 hover:text-red-600 rounded-lg transition-all"
+                                        title="Remover faixa de comissão"
+                                        aria-label="Remover faixa de comissão"
                                     >
                                         <Trash2 size={16} />
                                     </button>
