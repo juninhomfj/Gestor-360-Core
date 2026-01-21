@@ -234,7 +234,7 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
   // --- STYLES ---
   const textClass = darkMode ? 'text-slate-200' : 'text-gray-900';
   const containerClass = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200 shadow-sm';
-  const inputClass = darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900';
+  const inputClass = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   const PersonTypeToggle = ({ value, onChange }: { value: PersonType, onChange: (v: PersonType) => void }) => (
       <div className="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1 gap-1 dark:text-slate-100">
@@ -336,7 +336,7 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                                 className={`w-full p-2 rounded border ${inputClass}`}
                                 value={newAccName} onChange={e => setNewAccName(e.target.value)}
                             />
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <select 
                                     className={`flex-1 p-2 rounded border ${inputClass}`}
                                     value={newAccType} onChange={e => setNewAccType(e.target.value as any)}

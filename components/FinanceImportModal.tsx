@@ -77,7 +77,7 @@ const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose
 
   const bgClass = darkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900';
   const borderClass = darkMode ? 'border-slate-700' : 'border-gray-200';
-  const inputBg = darkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900';
+  const inputBg = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-2 md:p-4 backdrop-blur-sm">

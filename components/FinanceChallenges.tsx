@@ -220,7 +220,7 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                       <div className="space-y-4">
                           <div>
                               <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Nome do Desafio</label>
-                              <input className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
+                              <input className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-200 text-gray-900 focus:border-purple-500'}`} 
                                     value={newChalData.name} onChange={e => setNewChalData({...newChalData, name: e.target.value})} placeholder="Ex: Viagem 2026"/>
                           </div>
                           
@@ -229,13 +229,13 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                                   <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Valor Meta (R$)</label>
                                   <div className="relative">
                                     <span className="absolute left-3 top-3 text-slate-500">R$</span>
-                                    <input type="number" className={`w-full border rounded p-3 pl-10 outline-none font-bold ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
+                                    <input type="number" className={`w-full border rounded p-3 pl-10 outline-none font-bold ${darkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-200 text-gray-900 focus:border-purple-500'}`} 
                                             value={newChalData.target === 0 ? "" : newChalData.target} onChange={e => setNewChalData({...newChalData, target: parseNumericInput(e.target.value)})}/>
                                   </div>
                               </div>
                               <div>
                                   <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quantidade de Depósitos</label>
-                                  <input type="number" className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
+                                  <input type="number" className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-200 text-gray-900 focus:border-purple-500'}`} 
                                         value={newChalData.count === 0 ? "" : newChalData.count} onChange={e => setNewChalData({...newChalData, count: parseNumericInput(e.target.value)})}/>
                               </div>
                           </div>
@@ -266,21 +266,21 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                               <div className="grid grid-cols-3 gap-3">
                                   <button 
                                     onClick={() => setNewChalData({...newChalData, model: 'LINEAR'})}
-                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'LINEAR' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-black border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400')}`}
+                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'LINEAR' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-slate-900 border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400')}`}
                                   >
                                       <span className="block text-xs font-bold uppercase mb-1">Linear</span>
                                       <span className="text-[10px] opacity-80 block">Valores crescentes (1, 2, 3...) ajustados à meta.</span>
                                   </button>
                                   <button 
                                     onClick={() => setNewChalData({...newChalData, model: 'PROPORTIONAL'})}
-                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'PROPORTIONAL' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-black border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400')}`}
+                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'PROPORTIONAL' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-slate-900 border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400')}`}
                                   >
                                       <span className="block text-xs font-bold uppercase mb-1">Igual (Fixo)</span>
                                       <span className="text-[10px] opacity-80 block">Divide a meta igualmente entre os depósitos.</span>
                                   </button>
                                   <button 
                                     onClick={() => setNewChalData({...newChalData, model: 'CUSTOM'})}
-                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'CUSTOM' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-black border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400')}`}
+                                    className={`p-3 rounded-lg border text-left transition-all ${newChalData.model === 'CUSTOM' ? 'bg-purple-600 border-purple-500 text-white' : (darkMode ? 'bg-slate-900 border-slate-700 text-gray-400 hover:border-slate-500' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400')}`}
                                   >
                                       <span className="block text-xs font-bold uppercase mb-1">Manual</span>
                                       <span className="text-[10px] opacity-80 block">Começa zerado para você preencher.</span>

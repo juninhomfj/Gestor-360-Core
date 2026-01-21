@@ -296,7 +296,7 @@ const SalesForm: React.FC<Props> = ({
                   onChange={e => setProductType(e.target.value as ProductType)}
                   aria-label="Tipo de produto"
                 >
-                  <option value={ProductType.BASICA}>Cesta BÃ¡sica</option>
+                  <option value={ProductType.BASICA}>Cesta Básica</option>
                   <option value={ProductType.NATAL}>Cesta de Natal</option>
                 </select>
               </div>
@@ -328,12 +328,12 @@ const SalesForm: React.FC<Props> = ({
                     </div>
                 )}
                 {!selectedClientId && clientName && filteredClients.length === 0 && (
-                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente serÃ¡ criado!</p>
+                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">NÃºmero do OrÃ§amento</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Número do Orçamento</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -392,17 +392,17 @@ const SalesForm: React.FC<Props> = ({
                 <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
                   {commissionRatePercent > 0
                     ? `Taxa aplicada: ${commissionRatePercent.toFixed(2)}%`
-                    : 'Sem faixa de comissÃ£o aplicada'}
+                    : 'Sem faixa de comissão aplicada'}
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">CÃ³d. Rastreio / NF</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Cód. Rastreio / NF</label>
                 <div className="relative">
                    <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
                    <input
                     className={`${inputClasses} pl-10`}
-                    placeholder="CÃ³digo de rastreio ou nÃºmero" aria-label="CÃ³digo de rastreio ou nÃºmero"
+                    placeholder="Código de rastreio ou número" aria-label="Código de rastreio ou número"
                     value={trackingCode}
                     onChange={e => setTrackingCode(e.target.value)}
                   />
@@ -433,7 +433,7 @@ const SalesForm: React.FC<Props> = ({
               </div>
 
               <div className="md:col-span-2">
-                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">ObservaÃ§Ãµes</label>
+                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
                  <textarea 
                    className={`${inputClasses} h-24 resize-none`}
                    placeholder="Detalhes adicionais do pedido..." aria-label="Detalhes adicionais do pedido..."
