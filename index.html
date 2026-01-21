@@ -4,7 +4,78 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor360</title>
-</head>
+
+    <!-- Ajuda o navegador a não manter HTML velho (não substitui headers do servidor, mas ajuda) -->
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <script>
+      (function () {
+        // Será substituído pelo Vite no build
+        var CURRENT = "%VITE_APP_VERSION%";
+
+        // Se o Vite não substituiu (dev/erro), não faz nada
+        if (!CURRENT || CURRENT.indexOf("%VITE_APP_VERSION%") !== -1) return;
+
+        var KEY = "g360_build_version";
+        var RELOAD_KEY = "g360_forced_reload_version";
+        var PENDING_KEY = "g360_pending_update";
+
+        function isOnline() {
+          try {
+            return typeof navigator === "undefined" ? true : navigator.onLine !== false;
+          } catch (_) {
+            return true;
+          }
+        }
+
+        function alreadyForced() {
+          return localStorage.getItem(RELOAD_KEY) === CURRENT;
+        }
+
+        function forceRefreshOnce() {
+          if (alreadyForced()) return;
+
+          localStorage.setItem(RELOAD_KEY, CURRENT);
+
+          try {
+            var url = new URL(window.location.href);
+            var marker = url.searchParams.get("__v");
+            if (marker !== CURRENT) {
+              url.searchParams.set("__v", CURRENT);
+              window.location.replace(url.toString());
+              return;
+            }
+          } catch (_) {
+            // ignore
+          }
+
+          window.location.reload();
+        }
+
+        var prev = localStorage.getItem(KEY);
+        localStorage.setItem(KEY, CURRENT);
+
+        // Se mudou a versão do front: recarrega 1 vez (sem loop)
+        if (prev && prev !== CURRENT) {
+          if (isOnline()) {
+            forceRefreshOnce();
+          } else {
+            localStorage.setItem(PENDING_KEY, "1");
+          }
+        }
+
+        // Se estava offline e voltou: aplica atualização pendente
+        window.addEventListener("online", function () {
+          if (localStorage.getItem(PENDING_KEY) === "1") {
+            localStorage.removeItem(PENDING_KEY);
+            forceRefreshOnce();
+          }
+        });
+      })();
+    </script>
+  </head>
 
   <body class="min-h-screen bg-slate-950 text-slate-100">
     <div id="root"></div>
