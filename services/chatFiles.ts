@@ -1,5 +1,6 @@
 import { getSupabase } from './supabase';
 import { ChatAttachment } from '../types';
+import { networkFetch } from './networkControl';
 
 const EDGE_BASE = 'https://tgdboioadnuiimtuoryy.supabase.co/functions/v1/chat-signed-urls';
 const CHAT_BUCKET = 'chat-attachments';
@@ -38,11 +39,12 @@ export const buildAttachmentPath = (userId: string, messageId: string, fileName:
 
 export const requestUploadUrl = async (path: string, contentType: string) => {
   const headers = await createAuthHeaders();
-  const response = await fetch(`${EDGE_BASE}/upload-url`, {
+  const url = `${EDGE_BASE}/upload-url`;
+  const response = await networkFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({ path, contentType, expiresInSeconds: 3600 })
-  });
+  }, { lockKey: `${url}:${path}` });
 
   if (!response.ok) {
     throw new Error('Falha ao gerar URL de upload.');
@@ -53,11 +55,12 @@ export const requestUploadUrl = async (path: string, contentType: string) => {
 
 export const requestDownloadUrl = async (path: string, expiresInSeconds = 120) => {
   const headers = await createAuthHeaders();
-  const response = await fetch(`${EDGE_BASE}/download-url`, {
+  const url = `${EDGE_BASE}/download-url`;
+  const response = await networkFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({ path, expiresInSeconds })
-  });
+  }, { lockKey: `${url}:${path}` });
 
   if (!response.ok) {
     throw new Error('Falha ao gerar URL de download.');
@@ -72,13 +75,13 @@ export const uploadFileToSignedUrl = async (
   onProgress?: (progress: number) => void
 ) => {
   if (onProgress) onProgress(5);
-  const response = await fetch(uploadUrl, {
+  const response = await networkFetch(uploadUrl, {
     method: 'PUT',
     body: file,
     headers: {
       'Content-Type': file.type || 'application/octet-stream'
     }
-  });
+  }, { timeoutMs: 30000 });
 
   if (!response.ok) {
     throw new Error('Falha ao enviar arquivo.');
@@ -89,7 +92,8 @@ export const uploadFileToSignedUrl = async (
 
 export const registerAttachment = async (attachment: ChatAttachment) => {
   const headers = await createAuthHeaders();
-  const response = await fetch(`${EDGE_BASE}/register`, {
+  const url = `${EDGE_BASE}/register`;
+  const response = await networkFetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -102,7 +106,7 @@ export const registerAttachment = async (attachment: ChatAttachment) => {
         contentType: attachment.mime
       }
     })
-  });
+  }, { lockKey: `${url}:${attachment.messageId}` });
 
   if (!response.ok) {
     throw new Error('Falha ao registrar anexo.');

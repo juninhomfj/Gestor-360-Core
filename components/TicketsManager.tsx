@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Ticket, TicketPriority, TicketStatus, User } from '../types';
 import { getTickets, updateTicketAssignee, updateTicketStatus } from '../services/tickets';
 import { listUsers } from '../services/auth';
 import { AlertTriangle, CheckCircle2, Clock, RefreshCw, UserCheck, Copy, Sparkles, Loader2, Download } from 'lucide-react';
+import { networkFetch } from '../services/networkControl';
 
 interface TicketsManagerProps {
     currentUser: User;
@@ -38,6 +39,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
     const [showList, setShowList] = useState(true);
     const [showLogDetails, setShowLogDetails] = useState(false);
     const [copyStatus, setCopyStatus] = useState<string | null>(null);
+    const aiAbortRef = useRef<AbortController | null>(null);
     const [aiOutput, setAiOutput] = useState<string | null>(null);
     const [aiError, setAiError] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
@@ -184,8 +186,8 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         }));
         return `Analise o ticket e responda com:\nTL;DR: resumo em 1-2 linhas no topo.\n1) causa provavel\n2) passos de reproduzir\n3) sugestao tecnica de correcoes\n\nTicket:\n${JSON.stringify(summary, null, 2)}\n\nLogs:\n${JSON.stringify(logs, null, 2)}`;
     };
-    const callOpenAi = async (apiKey: string, prompt: string) => {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const callOpenAi = async (apiKey: string, prompt: string, signal?: AbortSignal) => {
+        const response = await networkFetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -197,7 +199,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                 temperature: 0.2,
                 max_tokens: 600
             })
-        });
+        }, { lockKey: `openai:${currentUser.id}`, signal, timeoutMs: 15000 });
         if (!response.ok) {
             const text = await response.text();
             throw new Error(text || 'Falha ao chamar OpenAI');
@@ -205,15 +207,15 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         const data = await response.json();
         return data?.choices?.[0]?.message?.content || 'Sem resposta.';
     };
-    const callGemini = async (apiKey: string, prompt: string) => {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const callGemini = async (apiKey: string, prompt: string, signal?: AbortSignal) => {
+        const response = await networkFetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { temperature: 0.2, maxOutputTokens: 600 }
             })
-        });
+        }, { lockKey: `gemini:${currentUser.id}`, signal, timeoutMs: 15000 });
         if (!response.ok) {
             const text = await response.text();
             throw new Error(text || 'Falha ao chamar Gemini');
@@ -243,10 +245,13 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
         }
         const prompt = buildAiPrompt(selectedTicket);
         setAiLoading(true);
+        aiAbortRef.current?.abort();
+        const controller = new AbortController();
+        aiAbortRef.current = controller;
         try {
             const text = settings.provider === 'GEMINI'
-                ? await callGemini(apiKey, prompt)
-                : await callOpenAi(apiKey, prompt);
+                ? await callGemini(apiKey, prompt, controller.signal)
+                : await callOpenAi(apiKey, prompt, controller.signal);
             let normalized = (text || '').trim();
             if (!/^TL;DR:/i.test(normalized)) {
                 const firstLine = normalized.split('\n').find((line) => line.trim()) || 'Resumo indisponivel.';
@@ -265,6 +270,11 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
             setAiLoading(false);
         }
     };
+    useEffect(() => {
+        return () => {
+            aiAbortRef.current?.abort();
+        };
+    }, []);
     const handleCopyAi = async () => {
         if (!aiOutput || !selectedTicket) return;
         const payload = JSON.stringify({

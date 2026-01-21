@@ -4,6 +4,8 @@ import { auth, db } from "./firebase";
 import { Logger } from "./logger";
 
 let running = false;
+const BOOTSTRAP_VERSION = "v2";
+const MINIMAL_SEED_VERSION = "v1";
 
 type SeedResult = { ok: string[]; skipped: string[]; failed: Array<{ key: string; error: any }> };
 
@@ -44,11 +46,17 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
   try {
     // LOCK em users/{uid} -> permitido por rules (o próprio user pode criar/atualizar)
     const userMetaRef = doc(db, "users", uid);
-    const userMetaSnap = await getDoc(userMetaRef);    const seedMeta = userMetaSnap.exists() ? userMetaSnap.data()?.seedBootstrap : undefined;
-    const alreadyDone = seedMeta?.done === true;
-    const minimalDone = seedMeta?.minimalDone === true;
-    if (alreadyDone && minimalDone) {
-      Logger.info("[Seed] Ja executado (seed bootstrap + minimal). Pulando.");
+    const userMetaSnap = await getDoc(userMetaRef);
+    const seedMeta = userMetaSnap.exists() ? userMetaSnap.data()?.seedBootstrap : undefined;
+    const bootstrapVersion = seedMeta?.bootstrapVersion || seedMeta?.seedVersion || null;
+    const minimalVersion = seedMeta?.minimalSeedVersion || seedMeta?.minimalVersion || null;
+    const shouldRunBootstrap = bootstrapVersion !== BOOTSTRAP_VERSION;
+    const shouldRunMinimal = minimalVersion !== MINIMAL_SEED_VERSION;
+    if (!shouldRunBootstrap && !shouldRunMinimal) {
+      Logger.info("[Seed] Ja executado (seed bootstrap + minimal). Pulando.", {
+        bootstrapVersion,
+        minimalVersion
+      });
       running = false;
       return;
     }
@@ -67,151 +75,147 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
 
     Logger.info("[Seed] Iniciando seed bootstrap...", { uid, role });
 
-    if (!alreadyDone) {
-
-    // (A) Config docs - APENAS DEV (suas rules exigem)
-    if (isDEV) {
-      await safeSet(
-        "config/system",
-        doc(db, "config", "system"),
-        {
-          modules: {
-            sales: true,
-            finance: true,
-            receivables: true,
-            distribution: true,
-            imports: true,
-            chat: true,
-            logs: true,
-            users: true,
+    if (shouldRunBootstrap) {
+      // (A) Config docs - APENAS DEV (suas rules exigem)
+      if (isDEV) {
+        await safeSet(
+          "config/system",
+          doc(db, "config", "system"),
+          {
+            modules: {
+              sales: true,
+              finance: true,
+              receivables: true,
+              distribution: true,
+              imports: true,
+              chat: true,
+              logs: true,
+              users: true,
+            },
+            updatedAt: serverTimestamp(),
           },
-          updatedAt: serverTimestamp(),
+          true,
+          result
+        );
+
+        await safeSet(
+          "config/ping",
+          doc(db, "config", "ping"),
+          { ok: true, updatedAt: serverTimestamp() },
+          true,
+          result
+        );
+
+        await safeSet(
+          "config/report",
+          doc(db, "config", "report"),
+          { enabled: true, updatedAt: serverTimestamp() },
+          true,
+          result
+        );
+      } else {
+        result.skipped.push("config/* (apenas DEV pode escrever por rules)");
+        Logger.warn("[Seed] Pulando criação de config/*: rules permitem write somente para DEV.");
+      }
+
+      // Base do placeholder (inativo)
+      const base = {
+        seed: true,
+        active: false,
+        deleted: true,
+        note: "seed placeholder - do not use",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      // Coleções com userId
+      const withUserId = [
+        "sales",
+        "sales_tasks",
+        "clients",
+        "campaigns",
+        "accounts",
+        "cards",
+        "categories",
+        "transactions",
+        "receivables",
+        "goals",
+        "challenges",
+        "challenge_cells",
+        "tickets",
+      ];
+
+      for (const coll of withUserId) {
+        const ref = doc(db, coll, "_seed_placeholder");
+        const specific: Record<string, any> = { id: "_seed_placeholder", userId: uid };
+
+        if (coll === "sales") {
+          specific.value = 0;
+          specific.status = "SEED";
+        }
+        if (coll === "sales_tasks") {
+          specific.title = "SEED";
+          specific.done = true;
+        }
+        if (coll === "clients") {
+          specific.name = "SEED";
+        }
+        if (coll === "campaigns") {
+          specific.name = "SEED";
+        }
+        if (coll === "transactions") {
+          specific.value = 0;
+          specific.description = "SEED";
+          specific.reconciled = true;
+          specific.date = serverTimestamp();
+        }
+        if (coll === "receivables") {
+          specific.value = 0;
+          specific.status = "PAID";
+          specific.dueDate = serverTimestamp();
+        }
+        if (coll === "tickets") {
+          specific.title = "SEED";
+          specific.description = "SEED";
+          specific.status = "CLOSED";
+        }
+
+        await safeSet(`${coll}/_seed_placeholder`, ref, { ...base, ...specific }, true, result);
+      }
+
+      // internal_messages (precisa respeitar rules: senderId == uid)
+      await safeSet(
+        "internal_messages/_seed_placeholder",
+        doc(db, "internal_messages", "_seed_placeholder"),
+        {
+          ...base,
+          id: "_seed_placeholder",
+          senderId: uid,
+          recipientId: uid,
+          text: "SEED",
         },
         true,
         result
       );
 
+      // audit_log (suas rules permitem CREATE para qualquer auth)
       await safeSet(
-        "config/ping",
-        doc(db, "config", "ping"),
-        { ok: true, updatedAt: serverTimestamp() },
+        "audit_log/_seed_placeholder",
+        doc(db, "audit_log", "_seed_placeholder"),
+        {
+          ...base,
+          id: "_seed_placeholder",
+          userId: uid,
+          category: "SEED",
+          level: "INFO",
+          payload: { seed: true },
+        },
         true,
         result
       );
-
-      await safeSet(
-        "config/report",
-        doc(db, "config", "report"),
-        { enabled: true, updatedAt: serverTimestamp() },
-        true,
-        result
-      );
-    } else {
-      result.skipped.push("config/* (apenas DEV pode escrever por rules)");
-      Logger.warn("[Seed] Pulando criação de config/*: rules permitem write somente para DEV.");
     }
 
-    // Base do placeholder (inativo)
-    const base = {
-      seed: true,
-      active: false,
-      deleted: true,
-      note: "seed placeholder - do not use",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    };
-
-    // Coleções com userId
-    const withUserId = [
-      "sales",
-      "sales_tasks",
-      "clients",
-      "campaigns",
-      "accounts",
-      "cards",
-      "categories",
-      "transactions",
-      "receivables",
-      "goals",
-      "challenges",
-      "challenge_cells",
-      "tickets",
-    ];
-
-    for (const coll of withUserId) {
-      const ref = doc(db, coll, "_seed_placeholder");
-      const specific: Record<string, any> = { id: "_seed_placeholder", userId: uid };
-
-      if (coll === "sales") {
-        specific.value = 0;
-        specific.status = "SEED";
-      }
-      if (coll === "sales_tasks") {
-        specific.title = "SEED";
-        specific.done = true;
-      }
-      if (coll === "clients") {
-        specific.name = "SEED";
-      }
-      if (coll === "campaigns") {
-        specific.name = "SEED";
-      }
-      if (coll === "transactions") {
-        specific.value = 0;
-        specific.description = "SEED";
-        specific.reconciled = true;
-        specific.date = serverTimestamp();
-      }
-      if (coll === "receivables") {
-        specific.value = 0;
-        specific.status = "PAID";
-        specific.dueDate = serverTimestamp();
-      }
-      if (coll === "tickets") {
-        specific.title = "SEED";
-        specific.description = "SEED";
-        specific.status = "CLOSED";
-      }
-
-      await safeSet(`${coll}/_seed_placeholder`, ref, { ...base, ...specific }, true, result);
-    }
-
-    // internal_messages (precisa respeitar rules: senderId == uid)
-    await safeSet(
-      "internal_messages/_seed_placeholder",
-      doc(db, "internal_messages", "_seed_placeholder"),
-      {
-        ...base,
-        id: "_seed_placeholder",
-        senderId: uid,
-        recipientId: uid,
-        text: "SEED",
-      },
-      true,
-      result
-    );
-
-    // audit_log (suas rules permitem CREATE para qualquer auth)
-    await safeSet(
-      "audit_log/_seed_placeholder",
-      doc(db, "audit_log", "_seed_placeholder"),
-      {
-        ...base,
-        id: "_seed_placeholder",
-        userId: uid,
-        category: "SEED",
-        level: "INFO",
-        payload: { seed: true },
-      },
-      true,
-      result
-    );
-
-    }
-
-    
-
-    if (!minimalDone) {
+    if (shouldRunMinimal) {
       const seedNowIso = new Date().toISOString();
       const seedDate = seedNowIso.slice(0, 10);
 
@@ -344,7 +348,7 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
           seedBootstrap: {
             ...(seedMeta || {}),
             minimalDone: true,
-            minimalSeedVersion: "v1",
+            minimalSeedVersion: MINIMAL_SEED_VERSION,
             updatedAt: serverTimestamp(),
           },
           updatedAt: serverTimestamp(),
@@ -354,7 +358,7 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
       );
     }
 
-    if (!alreadyDone) {
+    if (shouldRunBootstrap) {
       // Marca lock no users/{uid}
       await safeSet(
         "users/{uid}.seedBootstrap",
@@ -362,7 +366,8 @@ export async function runFirestoreSeedBootstrap(): Promise<void> {
         {
           seedBootstrap: {
             done: true,
-            seedVersion: "v1",
+            bootstrapVersion: BOOTSTRAP_VERSION,
+            seedVersion: BOOTSTRAP_VERSION,
             createdAt: serverTimestamp(),
             createdBy: uid,
             roleDetected: role || "unknown",
