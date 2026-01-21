@@ -1,0 +1,62 @@
+[
+  {
+    "id": "355ec5a6-40cd-499b-b9d6-5c6d0e372ed3",
+    "minPercent": "-999",
+    "maxPercent": "4.99",
+    "commissionRate": "0"
+  },
+  {
+    "id": "a0cb8c06-bbb7-48c0-88e6-06bf8a05f074",
+    "minPercent": "5",
+    "maxPercent": "10",
+    "commissionRate": "0.25"
+  },
+  {
+    "id": "d3869b1e-9ff7-4c3e-b35d-39ffc88f8791",
+    "minPercent": "10.01",
+    "maxPercent": "14",
+    "commissionRate": "0.5"
+  },
+  {
+    "id": "53266055-7c81-44e5-90b1-dfd3b7aeb07c",
+    "minPercent": "14.01",
+    "maxPercent": "18",
+    "commissionRate": "1"
+  },
+  {
+    "id": "c62fbcc2-5bd9-48fc-99f1-5623f85d1f68",
+    "minPercent": "18.01",
+    "maxPercent": "22",
+    "commissionRate": "1.5"
+  },
+  {
+    "id": "415aff46-09db-4b8f-a9c9-ff5e28c3c7ab",
+    "minPercent": "22.01",
+    "maxPercent": "26",
+    "commissionRate": "2"
+  },
+  {
+    "id": "34a5c0b7-e6f6-4df6-8de9-ead89bea5f24",
+    "minPercent": "26.01",
+    "maxPercent": "30",
+    "commissionRate": "2.5"
+  },
+  {
+    "id": "6dd8dc7e-8685-45a7-acb2-c77f01c1a7d1",
+    "minPercent": "30.01",
+    "maxPercent": "37",
+    "commissionRate": "3"
+  },
+  {
+    "id": "7350a95e-d075-4792-b3ce-7029552078b3",
+    "minPercent": "37.01",
+    "maxPercent": "42",
+    "commissionRate": "4"
+  },
+  {
+    "id": "4998dbd4-9517-44e1-a2d6-d01eb3be8a8f",
+    "minPercent": "42.01",
+    "maxPercent": "",
+    "commissionRate": "5"
+  }
+]
