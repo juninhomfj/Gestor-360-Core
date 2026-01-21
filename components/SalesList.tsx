@@ -64,7 +64,7 @@ const SalesList: React.FC<SalesListProps> = ({
 
   const processedSales = useMemo(() => {
     let result = sales.filter(sale => {
-      if (searchTerm && !(sale.client.toLowerCase().includes(searchTerm.toLowerCase()) || (sale.trackingCode || '').toLowerCase().includes(searchTerm.toLowerCase()))) return false;
+      if (searchTerm && !(sale.client.toLowerCase().includes(searchTerm.toLowerCase()) || String(sale.trackingCode ?? '').toLowerCase().includes(searchTerm.toLowerCase()))) return false;
       if (filterType !== 'ALL' && sale.type !== filterType) return false;
       if (filterStatus === 'PENDING' && !!sale.date) return false;
       if (filterStatus === 'BILLED' && !sale.date) return false;
