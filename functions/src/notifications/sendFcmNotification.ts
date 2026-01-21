@@ -26,11 +26,18 @@ const chunkTokens = (tokens: string[], size = 500): string[][] => {
     return chunks;
 };
 
+const ALLOWED_ORIGINS = [
+    'https://gestor-360.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:4173'
+];
+
 const applyCors = (req: functions.https.Request, res: functions.Response<any>) => {
-    const origin = req.headers.origin || '*';
-    res.set('Access-Control-Allow-Origin', origin);
+    const origin = String(req.headers.origin || '');
+    const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : 'https://gestor-360.vercel.app';
+    res.set('Access-Control-Allow-Origin', allowedOrigin);
     res.set('Vary', 'Origin');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Firebase-AppCheck, X-Firebase-Client');
 };
 
