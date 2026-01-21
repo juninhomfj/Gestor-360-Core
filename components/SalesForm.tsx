@@ -81,6 +81,7 @@ const SalesForm: React.FC<Props> = ({
         setValueSold(0);
         setMargin(0);
         setQuoteNumber('');
+        setQuoteDate(new Date().toISOString());
         setBillDate('');
         setObservations('');
         setTrackingCode('');
@@ -281,8 +282,19 @@ const SalesForm: React.FC<Props> = ({
             </div>
           )}
           <fieldset disabled={isLocked} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Produto</label>
+                <select
+                  className={inputClasses}
+                  value={productType}
+                  onChange={e => setProductType(e.target.value as ProductType)}
+                >
+                  <option value={ProductType.BASICA}>Cesta BÃ¡sica</option>
+                  <option value={ProductType.NATAL}>Cesta de Natal</option>
+                </select>
+              </div>
+
               <div className="relative">
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1 flex items-center gap-1">
                     <Users size={12}/> Cliente
@@ -309,20 +321,115 @@ const SalesForm: React.FC<Props> = ({
                     </div>
                 )}
                 {!selectedClientId && clientName && filteredClients.length === 0 && (
-                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
+                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente serÃ¡ criado!</p>
                 )}
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Produto</label>
-                <select
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">NÃºmero do OrÃ§amento</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
                   className={inputClasses}
-                  value={productType}
-                  onChange={e => setProductType(e.target.value as ProductType)}
-                >
-                  <option value={ProductType.BASICA}>Cesta Básica</option>
-                  <option value={ProductType.NATAL}>Cesta de Natal</option>
-                </select>
+                  value={quoteNumber}
+                  onChange={e => setQuoteNumber(e.target.value)}
+                />
               </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Qtd.</label>
+                <input
+                  type="number"
+                  className={inputClasses}
+                  value={quantity === 0 ? "" : quantity}
+                  onChange={e => setQuantity(parseNumericInput(e.target.value))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Proposto (R$)</label>
+                <input
+                  type="number"
+                  className={inputClasses}
+                  value={valueProposed === 0 ? "" : valueProposed}
+                  onChange={e => setValueProposed(parseNumericInput(e.target.value))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Total Venda / NF (R$)</label>
+                <div className="relative">
+                   <DollarSign className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                   <input
+                    type="number"
+                    className={`${inputClasses} pl-10 border-indigo-900/40`}
+                    value={valueSold === 0 ? "" : valueSold}
+                    onChange={e => setValueSold(parseNumericInput(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Margem %</label>
+                <input
+                  type="number"
+                  className={inputClasses}
+                  value={margin === 0 ? "" : margin}
+                  onChange={e => setMargin(parseNumericInput(e.target.value))}
+                />
+                <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  {commissionRatePercent > 0
+                    ? `Taxa aplicada: ${commissionRatePercent.toFixed(2)}%`
+                    : 'Sem faixa de comissÃ£o aplicada'}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">CÃ³d. Rastreio / NF</label>
+                <div className="relative">
+                   <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                   <input
+                    className={`${inputClasses} pl-10`}
+                    placeholder="CÃ³digo de rastreio ou nÃºmero"
+                    value={trackingCode}
+                    onChange={e => setTrackingCode(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Data de Faturamento</label>
+                <input
+                  type="date"
+                  className={`${inputClasses} ${isPendingBilling ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                  value={isPendingBilling ? '' : billDate}
+                  onChange={e => setBillDate(e.target.value)}
+                  disabled={isPendingBilling}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Prazo</label>
+                <input
+                  type="date"
+                  className={inputClasses}
+                  value={closeDate}
+                  onChange={e => setCloseDate(e.target.value)}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">ObservaÃ§Ãµes</label>
+                 <textarea 
+                   className={`${inputClasses} h-24 resize-none`}
+                   placeholder="Detalhes adicionais do pedido..."
+                   value={observations}
+                   onChange={e => setObservations(e.target.value)}
+                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Forma de Pagamento</label>
                 <select
@@ -336,82 +443,9 @@ const SalesForm: React.FC<Props> = ({
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Cód. Rastreio / NF</label>
-                <div className="relative">
-                   <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
-                   <input
-                    className={`${inputClasses} pl-10`}
-                    placeholder="Código de rastreio ou número"
-                    value={trackingCode}
-                    onChange={e => setTrackingCode(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Qtd.</label>
-                  <input
-                    type="number"
-                    className={inputClasses}
-                    value={quantity === 0 ? "" : quantity}
-                    onChange={e => setQuantity(parseNumericInput(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Margem %</label>
-                  <input
-                    type="number"
-                    className={inputClasses}
-                    value={margin === 0 ? "" : margin}
-                    onChange={e => setMargin(parseNumericInput(e.target.value))}
-                  />
-                  <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    {commissionRatePercent > 0
-                      ? `Taxa aplicada: ${commissionRatePercent.toFixed(2)}%`
-                      : 'Sem faixa de comissão aplicada'}
-                  </span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Número do Orçamento</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  className={inputClasses}
-                  value={quoteNumber}
-                  onChange={e => setQuoteNumber(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Proposto (R$)</label>
-                <input
-                  type="number"
-                  className={inputClasses}
-                  value={valueProposed === 0 ? "" : valueProposed}
-                  onChange={e => setValueProposed(parseNumericInput(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Total Venda / NF (R$)</label>
-                <div className="relative">
-                   <DollarSign className="absolute left-3 top-3.5 text-slate-400" size={16} />
-                   <input
-                    type="number"
-                    className={`${inputClasses} pl-10 border-indigo-900/40`}
-                    value={valueSold === 0 ? "" : valueSold}
-                    onChange={e => setValueSold(parseNumericInput(e.target.value))}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer mb-2 ml-1 group">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer ml-1 group">
                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isPendingBilling ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/20' : 'border-slate-600'}`}>
                         <input 
                             type="checkbox" 
@@ -426,45 +460,25 @@ const SalesForm: React.FC<Props> = ({
                     </span>
                 </label>
                 
-                <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Data de Faturamento</label>
-                <input
-                  type="date"
-                  className={`${inputClasses} ${isPendingBilling ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
-                  value={isPendingBilling ? '' : billDate}
-                  onChange={e => setBillDate(e.target.value)}
-                  disabled={isPendingBilling}
-                />
-              </div>
-              
-              <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-900/20 border border-amber-800/60' : 'bg-indigo-900/20 border border-indigo-800/60'}`}>
-                  {isPendingBilling ? (
-                      <>
-                        <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
-                        <p className="text-xs text-amber-200 leading-relaxed font-medium">
-                            Venda marcada como pendente. Ela não aparecerá nos gráficos de faturamento mensal até que você defina uma data.
-                        </p>
-                      </>
-                  ) : (
-                      <>
-                        <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
-                        <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                            Esta data define o mês em que a comissão será contabilizada no seu dashboard.
-                        </p>
-                      </>
-                  )}
+                <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-900/20 border border-amber-800/60' : 'bg-indigo-900/20 border border-indigo-800/60'}`}>
+                    {isPendingBilling ? (
+                        <>
+                          <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
+                          <p className="text-xs text-amber-200 leading-relaxed font-medium">
+                              Venda marcada como pendente. Ela n?o aparecer? nos gr?ficos de faturamento mensal at? que voc? defina uma data.
+                          </p>
+                        </>
+                    ) : (
+                        <>
+                          <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
+                          <p className="text-xs text-indigo-200 leading-relaxed font-medium">
+                              Esta data define o m?s em que a comiss?o ser? contabilizada no seu dashboard.
+                          </p>
+                        </>
+                    )}
+                </div>
               </div>
             </div>
-          </div>
-
-          <div>
-             <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
-             <textarea 
-               className={`${inputClasses} h-24 resize-none`}
-               placeholder="Detalhes adicionais do pedido..."
-               value={observations}
-               onChange={e => setObservations(e.target.value)}
-             />
-          </div>
           </fieldset>
         </div>
 

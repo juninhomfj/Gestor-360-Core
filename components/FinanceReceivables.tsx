@@ -18,6 +18,7 @@ interface FinanceReceivablesProps {
 const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({ 
     receivables = [], onUpdate, sales = [], accounts = [], darkMode, allowImport = true 
 }) => {
+  const parseNumericInput = (value: string) => (value === '' ? 0 : parseFloat(value));
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   
@@ -321,7 +322,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><DollarSign size={12}/> Valor Bruto</label>
                               <div className={`flex items-center px-3 py-2 rounded-lg border ${inputClass}`}>
                                   <span className="mr-2 opacity-50 font-bold">R$</span>
-                                  <input type="number" className="bg-transparent outline-none w-full font-bold text-lg" value={editingItem.value} onChange={e => setEditingItem({...editingItem, value: parseFloat(e.target.value) || 0})} />
+                                  <input type="number" className="bg-transparent outline-none w-full font-bold text-lg" value={editingItem.value === 0 ? '' : editingItem.value} onChange={e => setEditingItem({...editingItem, value: parseNumericInput(e.target.value)})} />
                               </div>
                           </div>
                           

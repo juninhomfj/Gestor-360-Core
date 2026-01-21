@@ -19,6 +19,7 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, onLogout }) => {
+  const parseNumericInput = (value: string) => (value === '' ? 0 : Number(value));
   const [name, setName] = useState(currentUser?.name || '');
   const [username, setUsername] = useState(currentUser?.username || '');
   const [tel, setTel] = useState(currentUser?.tel || '');
@@ -202,8 +203,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                             type="number"
                             min={0}
                             className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
-                            value={salesTargets.basic}
-                            onChange={e => setSalesTargets(prev => ({ ...prev, basic: Number(e.target.value) }))}
+                            value={salesTargets.basic === 0 ? '' : salesTargets.basic}
+                            onChange={e => setSalesTargets(prev => ({ ...prev, basic: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                     <div>
@@ -212,8 +213,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                             type="number"
                             min={0}
                             className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
-                            value={salesTargets.natal}
-                            onChange={e => setSalesTargets(prev => ({ ...prev, natal: Number(e.target.value) }))}
+                            value={salesTargets.natal === 0 ? '' : salesTargets.natal}
+                            onChange={e => setSalesTargets(prev => ({ ...prev, natal: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                 </div>

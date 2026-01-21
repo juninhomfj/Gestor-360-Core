@@ -110,6 +110,13 @@ storage/db.ts — IndexedDB (idb)
 
 components/* — UI e módulos
 
+Commission Engine Lock
+- O motor de comissao em `services/logic.ts` possui contrato bloqueado (banner "ARQUIVO BLOQUEADO").
+- A integridade e validada pelo hash em `commission.lock` via `scripts/guard-commission-lock.mjs`.
+- O guard e executado automaticamente em `npm run build` e `npm test`.
+- Testes unitarios em `tests/commissionEngine.test.ts` garantem faixas e bordas.
+
+
 🛟 Troubleshooting
 Firebase: Error (auth/invalid-api-key)
 O app não está lendo a apiKey do .env.local ou a chave é inválida/restrita.

@@ -18,6 +18,7 @@ interface Props {
 const FinanceTransactionForm: React.FC<Props> = ({
   isOpen, onClose, onSaved, onSave, accounts, cards, categories, initialType = 'EXPENSE'
 }) => {
+  const parseNumericInput = (value: string) => (value === '' ? 0 : parseFloat(value));
   const [type, setType] = useState<'INCOME' | 'EXPENSE' | 'TRANSFER'>(initialType);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState(0);
@@ -112,7 +113,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Valor do Lançamento</span>
                     <div className="relative w-full max-w-[250px]">
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-black opacity-30">R$</span>
-                        <input type="number" step="0.01" className={`bg-transparent text-5xl font-black text-center w-full outline-none ${type === 'INCOME' ? 'text-emerald-500' : type === 'EXPENSE' ? 'text-red-500' : 'text-blue-500'}`} value={amount} onChange={e => setAmount(Number(e.target.value))} autoFocus />
+                        <input type="number" step="0.01" className={`bg-transparent text-5xl font-black text-center w-full outline-none ${type === 'INCOME' ? 'text-emerald-500' : type === 'EXPENSE' ? 'text-red-500' : 'text-blue-500'}`} value={amount === 0 ? '' : amount} onChange={e => setAmount(parseNumericInput(e.target.value))} autoFocus />
                     </div>
                 </div>
 

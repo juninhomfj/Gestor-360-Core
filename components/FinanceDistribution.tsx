@@ -11,6 +11,7 @@ interface FinanceDistributionProps {
 }
 
 const FinanceDistribution: React.FC<FinanceDistributionProps> = ({ receivables, accounts, onDistribute, darkMode }) => {
+  const parseNumericInput = (value: string) => (value == "" ? 0 : parseFloat(value));
   const [selectedId, setSelectedId] = useState<string>('');
   
   // Dynamic Distribution State: { [accountId]: { mode: 'PERCENT' | 'VALUE', value: number } }
@@ -176,8 +177,8 @@ const FinanceDistribution: React.FC<FinanceDistributionProps> = ({ receivables, 
                                                <input 
                                                  type="number"
                                                  className={`w-24 p-2 rounded border font-bold text-right ${inputClass}`}
-                                                 value={state.value}
-                                                 onChange={e => handleInputChange(acc.id, 'value', parseFloat(e.target.value) || 0)}
+                                                 value={state.value === 0 ? "" : state.value}
+                                                 onChange={e => handleInputChange(acc.id, 'value', parseNumericInput(e.target.value))}
                                                />
                                            </div>
 

@@ -28,6 +28,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
   const [active, setActive] = useState(true);
   const [tiers, setTiers] = useState<CommissionCampaignTier[]>(defaultMetaTiers);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const parseNumericInput = (value: string) => (value == "" ? 0 : Number(value));
 
   const cardClass = darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200';
   const inputClass = darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-white border-gray-300';
@@ -205,24 +206,24 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
                   type="number"
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
-                  value={tier.from}
-                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, from: Number(e.target.value) } : t))}
+                  value={tier.from === 0 ? "" : tier.from}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, from: parseNumericInput(e.target.value) } : t))}
                   placeholder="De (%)"
                 />
                 <input
                   type="number"
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
-                  value={tier.to}
-                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, to: Number(e.target.value) } : t))}
+                  value={tier.to === 0 ? "" : tier.to}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, to: parseNumericInput(e.target.value) } : t))}
                   placeholder="Até (%)"
                 />
                 <input
                   type="number"
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
-                  value={tier.commissionPct}
-                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, commissionPct: Number(e.target.value) } : t))}
+                  value={tier.commissionPct === 0 ? "" : tier.commissionPct}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, commissionPct: parseNumericInput(e.target.value) } : t))}
                   placeholder="Comissão (%)"
                 />
               </div>

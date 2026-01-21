@@ -84,10 +84,13 @@ import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
 import { sendMessage, getMessages, subscribeToMessages } from './services/internalChat';
+import { requestAndSaveToken } from './services/pushService';
 import { ShieldAlert, LogOut, Loader2 } from 'lucide-react';
 import { SALES_TASK_LABELS } from './utils/salesTasks';
 import { dbBulkPut } from './storage/db';
 import { safeSetDoc } from './services/safeWrites';
+import { db } from './services/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { getTickets } from './services/tickets';
 
 type AuthView = 'LOGIN' | 'REQUEST_RESET' | 'APP' | 'ERROR' | 'LOADING' | 'BLOCKED';
@@ -158,6 +161,29 @@ const App: React.FC = () => {
         const id = crypto.randomUUID();
         setSortedToasts(prev => [...prev, { id, type, message }]);
     };
+    const parseLastSeen = (value?: string) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : 0;
+    };
+    const getLastSeen = (key: 'chat' | 'tickets') => {
+        if (!currentUser) return 0;
+        const prefs = currentUser.prefs || {};
+        const prefValue = key === 'chat' ? prefs.lastSeenChat : prefs.lastSeenTickets;
+        return parseLastSeen(prefValue);
+    };
+    const updateLastSeen = async (key: 'chat' | 'tickets', value: number) => {
+        if (!currentUser) return;
+        const prefs = currentUser.prefs || {};
+        const nextPrefs = {
+            ...prefs,
+            ...(key === 'chat' ? { lastSeenChat: String(value) } : { lastSeenTickets: String(value) })
+        };
+        const nextUser = { ...currentUser, prefs: nextPrefs };
+        handleUpdateUserInApp(nextUser);
+        try {
+            await updateUser(currentUser.id, { prefs: nextPrefs });
+        } catch {}
+    };
     const pushNotification = (notif: AppNotification) => {
         setNotifications(prev => {
             if (prev.find(n => n.id === notif.id)) return prev;
@@ -193,14 +219,37 @@ const App: React.FC = () => {
         activeTabRef.current = activeTab;
         if (!currentUser) return;
         if (activeTab === 'chat') {
-            localStorage.setItem('sys_last_seen_chat', String(Date.now()));
+            updateLastSeen('chat', Date.now());
             setNotifications(prev => prev.filter(n => !n.id.startsWith('chat:')));
         }
         if (activeTab === 'tickets') {
-            localStorage.setItem('sys_last_seen_tickets', String(Date.now()));
+            updateLastSeen('tickets', Date.now());
             setNotifications(prev => prev.filter(n => !n.id.startsWith('ticket:')));
         }
     }, [activeTab, currentUser]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        const localChat = parseLastSeen(localStorage.getItem('sys_last_seen_chat') || undefined);
+        const localTickets = parseLastSeen(localStorage.getItem('sys_last_seen_tickets') || undefined);
+        const prefChat = parseLastSeen(currentUser.prefs?.lastSeenChat);
+        const prefTickets = parseLastSeen(currentUser.prefs?.lastSeenTickets);
+        if (localChat > prefChat) updateLastSeen('chat', localChat);
+        if (localTickets > prefTickets) updateLastSeen('tickets', localTickets);
+    }, [currentUser?.id]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        const ref = doc(db, 'profiles', currentUser.id);
+        const unsubscribe = onSnapshot(ref, (snap) => {
+            const data = snap.data() as any;
+            if (!data?.prefs) return;
+            const nextPrefs = { ...(currentUser.prefs || {}), ...(data.prefs || {}) };
+            if (JSON.stringify(nextPrefs) === JSON.stringify(currentUser.prefs || {})) return;
+            handleUpdateUserInApp({ ...currentUser, prefs: nextPrefs });
+        });
+        return () => unsubscribe();
+    }, [currentUser?.id]);
 
     const removeToast = (id: string) => {
         setSortedToasts(prev => prev.filter(t => t.id !== id));
@@ -208,10 +257,13 @@ const App: React.FC = () => {
 
     const handleClearAllNotifications = async () => {
         if (!currentUser) return;
+        const now = Date.now();
         setNotifications([]);
+        await updateLastSeen('chat', now);
+        await updateLastSeen('tickets', now);
         if (isAdmin) {
             await clearNotifications(currentUser.id, 'ALL');
-            addToast('INFO', 'Histórico de notificações limpo para toda a rede.');
+            addToast('INFO', 'Hist?rico de notifica??es limpo para toda a rede.');
         }
     };
 
@@ -315,8 +367,8 @@ const App: React.FC = () => {
         if (!currentUser) return;
         let active = true;
         const bootNotifications = async () => {
-            const lastSeenChat = Number(localStorage.getItem('sys_last_seen_chat') || 0);
-            const lastSeenTickets = Number(localStorage.getItem('sys_last_seen_tickets') || 0);
+            const lastSeenChat = getLastSeen('chat');
+            const lastSeenTickets = getLastSeen('tickets');
             try {
                 const [chatHistory, tickets] = await Promise.all([
                     getMessages(currentUser.id, isAdmin),
@@ -390,7 +442,7 @@ const App: React.FC = () => {
             const pollTickets = async () => {
                 try {
                     if (activeTabRef.current === 'tickets') return;
-                    const lastSeenTickets = Number(localStorage.getItem('sys_last_seen_tickets') || 0);
+                    const lastSeenTickets = getLastSeen('tickets');
                     const tickets = await getTickets();
                     tickets
                         .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
@@ -404,6 +456,8 @@ const App: React.FC = () => {
                                 date: t.createdAt,
                                 read: false
                             });
+                            addToast('INFO', `Novo ticket: ${t.title}`);
+                            addToast('INFO', `Novo ticket: ${t.title}`);
                         });
                 } catch {}
             };
@@ -424,6 +478,10 @@ const App: React.FC = () => {
         try {
             await bootstrapProductionData();
             await loadDataForUser();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+            }
+            await requestAndSaveToken(user.id);
 
             const onboarded = localStorage.getItem("sys_onboarded_v1") === "true";
             if (!onboarded) {

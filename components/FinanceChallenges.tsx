@@ -16,6 +16,7 @@ interface FinanceChallengesProps {
 const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells, onUpdate, darkMode }) => {
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(challenges[0]?.id || null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const parseNumericInput = (value: string) => (value === '' ? 0 : Number(value));
   
   // Create Form State
   const [newChalData, setNewChalData] = useState({ name: '', target: 1000, count: 52, model: 'LINEAR' as ChallengeModel });
@@ -229,13 +230,13 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                                   <div className="relative">
                                     <span className="absolute left-3 top-3 text-slate-500">R$</span>
                                     <input type="number" className={`w-full border rounded p-3 pl-10 outline-none font-bold ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
-                                            value={newChalData.target} onChange={e => setNewChalData({...newChalData, target: Number(e.target.value)})}/>
+                                            value={newChalData.target === 0 ? "" : newChalData.target} onChange={e => setNewChalData({...newChalData, target: parseNumericInput(e.target.value)})}/>
                                   </div>
                               </div>
                               <div>
                                   <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quantidade de Depósitos</label>
                                   <input type="number" className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
-                                        value={newChalData.count} onChange={e => setNewChalData({...newChalData, count: Number(e.target.value)})}/>
+                                        value={newChalData.count === 0 ? "" : newChalData.count} onChange={e => setNewChalData({...newChalData, count: parseNumericInput(e.target.value)})}/>
                               </div>
                           </div>
 

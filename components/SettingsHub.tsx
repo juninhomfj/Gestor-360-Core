@@ -60,6 +60,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   darkMode, onThemeChange, currentUser, onUpdateUser, sales, onUpdateSales, onNotify,
   isAdmin, isDev, onLogout, initialTab, appMode
 }) => {
+  const parseNumericInput = (value: string) => (value === '' ? 0 : Number(value));
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'SYSTEM' | 'USERS' | 'WEBHOOKS' | 'COMMISSIONS' | 'ROADMAP' | 'SOUNDS' | 'TRASH' | 'CLIENTS' | 'MESSAGING' | 'LOGS' | 'AUDIT_FULL' | 'ACCESS' | 'DEVTOOLS' | 'AI_BI'>(initialTab || 'PROFILE');
   const [commissionTab, setCommissionTab] = useState<ProductType>(ProductType.BASICA); 
   const [showMobileContent, setShowMobileContent] = useState(false);
@@ -663,14 +664,14 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                         </div>
                         <div className="mt-4">
                             <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Limite diario por usuario</label>
-                            <input
-                                type="number"
-                                min={1}
-                                max={500}
-                                value={aiDailyLimit}
-                                onChange={(e) => setAiDailyLimit(Number(e.target.value || 1))}
-                                className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
-                            />
+                              <input
+                                  type="number"
+                                  min={1}
+                                  max={500}
+                                  value={aiDailyLimit === 0 ? '' : aiDailyLimit}
+                                  onChange={(e) => setAiDailyLimit(parseNumericInput(e.target.value))}
+                                  className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
+                              />
                             <p className="text-[10px] text-gray-400 mt-2">Limita a quantidade de chamadas de IA por usuario/dia.</p>
                         </div>
 
@@ -989,8 +990,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     type="number"
                                     step="0.01"
                                     className={`w-full p-3 rounded-xl border outline-none ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200'}`}
-                                    value={systemConfig.avistaLowMarginCommissionPct ?? 0.25}
-                                    onChange={(e) => setSystemConfig({ ...systemConfig, avistaLowMarginCommissionPct: Number(e.target.value) })}
+                                    value={(systemConfig.avistaLowMarginCommissionPct ?? 0.25) === 0 ? '' : (systemConfig.avistaLowMarginCommissionPct ?? 0.25)}
+                                    onChange={(e) => setSystemConfig({ ...systemConfig, avistaLowMarginCommissionPct: parseNumericInput(e.target.value) })}
                                 />
                             </div>
                         </div>

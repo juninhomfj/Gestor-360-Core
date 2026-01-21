@@ -64,6 +64,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
     const [useChat, setUseChat] = useState(true);
     const [useEmail, setUseEmail] = useState(false);
     const emailEnabled = false;
+    const parseNumericInput = (value: string, fallback = 0) => (value === '' ? fallback : Number(value));
 
     useEffect(() => {
         setIsLoadingUsers(true);
@@ -228,8 +229,8 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                             <input
                                 type="number"
                                 min={1}
-                                value={newDays}
-                                onChange={(e) => setNewDays(Number(e.target.value || 1))}
+                                value={newDays === 0 ? '' : newDays}
+                                onChange={(e) => setNewDays(parseNumericInput(e.target.value, 1))}
                                 className="w-16 px-2 py-1 rounded-lg border text-xs field-contrast"
                             />
                             <span className="text-[10px] text-slate-400">dias</span>

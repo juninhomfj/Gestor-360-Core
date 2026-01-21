@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite --config ./vite.config.ts",
     "dev:debug": "vite --config ./vite.config.ts --debug",
-    "prebuild": "node scripts/guard-no-cdn.mjs",
+    "prebuild": "node scripts/guard-no-cdn.mjs && node scripts/guard-commission-lock.mjs",
     "build": "vite build --config ./vite.config.ts",
     "preview": "vite preview",
+    "pretest": "node scripts/guard-commission-lock.mjs",
     "test": "vitest"
   },
   "dependencies": {

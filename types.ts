@@ -35,6 +35,8 @@ export interface UserPermissions {
 
 export interface UserPrefs {
   defaultModule?: string;
+  lastSeenChat?: string;
+  lastSeenTickets?: string;
 }
 
 export type UserModules = UserPermissions;

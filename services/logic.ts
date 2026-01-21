@@ -1,3 +1,20 @@
+/*
+**********************************************************************
+ARQUIVO BLOQUEADO — NAO MODIFICAR
+ALTERAR SOMENTE COM AUTORIZACAO EXPRESSA.
+
+CONTRATO DO MOTOR DE COMISSAO:
+- "margin" e apenas comparador de intervalo (min <= margin <= max).
+- "rate" e a taxa aplicada sobre a base de comissao.
+- A assinatura publica deve permanecer identica.
+
+EXEMPLOS (TABELA DE FAIXAS):
+| margin | min  | max  | rate |
+|  0.00  | 0.00 | 2.50 | 0.05 |
+|  2.51  | 2.51 | 4.00 | 0.10 |
+|  4.01  | 4.01 | null | 0.15 |
+**********************************************************************
+*/
 import {
   collection,
   query,
