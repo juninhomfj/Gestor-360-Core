@@ -293,7 +293,7 @@ const SalesForm: React.FC<Props> = ({
                 <select
                   className={inputClasses}
                   value={productType}
-                  onChange={e => setProductType(e.target.value as ProductType)}
+                  onChange={e = aria-label="Selecionar"> setProductType(e.target.value as ProductType)}
                   aria-label="Tipo de produto"
                 >
                   <option value={ProductType.BASICA}>Cesta BÃ¡sica</option>
@@ -307,9 +307,9 @@ const SalesForm: React.FC<Props> = ({
                 </label>
                 <input
                   className={inputClasses}
-                  placeholder="Nome do cliente ou empresa"
+                  placeholder="Nome do cliente ou empresa" aria-label="Nome do cliente ou empresa"
                   value={clientName}
-                  onChange={e => { setClientName(e.target.value); setShowClientList(true); setSelectedClientId(''); }}
+                  onChange={e = /> { setClientName(e.target.value); setShowClientList(true); setSelectedClientId(''); }}
                   onFocus={() => setShowClientList(true)}
                   aria-label="Cliente"
                 />
@@ -339,7 +339,7 @@ const SalesForm: React.FC<Props> = ({
                   inputMode="numeric"
                   className={inputClasses}
                   value={quoteNumber}
-                  onChange={e => setQuoteNumber(e.target.value)}
+                  onChange={e = /> setQuoteNumber(e.target.value)}
                   aria-label="Numero do orcamento"
                 />
               </div>
@@ -350,7 +350,7 @@ const SalesForm: React.FC<Props> = ({
                   type="number"
                   className={inputClasses}
                   value={quantity === 0 ? "" : quantity}
-                  onChange={e => setQuantity(parseNumericInput(e.target.value))}
+                  onChange={e = /> setQuantity(parseNumericInput(e.target.value))}
                   aria-label="Quantidade"
                 />
               </div>
@@ -361,7 +361,7 @@ const SalesForm: React.FC<Props> = ({
                   type="number"
                   className={inputClasses}
                   value={valueProposed === 0 ? "" : valueProposed}
-                  onChange={e => setValueProposed(parseNumericInput(e.target.value))}
+                  onChange={e = /> setValueProposed(parseNumericInput(e.target.value))}
                   aria-label="Valor proposto"
                 />
               </div>
@@ -374,7 +374,7 @@ const SalesForm: React.FC<Props> = ({
                     type="number"
                     className={`${inputClasses} pl-10 border-indigo-900/40`}
                     value={valueSold === 0 ? "" : valueSold}
-                    onChange={e => setValueSold(parseNumericInput(e.target.value))}
+                    onChange={e = /> setValueSold(parseNumericInput(e.target.value))}
                     aria-label="Valor da venda"
                   />
                 </div>
@@ -386,7 +386,7 @@ const SalesForm: React.FC<Props> = ({
                   type="number"
                   className={inputClasses}
                   value={margin === 0 ? "" : margin}
-                  onChange={e => setMargin(parseNumericInput(e.target.value))}
+                  onChange={e = /> setMargin(parseNumericInput(e.target.value))}
                   aria-label="Margem percentual"
                 />
                 <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
@@ -402,9 +402,9 @@ const SalesForm: React.FC<Props> = ({
                    <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
                    <input
                     className={`${inputClasses} pl-10`}
-                    placeholder="CÃ³digo de rastreio ou nÃºmero"
+                    placeholder="CÃ³digo de rastreio ou nÃºmero" aria-label="CÃ³digo de rastreio ou nÃºmero"
                     value={trackingCode}
-                    onChange={e => setTrackingCode(e.target.value)}
+                    onChange={e = /> setTrackingCode(e.target.value)}
                   />
                 </div>
               </div>
@@ -415,7 +415,7 @@ const SalesForm: React.FC<Props> = ({
                   type="date"
                   className={`${inputClasses} ${isPendingBilling ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
                   value={isPendingBilling ? '' : billDate}
-                  onChange={e => setBillDate(e.target.value)}
+                  onChange={e = /> setBillDate(e.target.value)}
                   disabled={isPendingBilling}
                   aria-label="Data de faturamento"
                 />
@@ -427,7 +427,7 @@ const SalesForm: React.FC<Props> = ({
                   type="date"
                   className={inputClasses}
                   value={closeDate}
-                  onChange={e => setCloseDate(e.target.value)}
+                  onChange={e = /> setCloseDate(e.target.value)}
                   aria-label="Prazo"
                 />
               </div>
@@ -436,7 +436,7 @@ const SalesForm: React.FC<Props> = ({
                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">ObservaÃ§Ãµes</label>
                  <textarea 
                    className={`${inputClasses} h-24 resize-none`}
-                   placeholder="Detalhes adicionais do pedido..."
+                   placeholder="Detalhes adicionais do pedido..." aria-label="Detalhes adicionais do pedido..."
                    value={observations}
                    onChange={e => setObservations(e.target.value)}
                    aria-label="Observacoes"
@@ -450,7 +450,7 @@ const SalesForm: React.FC<Props> = ({
                 <select
                   className={inputClasses}
                   value={paymentMethod}
-                  onChange={e => setPaymentMethod(e.target.value)}
+                  onChange={e = aria-label="Selecionar"> setPaymentMethod(e.target.value)}
                   aria-label="Forma de pagamento"
                 >
                   <option value="">Selecione</option>
@@ -467,7 +467,7 @@ const SalesForm: React.FC<Props> = ({
                             type="checkbox" 
                             className="hidden"
                             checked={isPendingBilling} 
-                            onChange={e => setIsPendingBilling(e.target.checked)}
+                            onChange={e = aria-label="Selecionar" /> setIsPendingBilling(e.target.checked)}
                             aria-label="Pendente de faturamento"
                         />
                         {isPendingBilling && <Clock size={12} className="text-white" />}

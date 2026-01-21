@@ -80,10 +80,10 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <p className="text-sm text-gray-500">Monitoramento transacional de infraestrutura cloud.</p>
                 </div>
                 <div className="flex w-full flex-wrap gap-2 md:w-auto">
-                    <button onClick={handleExport} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 transition-colors md:flex-none dark:text-slate-100">
+                    <button onClick={handleExport} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 transition-colors md:flex-none dark:text-slate-100" aria-label="Baixar" title="Baixar">
                         <Download size={20}/>
                     </button>
-                    <button onClick={loadLogs} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors md:flex-none">
+                    <button onClick={loadLogs} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors md:flex-none" aria-label="Atualizar" title="Atualizar">
                         <RefreshCw size={20} className={loading ? 'animate-spin' : ''}/>
                     </button>
                 </div>
@@ -96,9 +96,9 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                         <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
                         <input 
                             className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} 
-                            placeholder="Mensagem ou UID..." 
+                            placeholder="Mensagem ou UID..." aria-label="Mensagem ou UID..." 
                             value={searchTerm} 
-                            onChange={e => setSearchTerm(e.target.value)} 
+                            onChange={e = /> setSearchTerm(e.target.value)} 
                         />
                     </div>
                 </div>
@@ -107,7 +107,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <select 
                         className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`}
                         value={filterLevel}
-                        onChange={e => setFilterLevel(e.target.value as any)}
+                        onChange={e = aria-label="Selecionar"> setFilterLevel(e.target.value as any)}
                     >
                         <option value="ALL">Todos os Niveis (ALL)</option>
                         <option value="INFO">Informacao (INFO)</option>

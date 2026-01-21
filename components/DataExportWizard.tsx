@@ -75,7 +75,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                     <Download className="text-blue-500"/> Exportação de Dados
                 </h3>
-                <button onClick={onClose}><X className="text-gray-400 hover:text-gray-600"/></button>
+                <button onClick={onClose} aria-label="Fechar" title="Fechar"><X className="text-gray-400 hover:text-gray-600"/></button>
             </div>
 
             <div className="p-6">
@@ -113,10 +113,10 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                                 <div className="flex items-center gap-2">
                                     <input 
                                         type="password" 
-                                        placeholder="Senha para o arquivo" 
+                                        placeholder="Senha para o arquivo" aria-label="Senha para o arquivo" 
                                         className="border rounded px-3 py-1.5 text-sm w-40 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                                         value={backupPass}
-                                        onChange={e => setBackupPass(e.target.value)}
+                                        onChange={e = /> setBackupPass(e.target.value)}
                                     />
                                     <button onClick={handleFullBackup} disabled={loading} className="px-4 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm">
                                         {loading ? 'Gerando...' : 'Baixar Backup'}

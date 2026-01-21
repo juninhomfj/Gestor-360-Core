@@ -150,7 +150,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                 <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95 dark:text-slate-100">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-black">{editingId ? 'Editar Webhook' : 'Registrar Webhook'}</h3>
-                        <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+                        <button onClick={resetForm} className="text-gray-400 hover:text-gray-600" aria-label="Fechar" title="Fechar">
                             <X size={18} />
                         </button>
                     </div>
@@ -160,7 +160,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                             <input
                                 className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={endpoint}
-                                onChange={e => setEndpoint(e.target.value)}
+                                onChange={e = /> setEndpoint(e.target.value)}
                                 placeholder="https://api.seu-dominio.com/webhooks"
                             />
                         </div>
@@ -169,7 +169,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                             <input
                                 className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={secret}
-                                onChange={e => setSecret(e.target.value)}
+                                onChange={e = /> setSecret(e.target.value)}
                                 placeholder="Assinatura HMAC"
                             />
                         </div>

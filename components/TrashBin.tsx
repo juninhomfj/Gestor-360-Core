@@ -94,7 +94,7 @@ const TrashBin: React.FC<TrashBinProps> = ({ darkMode }) => {
                         <p className="text-xs text-gray-500 dark:text-gray-400">Itens são excluídos após 60 dias.</p>
                     </div>
                 </div>
-                <button onClick={loadData} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                <button onClick={loadData} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors" aria-label="Atualizar" title="Atualizar">
                     <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
                 </button>
             </div>

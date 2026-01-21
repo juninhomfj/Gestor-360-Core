@@ -85,7 +85,7 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                     <Database size={20} className="text-purple-500" />
                     <h3 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Inspetor de Dados</h3>
                 </div>
-                <button onClick={loadStoreData} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full">
+                <button onClick={loadStoreData} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full" aria-label="Atualizar" title="Atualizar">
                     <RefreshCw size={16} />
                 </button>
             </div>
@@ -96,16 +96,16 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                     <div className="p-2 border-b border-gray-200 dark:border-slate-700 space-y-2">
                         <select 
                             value={selectedStore} 
-                            onChange={e => setSelectedStore(e.target.value)}
+                            onChange={e = aria-label="Selecionar"> setSelectedStore(e.target.value)}
                             className={`w-full p-2 rounded text-sm font-bold ${darkMode ? 'bg-slate-800 text-white border-slate-600' : 'bg-white text-gray-800 border-gray-300'}`}
                         >
                             {STORES.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                         </select>
                         <input 
-                            placeholder="Filtrar..."
+                            placeholder="Filtrar..." aria-label="Filtrar..."
                             className={`w-full p-2 rounded text-xs ${darkMode ? 'bg-slate-800 text-white border-slate-600' : 'bg-white border-gray-300'}`}
                             value={filter}
-                            onChange={e => setFilter(e.target.value)}
+                            onChange={e = /> setFilter(e.target.value)}
                         />
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -142,7 +142,7 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                                 onClick={handleDeleteRecord}
                                 disabled={selectedRecordId === null}
                                 className="bg-red-600 text-white px-3 py-1.5 rounded flex items-center gap-2 text-xs font-bold hover:bg-red-700 disabled:opacity-50"
-                            >
+                             aria-label="Excluir" title="Excluir">
                                 <Trash2 size={14}/>
                             </button>
                             <button 

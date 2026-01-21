@@ -219,9 +219,9 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
               <div className={`rounded-xl p-6 w-full max-w-md ${cardClass}`}>
                   <h3 className="text-xl font-bold mb-4">Novo Recebível Manual</h3>
                   <div className="space-y-4">
-                      <input className={`w-full p-2 rounded border ${inputClass}`} placeholder="Descrição" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-                      <input type="number" className={`w-full p-2 rounded border ${inputClass}`} placeholder="Valor Bruto (R$)" value={formData.value} onChange={e => setFormData({...formData, value: e.target.value})} />
-                      <input type="date" className={`w-full p-2 rounded border ${inputClass}`} value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                      <input className={`w-full p-2 rounded border ${inputClass}`} placeholder="Descrição" aria-label="Descrição" value={formData.description} onChange={e = /> setFormData({...formData, description: e.target.value})} />
+                      <input type="number" className={`w-full p-2 rounded border ${inputClass}`} placeholder="Valor Bruto (R$)" aria-label="Valor Bruto (R$)" value={formData.value} onChange={e = /> setFormData({...formData, value: e.target.value})} />
+                      <input type="date" className={`w-full p-2 rounded border ${inputClass}`} value={formData.date} onChange={e = /> setFormData({...formData, date: e.target.value})} />
                       <div className="flex justify-end gap-2">
                           <button onClick={() => setIsFormOpen(false)} className="px-4 py-2 text-gray-500">Cancelar</button>
                           <button onClick={handleSaveNew} className="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
@@ -252,14 +252,14 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                               <input 
                                 type="date" 
                                 className={`w-full p-2 rounded border ${inputClass}`} 
-                                value={effDate} onChange={e => setEffDate(e.target.value)} 
+                                value={effDate} onChange={e = /> setEffDate(e.target.value)} 
                               />
                           </div>
                           <div>
                               <label className="text-xs font-bold uppercase block mb-1 opacity-70">Tipo de Pagamento</label>
                               <select 
                                 className={`w-full p-2 rounded border ${inputClass}`}
-                                value={effMode} onChange={e => setEffMode(e.target.value as any)}
+                                value={effMode} onChange={e = aria-label="Selecionar"> setEffMode(e.target.value as any)}
                               >
                                   <option value="FULL">Integral</option>
                                   <option value="PARTIAL">Parcelado / Parcial</option>
@@ -273,7 +273,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                               <input 
                                 type="number" 
                                 className={`w-full p-2 rounded border text-lg font-bold ${inputClass} border-emerald-500`} 
-                                value={effAmountPaid} onChange={e => setEffAmountPaid(e.target.value)} 
+                                value={effAmountPaid} onChange={e = /> setEffAmountPaid(e.target.value)} 
                               />
                               <div className="flex justify-between mt-2 text-xs">
                                   <span>Total Líquido: <strong>R$ {calculateNet(effectiveModal.item).toFixed(2)}</strong></span>
@@ -315,20 +315,20 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                       <div className="grid grid-cols-12 gap-4">
                           <div className="col-span-12">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><FileText size={12}/> Descrição</label>
-                              <input type="text" className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${inputClass}`} value={editingItem.description} onChange={e => setEditingItem({...editingItem, description: e.target.value})} />
+                              <input type="text" className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${inputClass}`} value={editingItem.description} onChange={e = /> setEditingItem({...editingItem, description: e.target.value})} />
                           </div>
                           
                           <div className="col-span-6">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><DollarSign size={12}/> Valor Bruto</label>
                               <div className={`flex items-center px-3 py-2 rounded-lg border ${inputClass}`}>
                                   <span className="mr-2 opacity-50 font-bold">R$</span>
-                                  <input type="number" className="bg-transparent outline-none w-full font-bold text-lg" value={editingItem.value === 0 ? '' : editingItem.value} onChange={e => setEditingItem({...editingItem, value: parseNumericInput(e.target.value)})} />
+                                  <input type="number" className="bg-transparent outline-none w-full font-bold text-lg" value={editingItem.value === 0 ? '' : editingItem.value} onChange={e = /> setEditingItem({...editingItem, value: parseNumericInput(e.target.value)})} />
                               </div>
                           </div>
                           
                           <div className="col-span-6">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><Calendar size={12}/> Data</label>
-                              <input type="date" className={`w-full px-3 py-2.5 rounded-lg border ${inputClass}`} value={editingItem.date} onChange={e => setEditingItem({...editingItem, date: e.target.value})} />
+                              <input type="date" className={`w-full px-3 py-2.5 rounded-lg border ${inputClass}`} value={editingItem.date} onChange={e = /> setEditingItem({...editingItem, date: e.target.value})} />
                           </div>
                       </div>
 
@@ -342,9 +342,9 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                           <div className="p-4 space-y-3">
                               {/* Add Deduction */}
                               <div className="flex gap-2">
-                                  <input placeholder="Ex: IRRF, Taxa" className={`flex-1 px-3 py-2 text-sm rounded-lg border ${inputClass}`} value={editDedDesc} onChange={e => setEditDedDesc(e.target.value)} />
-                                  <input type="number" placeholder="R$" className={`w-24 px-3 py-2 text-sm rounded-lg border ${inputClass}`} value={editDedAmount} onChange={e => setEditDedAmount(e.target.value)} />
-                                  <button onClick={handleAddDeductionToEdit} className="px-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"><Plus size={18} /></button>
+                                  <input placeholder="Ex: IRRF, Taxa" aria-label="Ex: IRRF, Taxa" className={`flex-1 px-3 py-2 text-sm rounded-lg border ${inputClass}`} value={editDedDesc} onChange={e = /> setEditDedDesc(e.target.value)} />
+                                  <input type="number" placeholder="R$" aria-label="R$" className={`w-24 px-3 py-2 text-sm rounded-lg border ${inputClass}`} value={editDedAmount} onChange={e = /> setEditDedAmount(e.target.value)} />
+                                  <button onClick={handleAddDeductionToEdit} className="px-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm" aria-label="Adicionar" title="Adicionar"><Plus size={18} /></button>
                               </div>
 
                               {/* Deduction List */}
@@ -372,7 +372,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                           <div className="text-right">
                               <p className="text-xs uppercase font-bold opacity-60 mb-1">Status Atual</p>
                               <label className={`inline-flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${editingItem.status === 'EFFECTIVE' ? 'bg-emerald-600 border-emerald-500 text-white shadow-emerald-900/20 shadow-lg' : 'bg-gray-200 border-gray-300 text-gray-600'}`}>
-                                  <input type="checkbox" className="hidden" checked={editingItem.status === 'EFFECTIVE'} onChange={e => setEditingItem({...editingItem!, status: e.target.checked ? 'EFFECTIVE' : 'PENDING'})} />
+                                  <input type="checkbox" className="hidden" checked={editingItem.status === 'EFFECTIVE'} onChange={e = aria-label="Selecionar" /> setEditingItem({...editingItem!, status: e.target.checked ? 'EFFECTIVE' : 'PENDING'})} />
                                   <span className="font-bold text-xs">{editingItem.status === 'EFFECTIVE' ? 'EFETIVADO' : 'PENDENTE'}</span>
                                   {editingItem.status === 'EFFECTIVE' && <CheckCircle size={14}/>}
                               </label>

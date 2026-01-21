@@ -70,7 +70,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={onClose} className="p-3 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-3 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full transition-colors" aria-label="Fechar" title="Fechar">
                             <X size={24} className="text-gray-400" />
                         </button>
                     </div>

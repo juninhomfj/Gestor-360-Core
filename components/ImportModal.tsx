@@ -108,7 +108,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
             <h2 className="text-lg md:text-xl font-bold flex items-center gap-2"><Table size={20} className="text-emerald-500"/> Importar de Planilha</h2>
             <p className="text-xs md:text-sm opacity-60">Associe as colunas do seu arquivo aos campos do sistema.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"><X size={24} /></button>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" aria-label="Fechar" title="Fechar"><X size={24} /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin">
@@ -166,7 +166,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
                     <select 
                         className={`w-full text-sm rounded-lg p-2 ${inputBg}`}
                         value={mapping[field.key] ?? -1}
-                        onChange={(e) => handleMapChange(field.key, Number(e.target.value))}
+                        onChange={(e) = aria-label="Selecionar"> handleMapChange(field.key, Number(e.target.value))}
                     >
                         <option value={-1}>-- Ignorar --</option>
                         {headers.map((h, idx) => (

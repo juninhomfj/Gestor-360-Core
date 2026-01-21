@@ -62,7 +62,7 @@ const SyncDetailsModal: React.FC<SyncDetailsModalProps> = ({ isOpen, onClose }) 
                             <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tighter">Integridade e Latência v2.9</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full transition-colors" aria-label="Fechar" title="Fechar">
                         <X size={20} className="text-gray-500" />
                     </button>
                 </div>

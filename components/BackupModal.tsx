@@ -142,7 +142,7 @@ const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, mode, onSucc
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative">
         {!restoreComplete && !isProcessing && (
-            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Fechar" title="Fechar">
                 <X size={24} />
             </button>
         )}
@@ -208,7 +208,7 @@ const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, mode, onSucc
                  {step === 2 && (
                     <div className="absolute inset-0 bg-white p-6 flex flex-col animate-in slide-in-from-right">
                         <h3 className="text-lg font-bold mb-4">Proteger Backup</h3>
-                        <input type="password" placeholder="Crie uma chave (senha)" className="w-full border p-3 rounded-lg mb-4" value={passphrase} onChange={e => setPassphrase(e.target.value)} />
+                        <input type="password" placeholder="Crie uma chave (senha)" aria-label="Crie uma chave (senha)" className="w-full border p-3 rounded-lg mb-4" value={passphrase} onChange={e = /> setPassphrase(e.target.value)} />
                         <button onClick={() => { if(passphrase) { handleBackup().then(() => setTimeout(handleClearFlow, 1000)); } }} className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold">Baixar & Apagar</button>
                         <button onClick={() => setStep(1)} className="mt-2 text-gray-400 text-sm underline text-center w-full">Voltar</button>
                     </div>
@@ -224,7 +224,7 @@ const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, mode, onSucc
                 </div>
                 <div className="space-y-4">
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors relative">
-                        <input type="file" accept=".v360" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setFile(e.target.files ? e.target.files[0] : null)} />
+                        <input type="file" accept=".v360" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e = aria-label="Selecionar arquivo" /> setFile(e.target.files ? e.target.files[0] : null)} />
                         {file ? (
                             <div className="flex flex-col items-center text-emerald-600">
                                 <FileTextIcon />
@@ -238,7 +238,7 @@ const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, mode, onSucc
                         )}
                     </div>
 
-                    <input type="password" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Digite a chave de segurança..." value={passphrase} onChange={e => setPassphrase(e.target.value)} />
+                    <input type="password" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Digite a chave de segurança..." aria-label="Digite a chave de segurança..." value={passphrase} onChange={e = /> setPassphrase(e.target.value)} />
                     
                     {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded font-medium flex items-center justify-center gap-2"><AlertTriangle size={16}/> {error}</p>}
                     
@@ -261,7 +261,7 @@ const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, mode, onSucc
                 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
                     <label className="text-xs font-bold text-blue-800 uppercase mb-1 block">Chave de Segurança</label>
-                    <input type="password" className="w-full border border-blue-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white" placeholder="Crie uma senha para este arquivo..." value={passphrase} onChange={e => setPassphrase(e.target.value)} />
+                    <input type="password" className="w-full border border-blue-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white" placeholder="Crie uma senha para este arquivo..." aria-label="Crie uma senha para este arquivo..." value={passphrase} onChange={e = /> setPassphrase(e.target.value)} />
                     <p className="text-[10px] text-blue-600 mt-1">Você precisará desta senha para restaurar.</p>
                 </div>
 

@@ -63,7 +63,7 @@ const InvitationSentModal: React.FC<InvitationSentModalProps> = ({ email, onClos
         <button 
             onClick={onClose}
             className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
-        >
+         aria-label="Fechar" title="Fechar">
             <X size={20} />
         </button>
       </div>

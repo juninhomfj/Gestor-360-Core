@@ -79,9 +79,9 @@ const ClientSearch: React.FC<ClientSearchProps> = ({ currentUser, darkMode }) =>
                 <input 
                     type="text" 
                     className={`flex-1 p-3 rounded-lg border outline-none ${inputClass}`}
-                    placeholder="Digite o nome do cliente..."
+                    placeholder="Digite o nome do cliente..." aria-label="Digite o nome do cliente..."
                     value={term}
-                    onChange={e => setTerm(e.target.value)}
+                    onChange={e = /> setTerm(e.target.value)}
                 />
                 <button 
                     type="submit" 

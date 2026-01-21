@@ -112,7 +112,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                   <div className="absolute inset-0 bg-black/40 rounded-[2.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                       <Camera size={24} />
                   </div>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoSelect} />
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoSelect} aria-label="Selecionar arquivo" />
               </div>
               <div className="text-center md:text-left flex-1">
                   <h2 className="text-4xl font-black tracking-tighter">{name || 'Seu Nome'}</h2>
@@ -149,7 +149,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">WhatsApp</label>
                         <div className="relative">
                             <Phone size={16} className="absolute left-3 top-3.5 text-gray-500" />
-                            <input className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={tel} onChange={e => setTel(e.target.value)} placeholder="55..." />
+                            <input className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={tel} onChange={e = /> setTel(e.target.value)} placeholder="55..." />
                         </div>
                     </div>
                 </div>
@@ -164,11 +164,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Nome Completo</label>
-                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={name} onChange={e => setName(e.target.value)} />
+                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100" value={name} onChange={e = /> setName(e.target.value)} />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Usuário</label>
-                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-mono dark:text-slate-100" value={username} onChange={e => setUsername(e.target.value)} />
+                        <input className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-mono dark:text-slate-100" value={username} onChange={e = /> setUsername(e.target.value)} />
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                     <select 
                         className="w-full p-4 border rounded-2xl dark:bg-slate-950 dark:border-slate-700 font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                         value={defaultModule}
-                        onChange={e => setDefaultModule(e.target.value)}
+                        onChange={e = aria-label="Selecionar"> setDefaultModule(e.target.value)}
                     >
                         <option value="home">Dashboard Geral (Menu)</option>
                         {SYSTEM_MODULES.filter(m => canAccess(currentUser, m.key) && !hiddenModules[m.key]).map(m => (
@@ -204,7 +204,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                             min={0}
                             className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
                             value={salesTargets.basic === 0 ? '' : salesTargets.basic}
-                            onChange={e => setSalesTargets(prev => ({ ...prev, basic: parseNumericInput(e.target.value) }))}
+                            onChange={e = /> setSalesTargets(prev => ({ ...prev, basic: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                     <div>
@@ -214,7 +214,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                             min={0}
                             className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
                             value={salesTargets.natal === 0 ? '' : salesTargets.natal}
-                            onChange={e => setSalesTargets(prev => ({ ...prev, natal: parseNumericInput(e.target.value) }))}
+                            onChange={e = /> setSalesTargets(prev => ({ ...prev, natal: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                 </div>

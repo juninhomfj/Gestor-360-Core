@@ -147,7 +147,7 @@ const DeduplicationReview: React.FC<DeduplicationReviewProps> = ({
                 <h3 className="text-xl font-bold flex items-center gap-2">
                     <Merge className="text-purple-500" /> Analisar Duplicatas
                 </h3>
-                <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full"><X size={20}/></button>
+                <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full" aria-label="Fechar" title="Fechar"><X size={20}/></button>
             </div>
 
             <div className="flex p-2 gap-2 bg-gray-50 dark:bg-slate-950/50 border-b border-gray-200 dark:border-slate-800 dark:text-slate-100">

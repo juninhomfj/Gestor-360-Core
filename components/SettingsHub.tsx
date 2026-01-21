@@ -534,7 +534,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
 
   return (
     <div className="min-h-[calc(100vh-10rem)] flex flex-col md:flex-row gap-6 relative animate-in fade-in pb-20 overflow-x-hidden">
-       <input type="file" ref={audioInputRef} className="hidden" accept="audio/*" onChange={handleAudioUpload} />
+       <input type="file" ref={audioInputRef} className="hidden" accept="audio/*" onChange={handleAudioUpload} aria-label="Selecionar arquivo" />
        <ReportBugModal 
          isOpen={bugModalOpen} 
          onClose={() => setBugModalOpen(false)} 
@@ -608,7 +608,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Provedor</label>
                                 <select
                                     value={aiProvider}
-                                    onChange={(e) => setAiProvider(e.target.value as 'OPENAI' | 'GEMINI')}
+                                    onChange={(e) = aria-label="Selecionar"> setAiProvider(e.target.value as 'OPENAI' | 'GEMINI')}
                                     className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
                                 >
                                     <option value="OPENAI">OpenAI</option>
@@ -624,7 +624,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                         <input
                                             type={showAiKey ? 'text' : 'password'}
                                             value={aiApiKey}
-                                            onChange={(e) => setAiApiKey(e.target.value)}
+                                            onChange={(e) = /> setAiApiKey(e.target.value)}
                                             placeholder="Cole a chave aqui"
                                             className={`w-full p-3 pr-10 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
                                         />
@@ -648,7 +648,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 <input
                                     type="checkbox"
                                     checked={aiEnabled}
-                                    onChange={(e) => setAiEnabled(e.target.checked)}
+                                    onChange={(e) = aria-label="Selecionar" /> setAiEnabled(e.target.checked)}
                                     className="h-5 w-5 accent-indigo-600"
                                 />
                             </label>
@@ -657,7 +657,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 <input
                                     type="checkbox"
                                     checked={biEnabled}
-                                    onChange={(e) => setBiEnabled(e.target.checked)}
+                                    onChange={(e) = aria-label="Selecionar" /> setBiEnabled(e.target.checked)}
                                     className="h-5 w-5 accent-indigo-600"
                                 />
                             </label>
@@ -669,7 +669,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                   min={1}
                                   max={500}
                                   value={aiDailyLimit === 0 ? '' : aiDailyLimit}
-                                  onChange={(e) => setAiDailyLimit(parseNumericInput(e.target.value))}
+                                  onChange={(e) = /> setAiDailyLimit(parseNumericInput(e.target.value))}
                                   className={`w-full p-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-200'}`}
                               />
                             <p className="text-[10px] text-gray-400 mt-2">Limita a quantidade de chamadas de IA por usuario/dia.</p>
@@ -906,9 +906,9 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     <input
                                         type="text"
                                         className={`flex-1 px-4 py-3 rounded-xl border text-sm font-semibold ${darkMode ? 'bg-black/40 border-slate-700 text-white' : 'bg-white border-gray-200'}`}
-                                        placeholder="Ex.: À vista, PIX, Boleto"
+                                        placeholder="Ex.: À vista, PIX, Boleto" aria-label="Ex.: À vista, PIX, Boleto"
                                         value={paymentMethodInput}
-                                        onChange={e => setPaymentMethodInput(e.target.value)}
+                                        onChange={e = /> setPaymentMethodInput(e.target.value)}
                                     />
                                     <button
                                         onClick={handleAddPaymentMethod}
@@ -991,7 +991,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     step="0.01"
                                     className={`w-full p-3 rounded-xl border outline-none ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200'}`}
                                     value={(systemConfig.avistaLowMarginCommissionPct ?? 0.25) === 0 ? '' : (systemConfig.avistaLowMarginCommissionPct ?? 0.25)}
-                                    onChange={(e) => setSystemConfig({ ...systemConfig, avistaLowMarginCommissionPct: parseNumericInput(e.target.value) })}
+                                    onChange={(e) = /> setSystemConfig({ ...systemConfig, avistaLowMarginCommissionPct: parseNumericInput(e.target.value) })}
                                 />
                             </div>
                         </div>
@@ -1045,7 +1045,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     <input 
                                         type="checkbox" 
                                         checked={soundEnabled} 
-                                        onChange={e => setSoundEnabled(e.target.checked)}
+                                        onChange={e = aria-label="Selecionar" /> setSoundEnabled(e.target.checked)}
                                         className="w-5 h-5 accent-indigo-600"
                                     />
                                 </label>
@@ -1055,7 +1055,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                 <input 
                                     type="range" min="0" max="1" step="0.1"
                                     value={soundVolume}
-                                    onChange={e => setSoundVolume(parseFloat(e.target.value))}
+                                    onChange={e = /> setSoundVolume(parseFloat(e.target.value))}
                                     className="w-full accent-indigo-600"
                                 />
                             </div>
@@ -1157,9 +1157,9 @@ const SoundRow = ({ label, value, onUpload, onTest, onDelete }: any) => (
             <span className="text-[10px] text-gray-500 font-mono tracking-tighter">{value ? '✓ Áudio customizado carregado' : '× Som padrão (Silencioso)'}</span>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-            {value && <button onClick={onTest} className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl hover:scale-110 transition-transform"><Activity size={18}/></button>}
+            {value && <button onClick={onTest} className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl hover:scale-110 transition-transform" aria-label="Acao" title="Acao"><Activity size={18}/></button>}
             <button onClick={onUpload} className="flex-1 sm:flex-none px-5 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-900/20">{value ? 'Trocar' : 'Carregar'}</button>
-            {value && <button onClick={onDelete} className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl hover:bg-red-50 hover:text-white transition-all"><Trash2 size={18}/></button>}
+            {value && <button onClick={onDelete} className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl hover:bg-red-50 hover:text-white transition-all" aria-label="Excluir" title="Excluir"><Trash2 size={18}/></button>}
         </div>
     </div>
 );

@@ -185,11 +185,11 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                     <div className="p-4 rounded-xl border field-contrast space-y-3">
                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Canais</label>
                         <label className="flex items-center gap-2 text-xs font-bold">
-                            <input type="checkbox" checked={useChat} onChange={(e) => setUseChat(e.target.checked)} />
+                            <input type="checkbox" checked={useChat} onChange={(e) = aria-label="Selecionar" /> setUseChat(e.target.checked)} />
                             Chat interno
                         </label>
                         <label className="flex items-center gap-2 text-xs font-bold">
-                            <input type="checkbox" checked={useEmail} onChange={(e) => setUseEmail(e.target.checked)} />
+                            <input type="checkbox" checked={useEmail} onChange={(e) = aria-label="Selecionar" /> setUseEmail(e.target.checked)} />
                             Email
                         </label>
                         {!emailEnabled && useEmail && (
@@ -223,14 +223,14 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                         </div>
                         <div className="flex items-center gap-2">
                             <label className="flex items-center gap-2 text-xs font-bold">
-                                <input type="checkbox" checked={newOnly} onChange={(e) => setNewOnly(e.target.checked)} />
+                                <input type="checkbox" checked={newOnly} onChange={(e) = aria-label="Selecionar" /> setNewOnly(e.target.checked)} />
                                 Apenas novos
                             </label>
                             <input
                                 type="number"
                                 min={1}
                                 value={newDays === 0 ? '' : newDays}
-                                onChange={(e) => setNewDays(parseNumericInput(e.target.value, 1))}
+                                onChange={(e) = /> setNewDays(parseNumericInput(e.target.value, 1))}
                                 className="w-16 px-2 py-1 rounded-lg border text-xs field-contrast"
                             />
                             <span className="text-[10px] text-slate-400">dias</span>
@@ -245,9 +245,9 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                     </div>
                     <input
                         className="w-full p-2.5 rounded-lg outline-none text-sm field-contrast"
-                        placeholder="Buscar usuarios por nome ou email"
+                        placeholder="Buscar usuarios por nome ou email" aria-label="Buscar usuarios por nome ou email"
                         value={searchUsers}
-                        onChange={(e) => setSearchUsers(e.target.value)}
+                        onChange={(e) = /> setSearchUsers(e.target.value)}
                     />
                     <div className="flex flex-wrap gap-2">
                         <button
@@ -272,7 +272,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                                     <input
                                         type="checkbox"
                                         checked={selectedUserIds.includes(u.id)}
-                                        onChange={(e) => {
+                                        onChange={(e) = aria-label="Selecionar" /> {
                                             if (e.target.checked) {
                                                 setSelectedUserIds((prev) => [...prev, u.id]);
                                             } else {
@@ -293,7 +293,7 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Corpo do Comunicado (Markdown)</label>
                         <textarea 
                             className="w-full p-4 rounded-xl border outline-none focus:ring-2 ring-indigo-500 h-32 resize-none field-contrast"
-                            placeholder="Escreva sua mensagem aqui..."
+                            placeholder="Escreva sua mensagem aqui..." aria-label="Escreva sua mensagem aqui..."
                             value={message}
                             onChange={e => setMessage(e.target.value)}
                         />
@@ -305,9 +305,9 @@ const AdminMessaging: React.FC<AdminMessagingProps> = ({ currentUser, darkMode }
                             <ImageIcon className="absolute left-3 top-3 text-gray-500" size={18}/>
                             <input 
                                 className="w-full pl-10 pr-4 py-3 rounded-xl border outline-none focus:ring-2 ring-indigo-500 field-contrast"
-                                placeholder="https://..."
+                                placeholder="https://..." aria-label="https://..."
                                 value={imageUrl}
-                                onChange={e => setImageUrl(e.target.value)}
+                                onChange={e = /> setImageUrl(e.target.value)}
                             />
                         </div>
                     </div>

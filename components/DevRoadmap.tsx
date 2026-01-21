@@ -146,7 +146,7 @@ const DevRoadmap: React.FC = () => {
                                     </p>
                                 </div>
                             </div>
-                            <button onClick={checkHealth} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                            <button onClick={checkHealth} className="p-2 hover:bg-white/10 rounded-lg transition-colors" aria-label="Atualizar" title="Atualizar">
                                 <RefreshCw size={16} className={workerStatus === 'CHECKING' ? 'animate-spin' : ''}/>
                             </button>
                         </div>
@@ -180,7 +180,7 @@ const DevRoadmap: React.FC = () => {
                         <button onClick={() => Logger.downloadLogs()} className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2">
                             <Download size={14}/> Exportar Diagnostico
                         </button>
-                        <button onClick={loadLogs} className="p-2 bg-slate-800 rounded-lg"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
+                        <button onClick={loadLogs} className="p-2 bg-slate-800 rounded-lg" aria-label="Atualizar" title="Atualizar"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
                     </div>
                 </div>
 
@@ -209,19 +209,19 @@ const DevRoadmap: React.FC = () => {
                 <div className="flex flex-col gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
                     <div className="flex flex-col sm:flex-row gap-2">
                         <select 
-                            value={selectedStore} onChange={e => setSelectedStore(e.target.value)}
+                            value={selectedStore} onChange={e = aria-label="Selecionar"> setSelectedStore(e.target.value)}
                             className="bg-slate-800 rounded-lg px-4 py-2 font-bold text-sm text-white"
                         >
                             {STORES.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                         </select>
                         <input 
-                            placeholder="Filtrar localmente..." value={dbFilter} onChange={e => setDbFilter(e.target.value)}
+                            placeholder="Filtrar localmente..." aria-label="Filtrar localmente..." value={dbFilter} onChange={e = /> setDbFilter(e.target.value)}
                             className="flex-1 px-4 py-2 bg-slate-800 rounded-lg text-xs text-white"
                         />
                     </div>
                     <div className="flex gap-2">
                         <button onClick={handleExportCSV} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase">Exportar Tabela</button>
-                        <button onClick={loadTable} className="p-2 bg-slate-800 rounded-lg"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
+                        <button onClick={loadTable} className="p-2 bg-slate-800 rounded-lg" aria-label="Atualizar" title="Atualizar"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
                     </div>
                 </div>
 

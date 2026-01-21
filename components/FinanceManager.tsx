@@ -332,14 +332,14 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                             <PersonTypeToggle value={newAccPersonType} onChange={setNewAccPersonType} />
                             
                             <input 
-                                placeholder="Nome da Conta (ex: Nubank PF)" 
+                                placeholder="Nome da Conta (ex: Nubank PF)" aria-label="Nome da Conta (ex: Nubank PF)" 
                                 className={`w-full p-2 rounded border ${inputClass}`}
-                                value={newAccName} onChange={e => setNewAccName(e.target.value)}
+                                value={newAccName} onChange={e = /> setNewAccName(e.target.value)}
                             />
                             <div className="flex gap-2">
                                 <select 
                                     className={`flex-1 p-2 rounded border ${inputClass}`}
-                                    value={newAccType} onChange={e => setNewAccType(e.target.value as any)}
+                                    value={newAccType} onChange={e = aria-label="Selecionar"> setNewAccType(e.target.value as any)}
                                 >
                                     <option value="CHECKING">Corrente</option>
                                     <option value="SAVINGS">Poupança</option>
@@ -348,9 +348,9 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                                     <option value="INTERNAL">Interna (Cofre)</option>
                                 </select>
                                 <input 
-                                    type="number" placeholder="Saldo Atual" 
+                                    type="number" placeholder="Saldo Atual" aria-label="Saldo Atual" 
                                     className={`flex-1 p-2 rounded border ${inputClass}`}
-                                    value={newAccBalance} onChange={e => setNewAccBalance(e.target.value)}
+                                    value={newAccBalance} onChange={e = /> setNewAccBalance(e.target.value)}
                                 />
                             </div>
                             
@@ -359,7 +359,7 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                                     <input 
                                         type="checkbox" 
                                         checked={newAccIsAccounting}
-                                        onChange={e => setNewAccIsAccounting(e.target.checked)}
+                                        onChange={e = aria-label="Selecionar" /> setNewAccIsAccounting(e.target.checked)}
                                         className="rounded text-blue-600 focus:ring-blue-500"
                                     />
                                     <div className="text-sm">
@@ -372,7 +372,7 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                                     <input 
                                         type="checkbox" 
                                         checked={newAccDistribution}
-                                        onChange={e => setNewAccDistribution(e.target.checked)}
+                                        onChange={e = aria-label="Selecionar" /> setNewAccDistribution(e.target.checked)}
                                         className="rounded text-emerald-600 focus:ring-emerald-500"
                                     />
                                     <div className="text-sm">
@@ -471,23 +471,23 @@ const FinanceManager: React.FC<FinanceManagerProps> = ({
                             <PersonTypeToggle value={newCardPersonType} onChange={setNewCardPersonType} />
 
                             <input 
-                                placeholder="Nome do Cartão (ex: Visa Infinite PJ)" 
+                                placeholder="Nome do Cartão (ex: Visa Infinite PJ)" aria-label="Nome do Cartão (ex: Visa Infinite PJ)" 
                                 className={`w-full p-2 rounded border ${inputClass}`}
-                                value={newCardName} onChange={e => setNewCardName(e.target.value)}
+                                value={newCardName} onChange={e = /> setNewCardName(e.target.value)}
                             />
                             <input 
-                                type="number" placeholder="Limite Total" 
+                                type="number" placeholder="Limite Total" aria-label="Limite Total" 
                                 className={`w-full p-2 rounded border ${inputClass}`}
-                                value={newCardLimit} onChange={e => setNewCardLimit(e.target.value)}
+                                value={newCardLimit} onChange={e = /> setNewCardLimit(e.target.value)}
                             />
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="text-xs text-gray-500 block mb-1">Dia Fechamento</label>
-                                    <input type="number" min="1" max="31" className={`w-full p-2 rounded border ${inputClass}`} value={newCardClosing} onChange={e => setNewCardClosing(e.target.value)}/>
+                                    <input type="number" min="1" max="31" className={`w-full p-2 rounded border ${inputClass}`} value={newCardClosing} onChange={e = /> setNewCardClosing(e.target.value)}/>
                                 </div>
                                 <div>
                                     <label className="text-xs text-gray-500 block mb-1">Dia Vencimento</label>
-                                    <input type="number" min="1" max="31" className={`w-full p-2 rounded border ${inputClass}`} value={newCardDue} onChange={e => setNewCardDue(e.target.value)}/>
+                                    <input type="number" min="1" max="31" className={`w-full p-2 rounded border ${inputClass}`} value={newCardDue} onChange={e = /> setNewCardDue(e.target.value)}/>
                                 </div>
                             </div>
 

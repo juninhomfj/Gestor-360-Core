@@ -86,10 +86,10 @@ const BoletoControl: React.FC<BoletoControlProps> = ({ sales, tasks, onUpdateTas
             <div className="relative">
                 <input 
                     type="text" 
-                    placeholder="Buscar cliente..." 
+                    placeholder="Buscar cliente..." aria-label="Buscar cliente..." 
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+                    onChange={e = /> setSearchTerm(e.target.value)}
                 />
                 <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             </div>
@@ -99,7 +99,7 @@ const BoletoControl: React.FC<BoletoControlProps> = ({ sales, tasks, onUpdateTas
             <select 
                 className="flex-1 border border-gray-300 rounded-lg p-2 text-sm bg-white text-gray-900"
                 value={filterType}
-                onChange={e => setFilterType(e.target.value as any)}
+                onChange={e = aria-label="Selecionar"> setFilterType(e.target.value as any)}
             >
                 <option value="ALL">Todos os Tipos</option>
                 {SALES_TASK_OPTIONS.map(option => (
@@ -110,7 +110,7 @@ const BoletoControl: React.FC<BoletoControlProps> = ({ sales, tasks, onUpdateTas
             <select 
                 className="flex-1 border border-gray-300 rounded-lg p-2 text-sm bg-white text-gray-900 font-bold text-gray-700"
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value as any)}
+                onChange={e = aria-label="Selecionar"> setStatusFilter(e.target.value as any)}
             >
                 <option value="ALL">Todos os Status</option>
                 <option value="OPEN">⏳ Em aberto</option>

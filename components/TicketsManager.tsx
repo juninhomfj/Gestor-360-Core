@@ -374,13 +374,13 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                 <div className="flex flex-col lg:flex-row gap-4">
                     <input
                         value={search}
-                        onChange={e => setSearch(e.target.value)}
+                        onChange={e = /> setSearch(e.target.value)}
                         placeholder="Buscar por módulo, título ou autor"
                         className={`flex-1 px-4 py-3 rounded-2xl border ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-gray-50 border-gray-200'}`}
                     />
                     <select
                         value={statusFilter}
-                        onChange={e => setStatusFilter(e.target.value as any)}
+                        onChange={e = aria-label="Selecionar"> setStatusFilter(e.target.value as any)}
                         className={`px-4 py-3 rounded-2xl border font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-gray-50 border-gray-200'}`}
                     >
                         <option value="ALL">Todos os status</option>
@@ -390,7 +390,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                     </select>
                     <select
                         value={priorityFilter}
-                        onChange={e => setPriorityFilter(e.target.value as any)}
+                        onChange={e = aria-label="Selecionar"> setPriorityFilter(e.target.value as any)}
                         className={`px-4 py-3 rounded-2xl border font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-gray-50 border-gray-200'}`}
                     >
                         <option value="ALL">Todas prioridades</option>
@@ -401,7 +401,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                     </select>
                     <select
                         value={sortBy}
-                        onChange={e => setSortBy(e.target.value as any)}
+                        onChange={e = aria-label="Selecionar"> setSortBy(e.target.value as any)}
                         className={`px-4 py-3 rounded-2xl border font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-gray-50 border-gray-200'}`}
                     >
                         <option value="DATE">Ordenar por data</option>
@@ -493,7 +493,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                     {isAdmin && (
                                         <select
                                             value={selectedTicket.assigneeId || ''}
-                                            onChange={e => handleAssign(e.target.value || undefined)}
+                                            onChange={e = aria-label="Selecionar"> handleAssign(e.target.value || undefined)}
                                             className={`mt-3 w-full px-3 py-2 rounded-xl border text-xs font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-gray-200'}`}
                                         >
                                             <option value="">Sem responsável</option>

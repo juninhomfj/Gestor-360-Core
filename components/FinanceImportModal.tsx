@@ -93,7 +93,7 @@ const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose
                 Mapeie as colunas do seu extrato bancário ou planilha.
             </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" aria-label="Fechar" title="Fechar">
             <X size={24} className="text-gray-500" />
           </button>
         </div>
@@ -133,7 +133,7 @@ const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose
                             <select 
                                 className={`w-full text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 ${inputBg}`}
                                 value={selectedIdx}
-                                onChange={(e) => handleMapChange(field.key, Number(e.target.value))}
+                                onChange={(e) = aria-label="Selecionar"> handleMapChange(field.key, Number(e.target.value))}
                             >
                                 <option value={-1}>-- Ignorar --</option>
                                 {headers.map((h, idx) => (

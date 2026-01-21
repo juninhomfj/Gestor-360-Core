@@ -149,7 +149,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Notifica a engenharia e os administradores.</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full text-gray-500 transition-colors"><X size={24}/></button>
+                        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full text-gray-500 transition-colors" aria-label="Fechar" title="Fechar"><X size={24}/></button>
                     </div>
 
                     <div className="p-8 space-y-6 flex-1 overflow-y-auto">
@@ -163,7 +163,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             <select 
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={module}
-                                onChange={e => setModule(e.target.value)}
+                                onChange={e = aria-label="Selecionar"> setModule(e.target.value)}
                             >
                                 <option>Home / Dashboard</option>
                                 <option>Vendas</option>
@@ -185,7 +185,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             <select
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={priority}
-                                onChange={e => setPriority(e.target.value as TicketPriority)}
+                                onChange={e = aria-label="Selecionar"> setPriority(e.target.value as TicketPriority)}
                             >
                                 <option value="LOW">Baixa</option>
                                 <option value="MEDIUM">Média</option>
@@ -198,7 +198,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">O que aconteceu?</label>
                             <textarea 
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 h-32 resize-none text-sm leading-relaxed field-contrast"
-                                placeholder="Descreva o erro..."
+                                placeholder="Descreva o erro..." aria-label="Descreva o erro..."
                                 value={description}
                                 onChange={e => setDescription(e.target.value)}
                             />
@@ -210,7 +210,7 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                                 <label className="flex items-center gap-2 px-4 py-3 rounded-2xl border text-xs font-bold cursor-pointer btn-soft">
                                     <Paperclip size={16} />
                                     Adicionar arquivo
-                                    <input type="file" className="hidden" onChange={handleAttachmentUpload} />
+                                    <input type="file" className="hidden" onChange={handleAttachmentUpload} aria-label="Selecionar arquivo" />
                                 </label>
                                 {attachments.length > 0 && (
                                     <span className="text-[10px] font-black uppercase text-gray-400">{attachments.length} anexos</span>

@@ -345,14 +345,14 @@ const SalesList: React.FC<SalesListProps> = ({
                           type="date"
                           className={`w-full p-3 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'}`}
                           value={billingDate}
-                          onChange={e => setBillingDate(e.target.value)}
+                          onChange={e = /> setBillingDate(e.target.value)}
                       />
                       <label className="flex items-start gap-3 text-xs text-gray-500">
                           <input
                               type="checkbox"
                               className="mt-0.5 h-4 w-4 accent-emerald-600"
                               checked={createReceivables}
-                              onChange={(e) => setCreateReceivables(e.target.checked)}
+                              onChange={(e) = aria-label="Selecionar" /> setCreateReceivables(e.target.checked)}
                           />
                           <span>
                               Criar recebíveis automaticamente para essas vendas faturadas.
@@ -387,7 +387,7 @@ const SalesList: React.FC<SalesListProps> = ({
               <button disabled={isReadOnly} onClick={handleImportClick} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-emerald-500 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:flex-none dark:text-slate-100" title="Importar XLSX/CSV">
                   <Upload size={20}/>
               </button>
-              <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange}/>
+              <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileChange}/ aria-label="Selecionar arquivo" />
               <button onClick={onClearAll} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl text-amber-500 hover:shadow-lg transition-all sm:flex-none dark:text-slate-100" title="Limpar Cache Local">
                   <RefreshCw size={20}/>
               </button>
@@ -402,13 +402,13 @@ const SalesList: React.FC<SalesListProps> = ({
               <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Pesquisar</label>
               <div className="relative">
                   <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
-                  <input className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} placeholder="Cliente ou Rastreio..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                  <input className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} placeholder="Cliente ou Rastreio..." aria-label="Cliente ou Rastreio..." value={searchTerm} onChange={e = /> setSearchTerm(e.target.value)} />
               </div>
           </div>
           <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Tipo</label>
-                  <select className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={filterType} onChange={e => setFilterType(e.target.value as any)}>
+                  <select className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={filterType} onChange={e = aria-label="Selecionar"> setFilterType(e.target.value as any)}>
                       <option value="ALL">Todas</option>
                       <option value={ProductType.BASICA}>Cesta Básica</option>
                       <option value={ProductType.NATAL}>Cesta de Natal</option>
@@ -416,7 +416,7 @@ const SalesList: React.FC<SalesListProps> = ({
               </div>
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Status</label>
-                  <select className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
+                  <select className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={filterStatus} onChange={e = aria-label="Selecionar"> setFilterStatus(e.target.value as any)}>
                       <option value="ALL">Todos</option>
                       <option value="PENDING">Pendente</option>
                       <option value="BILLED">Faturado</option>
@@ -426,11 +426,11 @@ const SalesList: React.FC<SalesListProps> = ({
           <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Início</label>
-                  <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+                  <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateFrom} onChange={e = /> setDateFrom(e.target.value)} />
               </div>
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Fim</label>
-                  <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateTo} onChange={e => setDateTo(e.target.value)} />
+                  <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateTo} onChange={e = /> setDateTo(e.target.value)} />
               </div>
           </div>
           <div className="md:col-span-2 flex flex-col gap-2 sm:flex-row">
@@ -487,7 +487,7 @@ const SalesList: React.FC<SalesListProps> = ({
               <table className="w-full text-sm text-left">
                   <thead className={`text-[10px] font-black uppercase tracking-widest border-b ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-500'}`}>
                       <tr>
-                          <th className="p-5 w-12"><input disabled={isReadOnly} type="checkbox" onChange={e => setSelectedIds(e.target.checked ? processedSales.map(s => s.id) : [])} checked={selectedIds.length === processedSales.length && processedSales.length > 0} /></th>
+                          <th className="p-5 w-12"><input disabled={isReadOnly} type="checkbox" onChange={e = aria-label="Selecionar" /> setSelectedIds(e.target.checked ? processedSales.map(s => s.id) : [])} checked={selectedIds.length === processedSales.length && processedSales.length > 0} /></th>
                           <th className="p-5">Data</th>
                           <th className="p-5">Cliente</th>
                           <th className="p-5">Tipo</th>
@@ -499,7 +499,7 @@ const SalesList: React.FC<SalesListProps> = ({
                   <tbody className={`divide-y ${darkMode ? 'divide-slate-700' : 'divide-gray-100'}`}>
                       {paginatedSales.map(sale => (
                           <tr key={sale.id} className={`hover:bg-indigo-500/5 transition-colors ${selectedIds.includes(sale.id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
-                              <td className="p-5"><input disabled={isReadOnly} type="checkbox" checked={selectedIds.includes(sale.id)} onChange={() => setSelectedIds(p => p.includes(sale.id) ? p.filter(x => x !== sale.id) : [...p, sale.id])} /></td>
+                              <td className="p-5"><input disabled={isReadOnly} type="checkbox" checked={selectedIds.includes(sale.id)} onChange={() = aria-label="Selecionar" /> setSelectedIds(p => p.includes(sale.id) ? p.filter(x => x !== sale.id) : [...p, sale.id])} /></td>
                               <td className="p-5">
                                   <div className="flex flex-col">
                                       <span className="font-black">{new Date(sale.date || sale.completionDate).toLocaleDateString('pt-BR')}</span>
@@ -541,7 +541,7 @@ const SalesList: React.FC<SalesListProps> = ({
           
           <div className={`p-4 border-t flex flex-col md:flex-row justify-between items-center gap-4 ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
               <div className="flex items-center gap-4">
-                  <select value={itemsPerPage} onChange={e => { setItemsPerPage(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)); setCurrentPage(1); }} className={`p-2 rounded-lg border text-xs font-bold ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white'}`}>
+                  <select value={itemsPerPage} onChange={e = aria-label="Selecionar"> { setItemsPerPage(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)); setCurrentPage(1); }} className={`p-2 rounded-lg border text-xs font-bold ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white'}`}>
                       <option value={25}>25 por página</option>
                       <option value={50}>50 por página</option>
                       <option value="ALL">Ver Todos</option>
@@ -616,14 +616,14 @@ const SalesList: React.FC<SalesListProps> = ({
                               type="checkbox"
                               className="mt-0.5 h-4 w-4 accent-red-600"
                               checked={deleteReceivables}
-                              onChange={(e) => setDeleteReceivables(e.target.checked)}
+                              onChange={(e) = aria-label="Selecionar" /> setDeleteReceivables(e.target.checked)}
                           />
                           <span>
                               Excluir recebíveis vinculados às vendas selecionadas.
                               <span className="block text-[11px] text-gray-400">Não remove cadastro do cliente.</span>
                           </span>
                       </label>
-                      <input type="password" placeholder="Senha de Admin" className={`w-full p-4 rounded-2xl border ${darkMode ? 'bg-black border-slate-700' : 'bg-gray-50'}`} value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} />
+                      <input type="password" placeholder="Senha de Admin" aria-label="Senha de Admin" className={`w-full p-4 rounded-2xl border ${darkMode ? 'bg-black border-slate-700' : 'bg-gray-50'}`} value={passwordConfirm} onChange={e = /> setPasswordConfirm(e.target.value)} />
                       <button onClick={handlePermanentDelete} disabled={isDeleting} className="w-full py-5 bg-red-600 text-white font-black rounded-3xl shadow-xl transition-all">
                           {isDeleting ? <Loader2 className="animate-spin mx-auto"/> : 'CONFIRMAR EXCLUSÃO'}
                       </button>
@@ -665,7 +665,7 @@ const SalesList: React.FC<SalesListProps> = ({
                           <select
                               className={`w-full p-4 rounded-2xl border text-sm ${darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-700'}`}
                               value={taskType}
-                              onChange={(e) => setTaskType(e.target.value as SalesTaskType)}
+                              onChange={(e) = aria-label="Selecionar"> setTaskType(e.target.value as SalesTaskType)}
                           >
                               {SALES_TASK_OPTIONS.map(option => (
                                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -679,7 +679,7 @@ const SalesList: React.FC<SalesListProps> = ({
                               type="date"
                               className={`w-full p-4 rounded-2xl border text-sm ${darkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-700'}`}
                               value={taskDueDate}
-                              onChange={(e) => setTaskDueDate(e.target.value)}
+                              onChange={(e) = /> setTaskDueDate(e.target.value)}
                           />
                       </div>
 

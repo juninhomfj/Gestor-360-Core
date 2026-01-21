@@ -114,10 +114,10 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                <input 
                  type="text"
-                 placeholder="Buscar categoria..."
+                 placeholder="Buscar categoria..." aria-label="Buscar categoria..."
                  className={`w-full pl-9 pr-4 py-2 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 outline-none ${inputBg}`}
                  value={searchTerm}
-                 onChange={e => setSearchTerm(e.target.value)}
+                 onChange={e = /> setSearchTerm(e.target.value)}
                />
            </div>
        </div>
@@ -148,7 +148,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                  className={`w-full border rounded p-2 ${inputBg}`}
                  placeholder={activeTab === 'PF' ? "Ex: Lazer" : "Ex: Escritório"}
                  value={newCatName}
-                 onChange={e => setNewCatName(e.target.value)}
+                 onChange={e = /> setNewCatName(e.target.value)}
                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
                />
            </div>
@@ -165,7 +165,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                     >Saída</button>
                 </div>
            </div>
-           <button onClick={handleAdd} className="bg-blue-600 text-white p-2 rounded h-10 w-full md:w-10 flex items-center justify-center hover:bg-blue-700 shadow-md">
+           <button onClick={handleAdd} className="bg-blue-600 text-white p-2 rounded h-10 w-full md:w-10 flex items-center justify-center hover:bg-blue-700 shadow-md" aria-label="Adicionar" title="Adicionar">
                <Plus size={20} />
            </button>
        </div>
@@ -204,9 +204,9 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                                    <div className="flex gap-2">
                                        <input 
                                          className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
-                                         placeholder="Nova subcategoria..."
+                                         placeholder="Nova subcategoria..." aria-label="Nova subcategoria..."
                                          value={newSubName}
-                                         onChange={e => setNewSubName(e.target.value)}
+                                         onChange={e = /> setNewSubName(e.target.value)}
                                          onKeyDown={e => e.key === 'Enter' && handleAddSubcategory(c.id)}
                                        />
                                        <button onClick={() => handleAddSubcategory(c.id)} className="bg-emerald-600 text-white px-2 rounded text-xs"><Plus size={14}/></button>
@@ -236,7 +236,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                                                     autoFocus
                                                     className={`w-16 p-0.5 rounded border ${inputBg}`}
                                                     value={editingBudget.value}
-                                                    onChange={e => setEditingBudget({...editingBudget, value: e.target.value})}
+                                                    onChange={e = /> setEditingBudget({...editingBudget, value: e.target.value})}
                                                     onKeyDown={e => e.key === 'Enter' && handleSaveBudget()}
                                                     onBlur={handleSaveBudget}
                                                />
@@ -274,9 +274,9 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                                    <div className="flex gap-2">
                                        <input 
                                          className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
-                                         placeholder="Nova subcategoria..."
+                                         placeholder="Nova subcategoria..." aria-label="Nova subcategoria..."
                                          value={newSubName}
-                                         onChange={e => setNewSubName(e.target.value)}
+                                         onChange={e = /> setNewSubName(e.target.value)}
                                          onKeyDown={e => e.key === 'Enter' && handleAddSubcategory(c.id)}
                                        />
                                        <button onClick={() => handleAddSubcategory(c.id)} className="bg-red-600 text-white px-2 rounded text-xs"><Plus size={14}/></button>

@@ -95,7 +95,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                 <CheckCircle className={isIncome ? "text-emerald-500" : "text-red-500"} size={20} />
                 {isIncome ? 'Receber Valor' : 'Pagar Conta'}
             </h3>
-            <button onClick={onClose}><X size={20} className="text-gray-400 hover:text-gray-500"/></button>
+            <button onClick={onClose} aria-label="Fechar" title="Fechar"><X size={20} className="text-gray-400 hover:text-gray-500"/></button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -112,7 +112,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                     type="date" 
                     className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500 ${inputClass}`}
                     value={date}
-                    onChange={e => setDate(e.target.value)}
+                    onChange={e = /> setDate(e.target.value)}
                 />
             </div>
 
@@ -123,7 +123,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                 <select 
                     className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-purple-500 ${inputClass}`}
                     value={accountId}
-                    onChange={e => setAccountId(e.target.value)}
+                    onChange={e = aria-label="Selecionar"> setAccountId(e.target.value)}
                 >
                     {accounts.map(acc => (
                         <option key={acc.id} value={acc.id}>{acc.name} (R$ {acc.balance.toFixed(2)})</option>
@@ -140,7 +140,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                     step="0.01"
                     className={`w-full p-2.5 rounded-lg border outline-none font-bold text-lg ${inputClass}`}
                     value={amount}
-                    onChange={e => setAmount(e.target.value)}
+                    onChange={e = /> setAmount(e.target.value)}
                 />
             </div>
 
@@ -161,7 +161,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                     <button onClick={() => fileInputRef.current?.click()} className={`w-8 h-8 rounded border-2 border-dashed flex items-center justify-center ${darkMode ? 'border-slate-600 hover:border-slate-400' : 'border-gray-300 hover:border-gray-400'}`}>
                         <Paperclip size={14} className="text-gray-500" />
                     </button>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*,application/pdf" onChange={handleFileSelect} />
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*,application/pdf" onChange={handleFileSelect} aria-label="Selecionar arquivo" />
                 </div>
             </div>
         </div>

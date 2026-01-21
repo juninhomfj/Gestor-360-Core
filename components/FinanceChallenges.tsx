@@ -221,7 +221,7 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                           <div>
                               <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Nome do Desafio</label>
                               <input className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
-                                    value={newChalData.name} onChange={e => setNewChalData({...newChalData, name: e.target.value})} placeholder="Ex: Viagem 2026"/>
+                                    value={newChalData.name} onChange={e = /> setNewChalData({...newChalData, name: e.target.value})} placeholder="Ex: Viagem 2026"/>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,13 +230,13 @@ const FinanceChallenges: React.FC<FinanceChallengesProps> = ({ challenges, cells
                                   <div className="relative">
                                     <span className="absolute left-3 top-3 text-slate-500">R$</span>
                                     <input type="number" className={`w-full border rounded p-3 pl-10 outline-none font-bold ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
-                                            value={newChalData.target === 0 ? "" : newChalData.target} onChange={e => setNewChalData({...newChalData, target: parseNumericInput(e.target.value)})}/>
+                                            value={newChalData.target === 0 ? "" : newChalData.target} onChange={e = /> setNewChalData({...newChalData, target: parseNumericInput(e.target.value)})}/>
                                   </div>
                               </div>
                               <div>
                                   <label className={`text-sm font-bold mb-1 block ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Quantidade de Depósitos</label>
                                   <input type="number" className={`w-full border rounded p-3 outline-none ${darkMode ? 'bg-black border-slate-700 text-white focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500'}`} 
-                                        value={newChalData.count === 0 ? "" : newChalData.count} onChange={e => setNewChalData({...newChalData, count: parseNumericInput(e.target.value)})}/>
+                                        value={newChalData.count === 0 ? "" : newChalData.count} onChange={e = /> setNewChalData({...newChalData, count: parseNumericInput(e.target.value)})}/>
                               </div>
                           </div>
 

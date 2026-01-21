@@ -79,7 +79,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
                                 id="login-email"
                                 type="email"
                                 value={identifier}
-                                onChange={e => setIdentifier(e.target.value)}
+                                onChange={e = /> setIdentifier(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 bg-slate-950/50 border border-white/5 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 ring-blue-500/5 transition-all text-sm font-medium"
                                 placeholder="nome@empresa.com"
                                 required
@@ -104,7 +104,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRequestReset }) => {
                                 id="login-password"
                                 type="password"
                                 value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                onChange={e = /> setPassword(e.target.value)}
                                 className="w-full pl-12 pr-4 py-4 bg-slate-950/50 border border-white/5 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 ring-blue-500/5 transition-all text-sm font-medium"
                                 placeholder="••••••••"
                                 required
