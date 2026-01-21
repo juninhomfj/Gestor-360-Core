@@ -168,7 +168,7 @@ export interface Ticket {
 
 export interface CommissionRule {
   id: string;
-  minPercent: number;
+  minPercent: number | null;
   maxPercent: number | null;
   commissionRate: number;
   isActive: boolean;

@@ -45,7 +45,7 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
         unsubscribeFn = subscribeToCommissionRules(type, (newRules) => {
             const normalized = (newRules || []).map(r => ({
                 ...r,
-                minPercent: Number(r.minPercent),
+                minPercent: r.minPercent === null ? null : Number(r.minPercent),
                 maxPercent: r.maxPercent === null ? null : Number(r.maxPercent),
                 commissionRate: formatRateForDisplay(Number(r.commissionRate))
             }));
@@ -139,8 +139,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
         if (Array.isArray(imported)) {
           setRules(imported.map((r, i) => ({
             id: `imp_${Date.now()}_${i}`,
-            minPercent: Number(r.minPercent || 0),
-            maxPercent: r.maxPercent ?? null,
+            minPercent: r.minPercent === null || r.minPercent === undefined ? null : Number(r.minPercent),
+            maxPercent: r.maxPercent === null || r.maxPercent === undefined ? null : Number(r.maxPercent),
             commissionRate: formatRateForDisplay(Number(r.commissionRate || 0)),
             isActive: true
           })));
@@ -231,9 +231,10 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                             <td className="p-4">
                                 <input 
                                     type="number" step="0.01"
+                                    placeholder="Sem limite"
                                     className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full"
-                                    value={rule.minPercent === 0 ? "" : rule.minPercent} 
-                                    onChange={(e) => handleFieldChange(rule.id, 'minPercent', parseNumericInput(e.target.value))}
+                                    value={rule.minPercent} 
+                                    onChange={(e) => handleFieldChange(rule.id, 'minPercent', parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
                                 />
                             </td>
