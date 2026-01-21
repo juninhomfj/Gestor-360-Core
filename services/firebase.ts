@@ -4,7 +4,8 @@ import {
   getFirestore,
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager
+  persistentMultipleTabManager,
+  persistentSingleTabManager
 } from "firebase/firestore";
 import { getMessaging, isSupported } from "firebase/messaging";
 import { getFunctions } from "firebase/functions";
@@ -53,16 +54,13 @@ export const firebaseConfig = {
 const hasRequired = Boolean(firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId);
 
 if (!hasRequired) {
-  console.error(
-    "[Firebase] Variáveis ausentes. Confirme .env/.env.local e reinicie o Vite.",
-    {
-      hasApiKey: Boolean(firebaseConfig.apiKey),
-      hasAuthDomain: Boolean(firebaseConfig.authDomain),
-      hasProjectId: Boolean(firebaseConfig.projectId),
-      mode: import.meta.env.MODE,
-      baseUrl: import.meta.env.BASE_URL
-    }
-  );
+  console.error("[Firebase] Variáveis ausentes. Confirme .env/.env.local e reinicie o Vite.", {
+    hasApiKey: Boolean(firebaseConfig.apiKey),
+    hasAuthDomain: Boolean(firebaseConfig.authDomain),
+    hasProjectId: Boolean(firebaseConfig.projectId),
+    mode: import.meta.env.MODE,
+    baseUrl: import.meta.env.BASE_URL
+  });
 
   throw new Error(
     "Firebase não inicializou: variáveis de ambiente ausentes. Verifique o .env/.env.local e reinicie (npm run dev)."
@@ -86,8 +84,14 @@ if (typeof window !== "undefined") {
       provider: new ReCaptchaV3Provider(recaptchaKey),
       isTokenAutoRefreshEnabled: true
     });
-  } else if (DEV) {
-    console.warn("🛠️ [AppCheck] Ignorado: chave reCAPTCHA ausente.");
+  } else {
+    // aviso leve em prod também (não quebra), porque se AppCheck estiver "enforced" no console,
+    // pode bloquear chamadas do Firestore/Functions sem token válido.
+    if (DEV) {
+      console.warn("🛠️ [AppCheck] Ignorado: chave reCAPTCHA ausente.");
+    } else {
+      console.warn("[AppCheck] Não inicializado (chave reCAPTCHA ausente).");
+    }
   }
 }
 
@@ -98,15 +102,29 @@ setPersistence(auth, browserLocalPersistence).catch((e) => {
 });
 
 export const db = (() => {
+  // ✅ Inicialização cirúrgica com fallback em camadas:
+  // 1) cache persistente + multi-tab
+  // 2) cache persistente + single-tab (mais compatível com iOS/Safari)
+  // 3) sem cache persistente (getFirestore)
   try {
     return initializeFirestore(app, {
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager()
       })
     });
-  } catch (e) {
-    if (DEV) console.warn("[Firestore] Fallback para getFirestore() (cache persistente indisponível).", e);
-    return getFirestore(app);
+  } catch (e1) {
+    if (DEV) console.warn("[Firestore] Multi-tab cache indisponível. Tentando single-tab...", e1);
+
+    try {
+      return initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentSingleTabManager()
+        })
+      });
+    } catch (e2) {
+      if (DEV) console.warn("[Firestore] Fallback para getFirestore() (cache persistente indisponível).", e2);
+      return getFirestore(app);
+    }
   }
 })();
 
