@@ -31,7 +31,12 @@ const ToastItem: React.FC<{ toast: ToastMessage; onRemove: (id: string) => void;
 
   useEffect(() => {
     // If mute options are open, prevent auto-close
-    if (showMuteOptions) return;
+    if (showMuteOptions) {
+      setIsFading(false);
+      return;
+    }
+
+    setIsFading(false);
 
     // Start fade out shortly before removal
     const fadeTimer = setTimeout(() => {

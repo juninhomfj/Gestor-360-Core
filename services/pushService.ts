@@ -3,6 +3,7 @@ import { initMessaging } from "./firebase";
 import { updateUser } from "./auth";
 import { httpsCallable } from "firebase/functions";
 import { functions, firebaseConfig, auth } from "./firebase";
+import { networkFetch } from "./networkControl";
 
 // Chave VAPID para notificações push
 const VAPID_KEY = (import.meta as any).env?.VITE_FIREBASE_VAPID_KEY || "BPEW_REPLACE_WITH_YOUR_ACTUAL_PUBLIC_VAPID_KEY_FROM_FIREBASE_CONSOLE";
@@ -87,14 +88,14 @@ export const sendPushNotification = async (
         }
         try {
             const url = `https://us-central1-${projectId}.cloudfunctions.net/sendFcmNotificationHttp`;
-            const res = await fetch(url, {
+            const res = await networkFetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify(payload)
-            });
+            }, { lockKey: `push:${targetUserId}:${title}` });
             if (!res.ok && (import.meta as any).env?.DEV) {
                 console.error("[Push] Falha ao enviar notificacao (http):", res.status);
             }

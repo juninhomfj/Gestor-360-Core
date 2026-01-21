@@ -231,6 +231,13 @@ const App: React.FC = () => {
     }, [activeTab, currentUser]);
 
     useEffect(() => {
+        if (activeTab !== 'dev_roadmap') return;
+        if (isDev) return;
+        setActiveTab('home');
+        localStorage.setItem('sys_last_tab', 'home');
+    }, [activeTab, isDev]);
+
+    useEffect(() => {
         if (!currentUser) return;
         const localChat = parseLastSeen(localStorage.getItem('sys_last_seen_chat') || undefined);
         const localTickets = parseLastSeen(localStorage.getItem('sys_last_seen_tickets') || undefined);

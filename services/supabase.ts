@@ -1,14 +1,34 @@
 let client: any | null = null;
 let clientPromise: Promise<any | null> | null = null;
+let envWarned = false;
+
+const readSupabaseEnv = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+  return { url, anonKey };
+};
+
+export const validateSupabaseEnv = () => {
+  const { url, anonKey } = readSupabaseEnv();
+  const ok = Boolean(url && anonKey);
+  if (!ok && !envWarned) {
+    envWarned = true;
+    console.warn('[Supabase] Variáveis ausentes no ambiente.', {
+      hasUrl: Boolean(url),
+      hasAnonKey: Boolean(anonKey),
+      mode: import.meta.env.MODE
+    });
+  }
+  return { ok, url, anonKey };
+};
 
 export const getSupabase = async () => {
   if (client) return client;
   if (clientPromise) return clientPromise;
 
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+  const { url, anonKey, ok } = validateSupabaseEnv();
 
-  if (!url || !anonKey) {
+  if (!ok) {
     return null;
   }
 

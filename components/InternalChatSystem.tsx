@@ -19,6 +19,7 @@ import { listUsers } from '../services/auth';
 import { base64ToBlob, fileToBase64 } from '../utils/fileHelper';
 import { getSupabase } from '../services/supabase';
 import { klipySearch, klipyTrending, resolveKlipyPreviewUrl, KlipyItem } from '../services/klipy';
+import { networkFetch } from '../services/networkControl';
 
 interface InternalChatSystemProps {
   currentUser: User;
@@ -51,7 +52,7 @@ const getAudioContext = (ref: React.MutableRefObject<AudioContext | null>) => {
 };
 
 const decodeAudioBuffer = async (url: string, audioCtx: AudioContext) => {
-  const res = await fetch(url);
+  const res = await networkFetch(url, {}, { lockKey: `audio:${url}` });
   const buffer = await res.arrayBuffer();
   return await audioCtx.decodeAudioData(buffer.slice(0));
 };

@@ -1,3 +1,5 @@
+import { networkFetch } from "./networkControl";
+
 type KlipyKind = "gifs" | "stickers" | "emojis";
 
 export type KlipyItem = {
@@ -54,7 +56,7 @@ export const klipyTrending = async (kind: KlipyKind, customerId: string, page = 
     customer_id: customerId,
     locale,
   });
-  const res = await fetch(url);
+  const res = await networkFetch(url, {}, { lockKey: url });
   if (!res.ok) throw new Error(`Klipy ${kind} trending falhou (${res.status}).`);
   const data = await res.json();
   return {
@@ -82,7 +84,7 @@ export const klipySearch = async (
     locale,
     content_filter: "medium",
   });
-  const res = await fetch(url);
+  const res = await networkFetch(url, {}, { lockKey: url });
   if (!res.ok) throw new Error(`Klipy ${kind} search falhou (${res.status}).`);
   const data = await res.json();
   return {
