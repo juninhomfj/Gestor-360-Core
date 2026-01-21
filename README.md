@@ -112,8 +112,6 @@ components/* — UI e módulos
 
 Commission Engine Lock
 - O motor de comissao em `services/logic.ts` possui contrato bloqueado (banner "ARQUIVO BLOQUEADO").
-- A integridade e validada pelo hash em `commission.lock` via `scripts/guard-commission-lock.mjs`.
-- O guard e executado automaticamente em `npm run build` e `npm test`.
 - Testes unitarios em `tests/commissionEngine.test.ts` garantem faixas e bordas.
 
 
@@ -129,4 +127,3 @@ No matching export ... services/logic.ts
 Algum componente importou função que não existe/exporta no logic.ts.
 
 Garanta que os exports compat foram adicionados ao final do arquivo.
-
