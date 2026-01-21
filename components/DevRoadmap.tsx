@@ -209,13 +209,13 @@ const DevRoadmap: React.FC = () => {
                 <div className="flex flex-col gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
                     <div className="flex flex-col sm:flex-row gap-2">
                         <select 
-                            value={selectedStore} onChange={e = aria-label="Selecionar"> setSelectedStore(e.target.value)}
+                            value={selectedStore} onChange={e => setSelectedStore(e.target.value)}
                             className="bg-slate-800 rounded-lg px-4 py-2 font-bold text-sm text-white"
                         >
                             {STORES.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                         </select>
                         <input 
-                            placeholder="Filtrar localmente..." aria-label="Filtrar localmente..." value={dbFilter} onChange={e = /> setDbFilter(e.target.value)}
+                            placeholder="Filtrar localmente..." aria-label="Filtrar localmente..." value={dbFilter} onChange={e => setDbFilter(e.target.value)}
                             className="flex-1 px-4 py-2 bg-slate-800 rounded-lg text-xs text-white"
                         />
                     </div>

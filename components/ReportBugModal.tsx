@@ -163,7 +163,8 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             <select 
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={module}
-                                onChange={e = aria-label="Selecionar"> setModule(e.target.value)}
+                                onChange={e => setModule(e.target.value)}
+                                aria-label="Selecionar"
                             >
                                 <option>Home / Dashboard</option>
                                 <option>Vendas</option>
@@ -185,7 +186,8 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
                             <select
                                 className="w-full p-4 rounded-2xl outline-none focus:ring-2 ring-red-500/50 font-bold field-contrast"
                                 value={priority}
-                                onChange={e = aria-label="Selecionar"> setPriority(e.target.value as TicketPriority)}
+                                onChange={e => setPriority(e.target.value as TicketPriority)}
+                                aria-label="Selecionar"
                             >
                                 <option value="LOW">Baixa</option>
                                 <option value="MEDIUM">Média</option>

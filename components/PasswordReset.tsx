@@ -62,7 +62,7 @@ const PasswordReset: React.FC<PasswordResetProps> = ({ onSuccess, userId }) => {
                             className="w-full bg-slate-900 border border-slate-600 rounded-lg py-3 pl-10 text-white focus:border-emerald-500 outline-none transition-colors"
                             placeholder="Mínimo 6 caracteres" aria-label="Mínimo 6 caracteres"
                             value={password}
-                            onChange={e = /> setPassword(e.target.value)}
+                            onChange={e => setPassword(e.target.value)}
                             autoFocus
                         />
                     </div>
@@ -77,7 +77,7 @@ const PasswordReset: React.FC<PasswordResetProps> = ({ onSuccess, userId }) => {
                             className="w-full bg-slate-900 border border-slate-600 rounded-lg py-3 pl-10 text-white focus:border-emerald-500 outline-none transition-colors"
                             placeholder="Repita a senha" aria-label="Repita a senha"
                             value={confirm}
-                            onChange={e = /> setConfirm(e.target.value)}
+                            onChange={e => setConfirm(e.target.value)}
                         />
                     </div>
                 </div>

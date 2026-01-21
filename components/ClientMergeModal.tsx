@@ -99,7 +99,7 @@ const ClientMergeModal: React.FC<ClientMergeModalProps> = ({
                                         name="masterSelect" 
                                         value={client.id} 
                                         checked={selectedMasterId === client.id}
-                                        onChange={() = aria-label="Selecionar" /> setSelectedMasterId(client.id)}
+                                        onChange={() => setSelectedMasterId(client.id)}
                                         className="w-5 h-5 text-indigo-600 mr-3"
                                     />
                                     <div className="flex-1">
@@ -119,7 +119,7 @@ const ClientMergeModal: React.FC<ClientMergeModalProps> = ({
                             type="text" 
                             className={`w-full p-3 rounded-lg border outline-none focus:ring-2 focus:ring-indigo-500 ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'}`}
                             value={finalName}
-                            onChange={e = /> setFinalName(e.target.value)}
+                            onChange={e => setFinalName(e.target.value)}
                         />
                         <p className="text-xs text-gray-500 mt-1">Este nome será aplicado a todas as vendas.</p>
                     </div>

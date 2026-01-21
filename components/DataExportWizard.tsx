@@ -116,7 +116,7 @@ const DataExportWizard: React.FC<DataExportWizardProps> = ({ onClose }) => {
                                         placeholder="Senha para o arquivo" aria-label="Senha para o arquivo" 
                                         className="border rounded px-3 py-1.5 text-sm w-40 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100"
                                         value={backupPass}
-                                        onChange={e = /> setBackupPass(e.target.value)}
+                                        onChange={e => setBackupPass(e.target.value)}
                                     />
                                     <button onClick={handleFullBackup} disabled={loading} className="px-4 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm">
                                         {loading ? 'Gerando...' : 'Baixar Backup'}

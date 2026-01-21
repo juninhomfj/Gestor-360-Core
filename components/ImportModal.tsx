@@ -166,7 +166,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
                     <select 
                         className={`w-full text-sm rounded-lg p-2 ${inputBg}`}
                         value={mapping[field.key] ?? -1}
-                        onChange={(e) = aria-label="Selecionar"> handleMapChange(field.key, Number(e.target.value))}
+                        onChange={(e) => handleMapChange(field.key, Number(e.target.value))}
                     >
                         <option value={-1}>-- Ignorar --</option>
                         {headers.map((h, idx) => (

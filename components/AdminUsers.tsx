@@ -140,11 +140,11 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Nome do Usuário</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100" value={newName} onChange={e = /> setNewName(e.target.value)} placeholder="Ex: João Silva" />
+                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: João Silva" />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">E-mail Corporativo</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 disabled:opacity-50 dark:text-slate-100" value={newEmail} onChange={e = /> setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
+                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 disabled:opacity-50 dark:text-slate-100" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
                     </div>
                 </div>
 

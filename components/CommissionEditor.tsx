@@ -236,10 +236,10 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                             <td className="p-4">
                                 <input 
                                     type="number" step="0.01"
-                                    placeholder="Sem limite" aria-label="Sem limite"
+                                    placeholder="Sem limite"
                                     className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full"
                                     value={rule.minPercent} 
-                                    onChange={(e) = /> handleFieldChange(rule.id, 'minPercent', parseFloat(e.target.value))}
+                                    onChange={(e) => handleFieldChange(rule.id, 'minPercent', parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
                                     aria-label="Margem mínima"
                                     title="Margem mínima"
@@ -248,10 +248,10 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                             <td className="p-4">
                                 <input 
                                     type="number" step="0.01" 
-                                    placeholder="Sem limite" aria-label="Sem limite"
+                                    placeholder="Sem limite"
                                     className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full"
                                     value={rule.maxPercent === null ? '' : rule.maxPercent} 
-                                    onChange={(e) = /> handleFieldChange(rule.id, 'maxPercent', e.target.value === '' ? null : parseFloat(e.target.value))}
+                                    onChange={(e) => handleFieldChange(rule.id, 'maxPercent', e.target.value === '' ? null : parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
                                     aria-label="Margem máxima"
                                     title="Margem máxima"
@@ -263,7 +263,7 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                         type="number" step="0.01"
                                         className="bg-transparent font-black text-emerald-600 dark:text-emerald-400 outline-none w-24 text-right"
                                         value={rule.commissionRate === 0 ? "" : rule.commissionRate} 
-                                        onChange={(e) = /> handleFieldChange(rule.id, 'commissionRate', parseNumericInput(e.target.value))}
+                                        onChange={(e) => handleFieldChange(rule.id, 'commissionRate', parseNumericInput(e.target.value))}
                                         disabled={readOnly || !isAdminOrDev}
                                         aria-label="Comissão percentual"
                                         title="Comissão percentual"

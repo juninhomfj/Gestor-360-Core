@@ -132,7 +132,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
                   <button onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-indigo-700">
                       {isImporting ? <Loader2 size={16} className="animate-spin"/> : <Upload size={16}/>} Importar
                   </button>
-                  <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.csv" onChange={async (e) = aria-label="Selecionar arquivo" /> {
+                  <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.csv" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       setIsImporting(true);
@@ -149,7 +149,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
           <div className={`p-4 rounded-xl border flex flex-col md:flex-row gap-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
               <div className="flex-1">
                   <label className="block text-[10px] font-black uppercase text-gray-400 mb-1">Tipo</label>
-                  <select value={filterType} onChange={e = aria-label="Selecionar"> setFilterType(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}>
+                  <select value={filterType} onChange={e => setFilterType(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}>
                       <option value="ALL">Todos</option>
                       <option value="INCOME">Receitas</option>
                       <option value="EXPENSE">Despesas</option>
@@ -158,7 +158,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
               </div>
               <div className="flex-1">
                   <label className="block text-[10px] font-black uppercase text-gray-400 mb-1">Mês</label>
-                  <input type="month" value={filterMonth} onChange={e = /> setFilterMonth(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}/>
+                  <input type="month" value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}/>
               </div>
           </div>
 
@@ -168,7 +168,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
                       <thead className={`text-[10px] font-black uppercase tracking-widest ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-600'}`}>
                           <tr>
                               <th className="p-4 w-10 text-center">
-                                  <input type="checkbox" onChange={e = aria-label="Selecionar" /> setSelectedIds(e.target.checked ? filtered.map(t => t.id) : [])} checked={selectedIds.length === filtered.length && filtered.length > 0} />
+                                  <input type="checkbox" onChange={e => setSelectedIds(e.target.checked ? filtered.map(t => t.id) : [])} checked={selectedIds.length === filtered.length && filtered.length > 0} />
                               </th>
                               <th className="p-4 w-10">Audit</th>
                               <th className="p-4">Data</th>
@@ -182,7 +182,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
                           {paginatedTransactions.map(t => (
                               <tr key={t.id} className={`${darkMode ? 'hover:bg-slate-800/50' : 'hover:bg-gray-50'} ${t.reconciled ? 'opacity-60' : ''} ${selectedIds.includes(t.id) ? 'bg-indigo-500/10' : ''}`}>
                                   <td className="p-4 text-center">
-                                      <input type="checkbox" checked={selectedIds.includes(t.id)} onChange={() = aria-label="Selecionar" /> setSelectedIds(prev => prev.includes(t.id) ? prev.filter(id => id !== t.id) : [...prev, t.id])} />
+                                      <input type="checkbox" checked={selectedIds.includes(t.id)} onChange={() => setSelectedIds(prev => prev.includes(t.id) ? prev.filter(id => id !== t.id) : [...prev, t.id])} />
                                   </td>
                                   <td className="p-4 text-center">
                                       <button 

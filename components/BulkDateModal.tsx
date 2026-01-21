@@ -78,7 +78,7 @@ const BulkDateModal: React.FC<BulkDateModalProps> = ({ isOpen, onClose, onConfir
                         <label className="block text-sm mb-1">Tipo de Venda</label>
                         <select 
                             value={filterType}
-                            onChange={(e) = aria-label="Selecionar"> setFilterType(e.target.value as any)}
+                            onChange={(e) => setFilterType(e.target.value as any)}
                             className={`w-full p-2 rounded border text-sm ${inputBg}`}
                         >
                             <option value="ALL">Todos os Tipos</option>
@@ -92,7 +92,7 @@ const BulkDateModal: React.FC<BulkDateModalProps> = ({ isOpen, onClose, onConfir
                         <input 
                             type="date" 
                             value={launchDateFrom}
-                            onChange={(e) = /> setLaunchDateFrom(e.target.value)}
+                            onChange={(e) => setLaunchDateFrom(e.target.value)}
                             className={`w-full p-2 rounded border text-sm ${inputBg}`}
                         />
                     </div>
@@ -101,7 +101,7 @@ const BulkDateModal: React.FC<BulkDateModalProps> = ({ isOpen, onClose, onConfir
                         <input 
                             type="checkbox" 
                             checked={onlyEmpty}
-                            onChange={(e) = aria-label="Selecionar" /> setOnlyEmpty(e.target.checked)}
+                            onChange={(e) => setOnlyEmpty(e.target.checked)}
                             className="rounded text-emerald-600 focus:ring-emerald-500"
                         />
                         <span className="text-sm">Considerar apenas vendas <strong>sem data</strong> de faturamento</span>
@@ -121,7 +121,7 @@ const BulkDateModal: React.FC<BulkDateModalProps> = ({ isOpen, onClose, onConfir
                     <input 
                         type="date" 
                         value={targetDate}
-                        onChange={(e) = /> setTargetDate(e.target.value)}
+                        onChange={(e) => setTargetDate(e.target.value)}
                         className={`w-full p-2 rounded border text-sm ring-2 ring-emerald-500/20 ${inputBg}`}
                     />
                 </div>

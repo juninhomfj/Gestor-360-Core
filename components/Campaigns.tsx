@@ -163,7 +163,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
         <div className="grid md:grid-cols-2 gap-4 mt-6">
           <div>
             <label className="text-xs font-bold uppercase opacity-70">Nome</label>
-            <input className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={name} onChange={e = /> setName(e.target.value)} />
+            <input className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={name} onChange={e => setName(e.target.value)} />
           </div>
           <div>
             <label className="text-xs font-bold uppercase opacity-70">Tipo</label>
@@ -173,11 +173,11 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
           </div>
           <div>
             <label className="text-xs font-bold uppercase opacity-70">Início (YYYY-MM)</label>
-            <input type="month" className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={startMonth} onChange={e = /> setStartMonth(e.target.value)} />
+            <input type="month" className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={startMonth} onChange={e => setStartMonth(e.target.value)} />
           </div>
           <div>
             <label className="text-xs font-bold uppercase opacity-70">Fim (YYYY-MM)</label>
-            <input type="month" className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={endMonth} onChange={e = /> setEndMonth(e.target.value)} />
+            <input type="month" className={`w-full p-3 rounded-xl border mt-1 ${inputClass}`} value={endMonth} onChange={e => setEndMonth(e.target.value)} />
           </div>
         </div>
 
@@ -207,7 +207,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
                   value={tier.from === 0 ? "" : tier.from}
-                  onChange={e = /> setTiers(prev => prev.map((t, i) => i === idx ? { ...t, from: parseNumericInput(e.target.value) } : t))}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, from: parseNumericInput(e.target.value) } : t))}
                   placeholder="De (%)"
                 />
                 <input
@@ -215,7 +215,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
                   value={tier.to === 0 ? "" : tier.to}
-                  onChange={e = /> setTiers(prev => prev.map((t, i) => i === idx ? { ...t, to: parseNumericInput(e.target.value) } : t))}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, to: parseNumericInput(e.target.value) } : t))}
                   placeholder="Até (%)"
                 />
                 <input
@@ -223,7 +223,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
                   step="0.01"
                   className={`p-3 rounded-xl border ${inputClass}`}
                   value={tier.commissionPct === 0 ? "" : tier.commissionPct}
-                  onChange={e = /> setTiers(prev => prev.map((t, i) => i === idx ? { ...t, commissionPct: parseNumericInput(e.target.value) } : t))}
+                  onChange={e => setTiers(prev => prev.map((t, i) => i === idx ? { ...t, commissionPct: parseNumericInput(e.target.value) } : t))}
                   placeholder="Comissão (%)"
                 />
               </div>
@@ -246,7 +246,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ currentUser, darkMode = true, onN
             type="month"
             className={`p-2 rounded-lg border text-xs font-bold ${inputClass}`}
             value={filterMonth}
-            onChange={e = /> setFilterMonth(e.target.value)}
+            onChange={e => setFilterMonth(e.target.value)}
             placeholder="YYYY-MM"
           />
         </div>

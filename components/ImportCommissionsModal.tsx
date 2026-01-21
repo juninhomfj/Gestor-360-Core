@@ -218,7 +218,7 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                         <select 
                             className={`w-full p-2 rounded border ${inputClass}`}
                             value={selectedPeriodBasic}
-                            onChange={e = aria-label="Selecionar"> setSelectedPeriodBasic(e.target.value)}
+                            onChange={e => setSelectedPeriodBasic(e.target.value)}
                         >
                             <option value="">-- Selecione --</option>
                             {availableBasicPeriods.map(p => (
@@ -239,7 +239,7 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                         <select 
                             className={`w-full p-2 rounded border ${inputClass}`}
                             value={selectedYearNatal}
-                            onChange={e = aria-label="Selecionar"> setSelectedYearNatal(e.target.value)}
+                            onChange={e => setSelectedYearNatal(e.target.value)}
                         >
                             <option value="">-- Selecione --</option>
                             {availableNatalYears.map(y => (
@@ -262,7 +262,7 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                                 type="date" 
                                 className={`w-full p-2 rounded border ${inputClass}`}
                                 value={customStart}
-                                onChange={e = /> setCustomStart(e.target.value)}
+                                onChange={e => setCustomStart(e.target.value)}
                             />
                         </div>
                         <div>
@@ -271,7 +271,7 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                                 type="date" 
                                 className={`w-full p-2 rounded border ${inputClass}`}
                                 value={customEnd}
-                                onChange={e = /> setCustomEnd(e.target.value)}
+                                onChange={e => setCustomEnd(e.target.value)}
                             />
                         </div>
                     </div>
@@ -302,7 +302,7 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                         min="1" 
                         max="100" 
                         value={importPercentage} 
-                        onChange={e = /> setImportPercentage(Number(e.target.value))}
+                        onChange={e => setImportPercentage(Number(e.target.value))}
                         className="flex-1 accent-indigo-600 cursor-pointer"
                     />
                     <div className="w-20 text-right">
@@ -327,14 +327,14 @@ const ImportCommissionsModal: React.FC<ImportCommissionsModalProps> = ({ isOpen,
                             placeholder="Descrição" aria-label="Descrição"
                             className={`flex-1 p-2 text-sm rounded border ${inputClass}`}
                             value={deductionDesc}
-                            onChange={e = /> setDeductionDesc(e.target.value)}
+                            onChange={e => setDeductionDesc(e.target.value)}
                         />
                         <input 
                             type="number"
                             placeholder="R$" aria-label="R$"
                             className={`w-24 p-2 text-sm rounded border ${inputClass}`}
                             value={deductionAmount}
-                            onChange={e = /> setDeductionAmount(e.target.value)}
+                            onChange={e => setDeductionAmount(e.target.value)}
                         />
                         <button 
                             onClick={handleAddDeduction}

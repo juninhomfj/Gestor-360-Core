@@ -133,7 +133,7 @@ const FinanceImportModal: React.FC<FinanceImportModalProps> = ({ isOpen, onClose
                             <select 
                                 className={`w-full text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 ${inputBg}`}
                                 value={selectedIdx}
-                                onChange={(e) = aria-label="Selecionar"> handleMapChange(field.key, Number(e.target.value))}
+                                onChange={(e) => handleMapChange(field.key, Number(e.target.value))}
                             >
                                 <option value={-1}>-- Ignorar --</option>
                                 {headers.map((h, idx) => (

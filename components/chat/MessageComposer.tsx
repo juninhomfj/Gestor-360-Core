@@ -49,7 +49,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
           type="file"
           multiple
           className="hidden"
-          onChange={(event) = aria-label="Selecionar arquivo" /> {
+          onChange={(event) => {
             if (event.target.files) {
               onFilesSelected(event.target.files);
               event.target.value = '';

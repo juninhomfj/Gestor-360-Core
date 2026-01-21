@@ -112,7 +112,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                     type="date" 
                     className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500 ${inputClass}`}
                     value={date}
-                    onChange={e = /> setDate(e.target.value)}
+                    onChange={e => setDate(e.target.value)}
                 />
             </div>
 
@@ -123,7 +123,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                 <select 
                     className={`w-full p-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-purple-500 ${inputClass}`}
                     value={accountId}
-                    onChange={e = aria-label="Selecionar"> setAccountId(e.target.value)}
+                    onChange={e => setAccountId(e.target.value)}
                 >
                     {accounts.map(acc => (
                         <option key={acc.id} value={acc.id}>{acc.name} (R$ {acc.balance.toFixed(2)})</option>
@@ -140,7 +140,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
                     step="0.01"
                     className={`w-full p-2.5 rounded-lg border outline-none font-bold text-lg ${inputClass}`}
                     value={amount}
-                    onChange={e = /> setAmount(e.target.value)}
+                    onChange={e => setAmount(e.target.value)}
                 />
             </div>
 

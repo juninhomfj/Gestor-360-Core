@@ -98,7 +98,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                             className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} 
                             placeholder="Mensagem ou UID..." aria-label="Mensagem ou UID..." 
                             value={searchTerm} 
-                            onChange={e = /> setSearchTerm(e.target.value)} 
+                            onChange={e => setSearchTerm(e.target.value)} 
                         />
                     </div>
                 </div>
@@ -107,7 +107,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <select 
                         className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`}
                         value={filterLevel}
-                        onChange={e = aria-label="Selecionar"> setFilterLevel(e.target.value as any)}
+                        onChange={e => setFilterLevel(e.target.value as any)}
                     >
                         <option value="ALL">Todos os Niveis (ALL)</option>
                         <option value="INFO">Informacao (INFO)</option>

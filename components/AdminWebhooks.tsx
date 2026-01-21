@@ -160,7 +160,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                             <input
                                 className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={endpoint}
-                                onChange={e = /> setEndpoint(e.target.value)}
+                                onChange={e => setEndpoint(e.target.value)}
                                 placeholder="https://api.seu-dominio.com/webhooks"
                             />
                         </div>
@@ -169,7 +169,7 @@ const AdminWebhooks: React.FC<AdminWebhooksProps> = ({ onNotify, darkMode }) => 
                             <input
                                 className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100"
                                 value={secret}
-                                onChange={e = /> setSecret(e.target.value)}
+                                onChange={e => setSecret(e.target.value)}
                                 placeholder="Assinatura HMAC"
                             />
                         </div>

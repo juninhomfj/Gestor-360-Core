@@ -96,7 +96,7 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                     <div className="p-2 border-b border-gray-200 dark:border-slate-700 space-y-2">
                         <select 
                             value={selectedStore} 
-                            onChange={e = aria-label="Selecionar"> setSelectedStore(e.target.value)}
+                            onChange={e => setSelectedStore(e.target.value)}
                             className={`w-full p-2 rounded text-sm font-bold ${darkMode ? 'bg-slate-800 text-white border-slate-600' : 'bg-white text-gray-800 border-gray-300'}`}
                         >
                             {STORES.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
@@ -105,7 +105,7 @@ const DatabaseInspector: React.FC<DatabaseInspectorProps> = ({ darkMode }) => {
                             placeholder="Filtrar..." aria-label="Filtrar..."
                             className={`w-full p-2 rounded text-xs ${darkMode ? 'bg-slate-800 text-white border-slate-600' : 'bg-white border-gray-300'}`}
                             value={filter}
-                            onChange={e = /> setFilter(e.target.value)}
+                            onChange={e => setFilter(e.target.value)}
                         />
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">

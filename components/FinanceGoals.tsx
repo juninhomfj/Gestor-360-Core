@@ -110,7 +110,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                           <input 
                             className={`w-full border rounded p-2 ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`} 
                             value={name}
-                            onChange={e = /> setName(e.target.value)}
+                            onChange={e => setName(e.target.value)}
                           />
                       </div>
                       <div>
@@ -120,7 +120,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                             step="0.01"
                             className={`w-full border rounded p-2 ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`} 
                             value={targetValue}
-                            onChange={e = /> setTargetValue(e.target.value)}
+                            onChange={e => setTargetValue(e.target.value)}
                           />
                       </div>
                       <div className="flex gap-2 pt-4">
@@ -187,7 +187,7 @@ const FinanceGoals: React.FC<FinanceGoalsProps> = ({ goals, onUpdate, darkMode }
                                         placeholder="Valor" aria-label="Valor" 
                                         className={`border rounded px-2 w-full ${darkMode ? 'bg-black border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                         value={amountToAdd}
-                                        onChange={e = /> setAmountToAdd(e.target.value)}
+                                        onChange={e => setAmountToAdd(e.target.value)}
                                       />
                                       <button onClick={() => handleAddAmount(goal)} className="bg-blue-600 text-white px-3 rounded font-bold">OK</button>
                                       <button onClick={() => setAddingAmountId(null)} className={`px-3 rounded font-bold ${darkMode ? 'bg-slate-700 text-white' : 'bg-gray-200 text-gray-700'}`}>X</button>

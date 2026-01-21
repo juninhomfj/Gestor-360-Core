@@ -1425,7 +1425,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                   className={`w-full p-2.5 rounded-lg outline-none text-sm ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}
                   placeholder="Search KLIPY" aria-label="Search KLIPY"
                   value={klipyQuery}
-                  onChange={(e) = /> setKlipyQuery(e.target.value)}
+                  onChange={(e) => setKlipyQuery(e.target.value)}
                 />
 
                 {klipyError && (
@@ -1478,7 +1478,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
               <input
                 className={`flex-1 p-3 rounded-xl outline-none ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}
                 value={inputText}
-                onChange={(e) = /> setInputText(e.target.value)}
+                onChange={(e) => setInputText(e.target.value)}
                 placeholder="Digite..."
                 onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSend()}
                 spellCheck
@@ -1489,7 +1489,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                 accept="image/*,audio/*,video/*"
                 ref={fileInputRef}
                 className="hidden"
-                onChange={(e) = aria-label="Selecionar arquivo" /> {
+                onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) handleMediaPick(file);
                   e.currentTarget.value = '';
@@ -1577,12 +1577,12 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
             <input
               className={`mt-2 w-full p-3 rounded-xl outline-none ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}
               value={roomName}
-              onChange={(e) = /> setRoomName(e.target.value)}
+              onChange={(e) => setRoomName(e.target.value)}
             />
           </div>
 
           <label className="flex items-center gap-2 text-xs font-bold">
-            <input type="checkbox" checked={roomPrivate} onChange={(e) = aria-label="Selecionar" /> setRoomPrivate(e.target.checked)} />
+            <input type="checkbox" checked={roomPrivate} onChange={(e) => setRoomPrivate(e.target.checked)} />
             Grupo privado
           </label>
 
@@ -1599,7 +1599,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={(e) = aria-label="Selecionar" /> {
+                        onChange={(e) => {
                           setSelectedMembers((prev) =>
                             e.target.checked ? [...prev, user.id] : prev.filter((id) => id !== user.id)
                           );
@@ -1624,7 +1624,7 @@ const InternalChatSystem: React.FC<InternalChatSystemProps> = ({
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={(e) = aria-label="Selecionar" /> {
+                        onChange={(e) => {
                           setSelectedModerators((prev) =>
                             e.target.checked ? [...prev, user.id] : prev.filter((id) => id !== user.id)
                           );
