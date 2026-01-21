@@ -228,6 +228,21 @@ const SalesList: React.FC<SalesListProps> = ({
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
+  const parseExcelSerialDate = (numericValue: number) => {
+    if (!Number.isFinite(numericValue)) return null;
+    if (XLSX.SSF && typeof XLSX.SSF.parse_date_code === 'function') {
+      const parsed = XLSX.SSF.parse_date_code(numericValue);
+      if (parsed?.y && parsed?.m && parsed?.d) {
+        return `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`;
+      }
+    }
+    const excelEpoch = Date.UTC(1899, 11, 30);
+    const millis = excelEpoch + numericValue * 24 * 60 * 60 * 1000;
+    const fallback = new Date(millis);
+    if (Number.isNaN(fallback.getTime())) return null;
+    return fallback.toISOString().split('T')[0];
+  };
+
   const parseDateValue = (value: any) => {
     if (!value) return null;
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -237,11 +252,8 @@ const SalesList: React.FC<SalesListProps> = ({
       ? value
       : (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value)) ? Number(value) : null);
     if (numericValue !== null) {
-      const parsed = XLSX.SSF ? XLSX.SSF.parse_date_code(numericValue) : null;
-      if (parsed) {
-        const formatted = `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`;
-        return formatted;
-      }
+      const formatted = parseExcelSerialDate(numericValue);
+      if (formatted) return formatted;
     }
     const text = String(value).trim();
     if (!text) return null;

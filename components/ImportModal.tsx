@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ImportMapping } from '../types';
 import { X, ArrowRight, Check, AlertTriangle, Table } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -37,6 +38,27 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
+
+  const formatDatePreviewValue = (value: unknown) => {
+    if (value === null || value === undefined || value === '') return '-';
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toLocaleDateString('pt-BR');
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      const parsed = XLSX.SSF.parse_date_code(value);
+      if (parsed && parsed.y && parsed.m && parsed.d) {
+        const day = String(parsed.d).padStart(2, '0');
+        const month = String(parsed.m).padStart(2, '0');
+        return `${day}/${month}/${parsed.y}`;
+      }
+      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+      const date = new Date(excelEpoch.getTime() + value * 86400000);
+      if (!Number.isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR');
+      }
+    }
+    return String(value);
+  };
 
   useEffect(() => {
     if (isOpen && fileData && fileData.length > 0) {
@@ -84,7 +106,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
         <div className={`p-4 md:p-6 border-b ${borderClass} flex justify-between items-center shrink-0`}>
           <div>
             <h2 className="text-lg md:text-xl font-bold flex items-center gap-2"><Table size={20} className="text-emerald-500"/> Importar de Planilha</h2>
-            <p className="text-xs md:text-sm opacity-60">Asocie as colunas do seu arquivo aos campos do sistema.</p>
+            <p className="text-xs md:text-sm opacity-60">Associe as colunas do seu arquivo aos campos do sistema.</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"><X size={24} /></button>
         </div>
@@ -119,11 +141,16 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, fileData, on
                 </thead>
                 <tbody>
                   <tr className={darkMode ? 'text-slate-200' : 'text-gray-700'}>
-                    {headers.map((_, idx) => (
-                      <td key={idx} className="border-b px-2 py-1">
-                        {previewRow[idx] !== undefined && previewRow[idx] !== null ? String(previewRow[idx]) : '-'}
-                      </td>
-                    ))}
+                    {headers.map((header, idx) => {
+                      const value = previewRow[idx];
+                      const isDateColumn = header ? normalizeHeader(header).includes('data') : false;
+                      const displayValue = isDateColumn ? formatDatePreviewValue(value) : (value !== undefined && value !== null ? String(value) : '-');
+                      return (
+                        <td key={idx} className="border-b px-2 py-1">
+                          {displayValue}
+                        </td>
+                      );
+                    })}
                   </tr>
                 </tbody>
               </table>
