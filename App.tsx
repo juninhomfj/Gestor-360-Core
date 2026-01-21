@@ -111,6 +111,7 @@ const App: React.FC = () => {
     const syncWorkerStopRef = useRef<(() => void) | null>(null);
     const emptySalesToastRef = useRef(false);
     const missingSalesIndexToastRef = useRef(false);
+    const notifiedTicketIdsRef = useRef<Set<string>>(new Set());
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [authView, setAuthView] = useState<AuthView>('LOADING');
@@ -447,6 +448,7 @@ const App: React.FC = () => {
                     tickets
                         .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
                         .forEach(t => {
+                            if (notifiedTicketIdsRef.current.has(t.id)) return;
                             pushNotification({
                                 id: `ticket:${t.id}`,
                                 title: `Novo ticket: ${t.title}`,
@@ -457,7 +459,7 @@ const App: React.FC = () => {
                                 read: false
                             });
                             addToast('INFO', `Novo ticket: ${t.title}`);
-                            addToast('INFO', `Novo ticket: ${t.title}`);
+                            notifiedTicketIdsRef.current.add(t.id);
                         });
                 } catch {}
             };
@@ -476,6 +478,7 @@ const App: React.FC = () => {
     const handleLoginSuccess = async (user: User) => {
         setCurrentUser(user);
         try {
+            console.warn("[Bootstrap] Iniciando carga inicial Firestore.", { uid: user.uid });
             await bootstrapProductionData();
             await loadDataForUser();
             if ('serviceWorker' in navigator) {
@@ -515,6 +518,7 @@ const App: React.FC = () => {
         } catch (e) {
             setAuthView('APP');
         } finally {
+            console.warn("[Bootstrap] Finalizado.", { uid: user.uid });
             setLoading(false);
         }
     };
@@ -684,7 +688,14 @@ const App: React.FC = () => {
             setCells(finData.cells || []);
             
             if (rConfig?.daysForLost) setReportConfig(rConfig as ReportConfig);
-        } catch (e) {}
+            console.warn("[Bootstrap] Dados carregados.", {
+                sales: storedSales?.length || 0,
+                clients: storedClients?.length || 0,
+                transactions: finData.transactions?.length || 0
+            });
+        } catch (e: any) {
+            console.error("[Bootstrap] Falha ao carregar dados.", { code: e?.code, message: e?.message });
+        }
     };
 
     const persistCollection = async <T extends { id: string }>(
