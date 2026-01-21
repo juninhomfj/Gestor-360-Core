@@ -288,64 +288,64 @@ const SalesForm: React.FC<Props> = ({
           )}
           <fieldset disabled={isLocked} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Produto</label>
-                <select
-                  className={inputClasses}
-                  value={productType}
-                  onChange={e => setProductType(e.target.value as ProductType)}
-                  aria-label="Tipo de produto"
-                >
-                  <option value={ProductType.BASICA}>Cesta Básica</option>
-                  <option value={ProductType.NATAL}>Cesta de Natal</option>
-                </select>
-              </div>
+              {/* Ordem (TAB) do formulário: Cliente → Orçamento → Quantidade → Valor Proposto → Valor da Venda → Margem → Rastreio → Faturamento/Prazo → Tipo de Cesta */}
 
-              <div className="relative">
+              <div className="relative md:col-span-2">
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1 flex items-center gap-1">
-                    <Users size={12}/> Cliente
+                  <Users size={12} /> Cliente
                 </label>
                 <input
                   className={inputClasses}
-                  placeholder="Nome do cliente ou empresa" aria-label="Nome do cliente ou empresa"
+                  placeholder="Nome do cliente ou empresa"
+                  aria-label="Nome do cliente ou empresa"
                   value={clientName}
-                  onChange={e => { setClientName(e.target.value); setShowClientList(true); setSelectedClientId(''); }}
+                  onChange={e => {
+                    setClientName(e.target.value);
+                    setShowClientList(true);
+                    setSelectedClientId('');
+                  }}
                   onFocus={() => setShowClientList(true)}
-                 
+                  onKeyDown={e => {
+                    // Mantém a navegação por TAB fluida (não prende o foco na lista de sugestões)
+                    if (e.key === 'Tab' || e.key === 'Escape') {
+                      setShowClientList(false);
+                    }
+                  }}
                 />
                 {showClientList && filteredClients.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto">
-                        {filteredClients.map(c => (
-                            <button 
-                                key={c.id} 
-                                onClick={() => handleSelectClient(c)}
-                                className="group w-full text-left p-3 text-sm hover:bg-emerald-900/20 border-b last:border-0 border-slate-700 flex justify-between items-center text-slate-100"
-                            >
-                                <span>{c.name}</span>
-                                <Check size={14} className="text-emerald-500 opacity-0 group-hover:opacity-100"/>
-                            </button>
-                        ))}
-                    </div>
+                  <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto">
+                    {filteredClients.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectClient(c)}
+                        className="group w-full text-left p-3 text-sm hover:bg-emerald-900/20 border-b last:border-0 border-slate-700 flex justify-between items-center text-slate-100"
+                      >
+                        <span>{c.name}</span>
+                        <Check size={14} className="text-emerald-500 opacity-0 group-hover:opacity-100" />
+                      </button>
+                    ))}
+                  </div>
                 )}
                 {!selectedClientId && clientName && filteredClients.length === 0 && (
-                    <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
+                  <p className="text-[10px] text-emerald-400 font-bold mt-1 ml-1 animate-pulse">Novo cliente será criado!</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Número do Orçamento</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Orçamento</label>
                 <input
                   type="text"
                   inputMode="numeric"
                   className={inputClasses}
                   value={quoteNumber}
                   onChange={e => setQuoteNumber(e.target.value)}
-                  aria-label="Numero do orcamento"
+                  aria-label="Orçamento"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Qtd.</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Quantidade</label>
                 <input
                   type="number"
                   className={inputClasses}
@@ -367,10 +367,10 @@ const SalesForm: React.FC<Props> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Total Venda / NF (R$)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor da Venda (R$)</label>
                 <div className="relative">
-                   <DollarSign className="absolute left-3 top-3.5 text-slate-400" size={16} />
-                   <input
+                  <DollarSign className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                  <input
                     type="number"
                     className={`${inputClasses} pl-10 border-indigo-900/40`}
                     value={valueSold === 0 ? "" : valueSold}
@@ -396,13 +396,14 @@ const SalesForm: React.FC<Props> = ({
                 </span>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Cód. Rastreio / NF</label>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Rastreio</label>
                 <div className="relative">
-                   <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
-                   <input
+                  <Truck className="absolute left-3 top-3.5 text-slate-400" size={16} />
+                  <input
                     className={`${inputClasses} pl-10`}
-                    placeholder="Código de rastreio ou número" aria-label="Código de rastreio ou número"
+                    placeholder="Código de rastreio ou NF"
+                    aria-label="Código de rastreio ou NF"
                     value={trackingCode}
                     onChange={e => setTrackingCode(e.target.value)}
                   />
@@ -433,14 +434,27 @@ const SalesForm: React.FC<Props> = ({
               </div>
 
               <div className="md:col-span-2">
-                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
-                 <textarea 
-                   className={`${inputClasses} h-24 resize-none`}
-                   placeholder="Detalhes adicionais do pedido..." aria-label="Detalhes adicionais do pedido..."
-                   value={observations}
-                   onChange={e => setObservations(e.target.value)}
-                  
-                 />
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Cesta</label>
+                <select
+                  className={inputClasses}
+                  value={productType}
+                  onChange={e => setProductType(e.target.value as ProductType)}
+                  aria-label="Tipo de cesta"
+                >
+                  <option value={ProductType.BASICA}>Cesta Básica</option>
+                  <option value={ProductType.NATAL}>Cesta de Natal</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
+                <textarea
+                  className={`${inputClasses} h-24 resize-none`}
+                  placeholder="Detalhes adicionais do pedido..."
+                  aria-label="Detalhes adicionais do pedido..."
+                  value={observations}
+                  onChange={e => setObservations(e.target.value)}
+                />
               </div>
             </div>
 
@@ -482,14 +496,14 @@ const SalesForm: React.FC<Props> = ({
                         <>
                           <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
                           <p className="text-xs text-amber-200 leading-relaxed font-medium">
-                              Venda marcada como pendente. Ela n?o aparecer? nos gr?ficos de faturamento mensal at? que voc? defina uma data.
+                              Venda marcada como pendente. Ela não aparecerá nos gráficos de faturamento mensal até que você defina uma data.
                           </p>
                         </>
                     ) : (
                         <>
                           <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
                           <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                              Esta data define o m?s em que a comiss?o ser? contabilizada no seu dashboard.
+                              Esta data define o mês em que a comissão será contabilizada no seu dashboard.
                           </p>
                         </>
                     )}
