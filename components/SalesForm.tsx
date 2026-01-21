@@ -266,7 +266,12 @@ const SalesForm: React.FC<Props> = ({
               {initialData ? 'Editar Venda' : 'Lançar Nova Venda'}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+            title="Fechar modal de venda"
+            aria-label="Fechar modal de venda"
+          >
             <X size={20} />
           </button>
         </div>
@@ -289,6 +294,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={productType}
                   onChange={e => setProductType(e.target.value as ProductType)}
+                  aria-label="Tipo de produto"
                 >
                   <option value={ProductType.BASICA}>Cesta BÃ¡sica</option>
                   <option value={ProductType.NATAL}>Cesta de Natal</option>
@@ -305,6 +311,7 @@ const SalesForm: React.FC<Props> = ({
                   value={clientName}
                   onChange={e => { setClientName(e.target.value); setShowClientList(true); setSelectedClientId(''); }}
                   onFocus={() => setShowClientList(true)}
+                  aria-label="Cliente"
                 />
                 {showClientList && filteredClients.length > 0 && (
                     <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto">
@@ -333,6 +340,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={quoteNumber}
                   onChange={e => setQuoteNumber(e.target.value)}
+                  aria-label="Numero do orcamento"
                 />
               </div>
 
@@ -343,6 +351,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={quantity === 0 ? "" : quantity}
                   onChange={e => setQuantity(parseNumericInput(e.target.value))}
+                  aria-label="Quantidade"
                 />
               </div>
 
@@ -353,6 +362,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={valueProposed === 0 ? "" : valueProposed}
                   onChange={e => setValueProposed(parseNumericInput(e.target.value))}
+                  aria-label="Valor proposto"
                 />
               </div>
 
@@ -365,6 +375,7 @@ const SalesForm: React.FC<Props> = ({
                     className={`${inputClasses} pl-10 border-indigo-900/40`}
                     value={valueSold === 0 ? "" : valueSold}
                     onChange={e => setValueSold(parseNumericInput(e.target.value))}
+                    aria-label="Valor da venda"
                   />
                 </div>
               </div>
@@ -376,6 +387,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={margin === 0 ? "" : margin}
                   onChange={e => setMargin(parseNumericInput(e.target.value))}
+                  aria-label="Margem percentual"
                 />
                 <span className="mt-1 block text-[10px] font-black uppercase tracking-widest text-slate-500">
                   {commissionRatePercent > 0
@@ -405,6 +417,7 @@ const SalesForm: React.FC<Props> = ({
                   value={isPendingBilling ? '' : billDate}
                   onChange={e => setBillDate(e.target.value)}
                   disabled={isPendingBilling}
+                  aria-label="Data de faturamento"
                 />
               </div>
 
@@ -415,6 +428,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={closeDate}
                   onChange={e => setCloseDate(e.target.value)}
+                  aria-label="Prazo"
                 />
               </div>
 
@@ -425,6 +439,7 @@ const SalesForm: React.FC<Props> = ({
                    placeholder="Detalhes adicionais do pedido..."
                    value={observations}
                    onChange={e => setObservations(e.target.value)}
+                   aria-label="Observacoes"
                  />
               </div>
             </div>
@@ -436,6 +451,7 @@ const SalesForm: React.FC<Props> = ({
                   className={inputClasses}
                   value={paymentMethod}
                   onChange={e => setPaymentMethod(e.target.value)}
+                  aria-label="Forma de pagamento"
                 >
                   <option value="">Selecione</option>
                   {paymentMethods.map(method => (
@@ -452,6 +468,7 @@ const SalesForm: React.FC<Props> = ({
                             className="hidden"
                             checked={isPendingBilling} 
                             onChange={e => setIsPendingBilling(e.target.checked)}
+                            aria-label="Pendente de faturamento"
                         />
                         {isPendingBilling && <Clock size={12} className="text-white" />}
                     </div>
