@@ -710,6 +710,7 @@ export const getStoredSales = async (): Promise<Sale[]> => {
     errorCode = e?.code;
     indexRequired = e?.code === "failed-precondition" || Boolean(e?.message?.includes("requires an index"));
     Logger.error("Audit: Falha ao buscar vendas no Firestore.", { uid, message: e?.message, code: e?.code });
+    console.error("[Bootstrap] Firestore sales query falhou.", { code: e?.code, message: e?.message });
   }
 
   const localSales = await dbGetAll("sales", (s) => s.userId === uid);
