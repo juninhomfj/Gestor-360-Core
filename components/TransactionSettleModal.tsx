@@ -71,7 +71,7 @@ const TransactionSettleModal: React.FC<TransactionSettleModalProps> = ({
   };
 
   const bgClass = darkMode ? 'bg-slate-900 text-white' : 'bg-white text-gray-900';
-  const inputClass = darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900';
+  const inputClass = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   const isIncome = transaction.type === 'INCOME';
 

@@ -112,6 +112,7 @@ const App: React.FC = () => {
     const emptySalesToastRef = useRef(false);
     const missingSalesIndexToastRef = useRef(false);
     const notifiedTicketIdsRef = useRef<Set<string>>(new Set());
+    const bootstrapLogRef = useRef(false);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [authView, setAuthView] = useState<AuthView>('LOADING');
@@ -688,11 +689,14 @@ const App: React.FC = () => {
             setCells(finData.cells || []);
             
             if (rConfig?.daysForLost) setReportConfig(rConfig as ReportConfig);
-            console.warn("[Bootstrap] Dados carregados.", {
-                sales: storedSales?.length || 0,
-                clients: storedClients?.length || 0,
-                transactions: finData.transactions?.length || 0
-            });
+            if (!bootstrapLogRef.current) {
+                console.warn("[Bootstrap] Dados carregados.", {
+                    sales: storedSales?.length || 0,
+                    clients: storedClients?.length || 0,
+                    transactions: finData.transactions?.length || 0
+                });
+                bootstrapLogRef.current = true;
+            }
         } catch (e: any) {
             console.error("[Bootstrap] Falha ao carregar dados.", { code: e?.code, message: e?.message });
         }

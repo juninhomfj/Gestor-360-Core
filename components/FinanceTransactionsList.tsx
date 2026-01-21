@@ -149,7 +149,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
           <div className={`p-4 rounded-xl border flex flex-col md:flex-row gap-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
               <div className="flex-1">
                   <label className="block text-[10px] font-black uppercase text-gray-400 mb-1">Tipo</label>
-                  <select value={filterType} onChange={e => setFilterType(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}>
+                  <select value={filterType} onChange={e => setFilterType(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
                       <option value="ALL">Todos</option>
                       <option value="INCOME">Receitas</option>
                       <option value="EXPENSE">Despesas</option>
@@ -158,7 +158,7 @@ const FinanceTransactionsList: React.FC<FinanceTransactionsListProps> = ({
               </div>
               <div className="flex-1">
                   <label className="block text-[10px] font-black uppercase text-gray-400 mb-1">Mês</label>
-                  <input type="month" value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-300'}`}/>
+                  <input type="month" value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className={`w-full p-2 rounded-lg border text-sm ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}/>
               </div>
           </div>
 

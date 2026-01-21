@@ -99,7 +99,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
   const bgClass = darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200 shadow-sm';
   const textClass = darkMode ? 'text-white' : 'text-gray-800';
   const subTextClass = darkMode ? 'text-gray-400' : 'text-gray-600';
-  const inputBg = darkMode ? 'bg-black border-slate-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900';
+  const inputBg = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   return (
     <div className="space-y-6">
@@ -154,7 +154,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
            </div>
            <div className="w-full md:w-auto">
                 <label className={`text-xs mb-1 block ${subTextClass} font-bold`}>Tipo</label>
-                <div className={`flex rounded p-1 border ${darkMode ? 'bg-black border-slate-700' : 'bg-gray-100 border-gray-200'}`}>
+                <div className={`flex rounded p-1 border ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-gray-100 border-gray-200'}`}>
                     <button 
                         onClick={() => setNewCatType('INCOME')}
                         className={`px-3 py-1 text-sm rounded ${newCatType === 'INCOME' ? 'bg-emerald-600 text-white shadow' : 'text-gray-500 hover:text-gray-700'}`}
@@ -203,7 +203,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                                    </div>
                                    <div className="flex gap-2">
                                        <input 
-                                         className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+                                         className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                                          placeholder="Nova subcategoria..." aria-label="Nova subcategoria..."
                                          value={newSubName}
                                          onChange={e => setNewSubName(e.target.value)}
@@ -273,7 +273,7 @@ const FinanceCategories: React.FC<FinanceCategoriesProps> = ({ categories, onUpd
                                    </div>
                                    <div className="flex gap-2">
                                        <input 
-                                         className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+                                         className={`flex-1 text-xs p-1 rounded border ${darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}
                                          placeholder="Nova subcategoria..." aria-label="Nova subcategoria..."
                                          value={newSubName}
                                          onChange={e => setNewSubName(e.target.value)}

@@ -119,13 +119,13 @@ const FinanceTransactionForm: React.FC<Props> = ({
 
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Descrição</label>
-                    <input className="w-full text-xl font-bold p-3 bg-transparent border-b-2 border-gray-100 dark:border-slate-800 outline-none focus:border-indigo-500 transition-colors dark:text-white" placeholder="Ex: Pagamento Fornecedor" aria-label="Ex: Pagamento Fornecedor" value={description} onChange={e => setDescription(e.target.value)} />
+                    <input className="w-full text-xl font-bold p-3 bg-transparent border-b-2 border-gray-100 dark:border-slate-700 outline-none focus:border-indigo-500 transition-colors dark:text-white" placeholder="Ex: Pagamento Fornecedor" aria-label="Ex: Pagamento Fornecedor" value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Conta</label>
-                        <select className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-sm dark:text-white" value={accountId} onChange={e => setAccountId(e.target.value)} aria-label="Conta">
+                        <select className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 outline-none text-sm dark:text-white" value={accountId} onChange={e => setAccountId(e.target.value)} aria-label="Conta">
                             <option value="">Selecione...</option>
                             {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name} (R$ {acc.balance.toFixed(2)})</option>)}
                         </select>
@@ -133,7 +133,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
                     {type !== 'TRANSFER' && (
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Categoria</label>
-                            <select className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-sm dark:text-white" value={categoryId} onChange={e => setCategoryId(e.target.value)} aria-label="Categoria">
+                            <select className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 outline-none text-sm dark:text-white" value={categoryId} onChange={e => setCategoryId(e.target.value)} aria-label="Categoria">
                                 <option value="">Selecione...</option>
                                 {filteredCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                             </select>
@@ -144,10 +144,10 @@ const FinanceTransactionForm: React.FC<Props> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Data</label>
-                        <input type="date" className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-sm dark:text-white" value={date} onChange={e => setDate(e.target.value)} aria-label="Data" />
+                        <input type="date" className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 outline-none text-sm dark:text-white" value={date} onChange={e => setDate(e.target.value)} aria-label="Data" />
                     </div>
                     <div className="flex flex-col justify-end">
-                        <label className="flex items-center gap-2 cursor-pointer p-4 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30 dark:text-slate-100">
+                        <label className="flex items-center gap-2 cursor-pointer p-4 rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/30 dark:text-slate-100">
                             <input type="checkbox" className="w-5 h-5 rounded text-indigo-600" checked={isPaid} onChange={e => setIsPaid(e.target.checked)} aria-label="Lancamento realizado" />
                             <span className="text-sm font-bold">{isPaid ? 'Lançamento Realizado' : 'Provisionar p/ Futuro'}</span>
                         </label>
@@ -171,7 +171,7 @@ const FinanceTransactionForm: React.FC<Props> = ({
                     
                     {isRecurring && (
                         <div className="space-y-3 animate-in fade-in">
-                            <select className="w-full p-3 rounded-lg border dark:bg-slate-800 text-sm dark:text-slate-100" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)} aria-label="Regra de recorrencia">
+                            <select className="w-full p-3 rounded-lg border dark:border-slate-700 dark:bg-slate-900 text-sm dark:text-slate-100" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)} aria-label="Regra de recorrencia">
                                 <option value="MONTHLY">Todo mês</option>
                                 <option value="WEEKLY">Toda semana</option>
                                 <option value="DAILY">Todo dia</option>
@@ -193,13 +193,13 @@ const FinanceTransactionForm: React.FC<Props> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Centro de Custo</label>
-                        <input className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-sm dark:text-white" placeholder="Ex: Marketing" aria-label="Ex: Marketing" value={costCenter} onChange={e => setCostCenter(e.target.value)} />
+                        <input className="w-full p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 outline-none text-sm dark:text-white" placeholder="Ex: Marketing" aria-label="Ex: Marketing" value={costCenter} onChange={e => setCostCenter(e.target.value)} />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tags</label>
                         <div className="relative">
                             <Hash size={14} className="absolute left-3 top-4 text-gray-400"/>
-                            <input className="w-full pl-8 p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-800 outline-none text-xs dark:text-white" placeholder="fixo, variável..." aria-label="fixo, variável..." value={tags} onChange={e => setTags(e.target.value)} />
+                            <input className="w-full pl-8 p-4 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 outline-none text-xs dark:text-white" placeholder="fixo, variável..." aria-label="fixo, variável..." value={tags} onChange={e => setTags(e.target.value)} />
                         </div>
                     </div>
                 </div>

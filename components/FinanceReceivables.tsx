@@ -176,7 +176,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
   const totalEffective = receivables.filter(r => r.status === 'EFFECTIVE' && !r.distributed).reduce((acc, r) => acc + calculateNet(r), 0);
 
   const cardClass = darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-800';
-  const inputClass = darkMode ? 'bg-black border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900';
+  const inputClass = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
 
   return (
     <div className="space-y-6">
@@ -246,7 +246,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                           <p className="text-lg">{effectiveModal.item.description}</p>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                               <label className="text-xs font-bold uppercase block mb-1 opacity-70">Data Efetivação</label>
                               <input 
@@ -312,13 +312,13 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
 
                   <div className="p-6 overflow-y-auto space-y-6">
                       {/* Main Info Grid */}
-                      <div className="grid grid-cols-12 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                           <div className="col-span-12">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><FileText size={12}/> Descrição</label>
                               <input type="text" className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${inputClass}`} value={editingItem.description} onChange={e => setEditingItem({...editingItem, description: e.target.value})} />
                           </div>
                           
-                          <div className="col-span-6">
+                          <div className="col-span-12 md:col-span-6">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><DollarSign size={12}/> Valor Bruto</label>
                               <div className={`flex items-center px-3 py-2 rounded-lg border ${inputClass}`}>
                                   <span className="mr-2 opacity-50 font-bold">R$</span>
@@ -326,7 +326,7 @@ const FinanceReceivables: React.FC<FinanceReceivablesProps> = ({
                               </div>
                           </div>
                           
-                          <div className="col-span-6">
+                          <div className="col-span-12 md:col-span-6">
                               <label className="text-xs font-bold mb-1 block opacity-70 flex items-center gap-1"><Calendar size={12}/> Data</label>
                               <input type="date" className={`w-full px-3 py-2.5 rounded-lg border ${inputClass}`} value={editingItem.date} onChange={e => setEditingItem({...editingItem, date: e.target.value})} />
                           </div>

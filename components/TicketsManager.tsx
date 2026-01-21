@@ -69,8 +69,8 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                 setSelectedTicketId(data[0].id);
                 setShowList(false);
             }
-        } catch (error) {
-            console.error('[Tickets] Falha ao carregar tickets', error);
+        } catch (error: any) {
+            console.error('[Tickets] Falha ao carregar tickets', { code: error?.code, message: error?.message });
             setErrorMessage('Não foi possível carregar os tickets. Tente novamente.');
         } finally {
             setIsLoading(false);
@@ -339,15 +339,25 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
 
     const handleAssign = async (assigneeId?: string) => {
         if (!selectedTicket) return;
-        const user = users.find(u => u.id === assigneeId) || (assigneeId === currentUser.id ? currentUser : undefined);
-        await updateTicketAssignee(selectedTicket.id, assigneeId, user?.name);
-        await refreshTickets();
+        try {
+            const user = users.find(u => u.id === assigneeId) || (assigneeId === currentUser.id ? currentUser : undefined);
+            await updateTicketAssignee(selectedTicket.id, assigneeId, user?.name);
+            await refreshTickets();
+        } catch (error: any) {
+            console.error('[Tickets] Falha ao atualizar responsável', { code: error?.code, message: error?.message });
+            setErrorMessage('Não foi possível atualizar o responsável. Tente novamente.');
+        }
     };
 
     const handleStatusChange = async (status: TicketStatus) => {
         if (!selectedTicket) return;
-        await updateTicketStatus(selectedTicket.id, status);
-        await refreshTickets();
+        try {
+            await updateTicketStatus(selectedTicket.id, status);
+            await refreshTickets();
+        } catch (error: any) {
+            console.error('[Tickets] Falha ao atualizar status', { code: error?.code, message: error?.message });
+            setErrorMessage('Não foi possível atualizar o status. Tente novamente.');
+        }
     };
 
     const themeCard = darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900';
