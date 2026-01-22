@@ -106,7 +106,6 @@ const isHiddenModule = (user: User | null, mod: string): boolean =>
     !!(user as any)?.hiddenModules?.[mod];
 
 const App: React.FC = () => {
-    const initRun = useRef(false);
     const activeTabRef = useRef<string>('home');
     const syncWorkerStopRef = useRef<(() => void) | null>(null);
     const emptySalesToastRef = useRef(false);
@@ -319,8 +318,6 @@ const App: React.FC = () => {
         }
     };
     useEffect(() => {
-        if (initRun.current) return;
-        initRun.current = true;
         let isMounted = true;
         let unsubscribe: (() => void) | undefined;
         const lastUidRef: { current: string | null } = { current: null };
