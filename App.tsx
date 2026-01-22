@@ -231,13 +231,6 @@ const App: React.FC = () => {
     }, [activeTab, currentUser]);
 
     useEffect(() => {
-        if (activeTab !== 'dev_roadmap') return;
-        if (isDev) return;
-        setActiveTab('home');
-        localStorage.setItem('sys_last_tab', 'home');
-    }, [activeTab, isDev]);
-
-    useEffect(() => {
         if (!currentUser) return;
         const localChat = parseLastSeen(localStorage.getItem('sys_last_seen_chat') || undefined);
         const localTickets = parseLastSeen(localStorage.getItem('sys_last_seen_tickets') || undefined);
@@ -296,7 +289,8 @@ const App: React.FC = () => {
             return;
         }
         if (!syncWorkerStopRef.current) {
-            syncWorkerStopRef.current = startSyncWorker();
+			// Give initial reads (post-login) a moment to settle before sync retries start.
+			syncWorkerStopRef.current = startSyncWorker({ initialDelayMs: 8000 });
         }
         return () => {
             syncWorkerStopRef.current?.();
@@ -426,11 +420,42 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!currentUser) return;
-        let unsubscribe: { unsubscribe: () => void } | null = null;
+        // IMPORTANTE (React.StrictMode / efeitos assíncronos):
+        // Se o componente desmontar antes do await resolver, precisamos cancelar e
+        // garantir que qualquer listener criado depois seja imediatamente encerrado.
+        let cancelled = false;
+        let channel: { unsubscribe: () => void } | null = null;
         let ticketInterval: number | null = null;
+
+        const pollTickets = async () => {
+            if (cancelled) return;
+            try {
+                if (activeTabRef.current === 'tickets') return;
+                const lastSeenTickets = getLastSeen('tickets');
+                const tickets = await getTickets();
+                if (cancelled) return;
+                tickets
+                    .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
+                    .forEach(t => {
+                        if (notifiedTicketIdsRef.current.has(t.id)) return;
+                        pushNotification({
+                            id: `ticket:${t.id}`,
+                            title: `Novo ticket: ${t.title}`,
+                            message: t.description || 'Ticket registrado.',
+                            type: 'WARNING',
+                            source: 'SYSTEM',
+                            date: t.createdAt,
+                            read: false
+                        });
+                        addToast('INFO', `Novo ticket: ${t.title}`);
+                        notifiedTicketIdsRef.current.add(t.id);
+                    });
+            } catch {}
+        };
+
         const start = async () => {
             try {
-                const channel = await subscribeToMessages(currentUser.id, isAdmin, (msg) => {
+                const created = await subscribeToMessages(currentUser.id, isAdmin, (msg) => {
                     if (msg.deleted) return;
                     if (msg.senderId === currentUser.id) return;
                     if (activeTabRef.current === 'chat') return;
@@ -445,40 +470,24 @@ const App: React.FC = () => {
                         read: false
                     });
                 });
-                unsubscribe = channel || null;
+
+                // Se o efeito foi desmontado antes do subscribe resolver, fecha imediatamente.
+                if (cancelled) {
+                    created?.unsubscribe?.();
+                    return;
+                }
+                channel = created || null;
             } catch {}
 
-            const pollTickets = async () => {
-                try {
-                    if (activeTabRef.current === 'tickets') return;
-                    const lastSeenTickets = getLastSeen('tickets');
-                    const tickets = await getTickets();
-                    tickets
-                        .filter(t => new Date(t.createdAt).getTime() > lastSeenTickets)
-                        .forEach(t => {
-                            if (notifiedTicketIdsRef.current.has(t.id)) return;
-                            pushNotification({
-                                id: `ticket:${t.id}`,
-                                title: `Novo ticket: ${t.title}`,
-                                message: t.description || 'Ticket registrado.',
-                                type: 'WARNING',
-                                source: 'SYSTEM',
-                                date: t.createdAt,
-                                read: false
-                            });
-                            addToast('INFO', `Novo ticket: ${t.title}`);
-                            notifiedTicketIdsRef.current.add(t.id);
-                        });
-                } catch {}
-            };
-
             await pollTickets();
-            ticketInterval = window.setInterval(pollTickets, 30000);
+            if (cancelled) return;
+            ticketInterval = window.setInterval(() => void pollTickets(), 30000);
         };
 
-        start();
+        void start();
         return () => {
-            unsubscribe?.unsubscribe?.();
+            cancelled = true;
+            channel?.unsubscribe?.();
             if (ticketInterval) window.clearInterval(ticketInterval);
         };
     }, [currentUser?.id, isAdmin]);

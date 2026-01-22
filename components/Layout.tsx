@@ -97,30 +97,62 @@ const Layout: React.FC<LayoutProps> = ({
   }, [currentTheme]);
 
   useEffect(() => {
+      if (!currentUser) return;
+
+      let cancelled = false;
+      let timeoutId: number | null = null;
+      let inFlight = false;
+
+      const MIN_DELAY_MS = 15000;
+      const MAX_DELAY_MS = 120000;
+      let nextDelayMs = MIN_DELAY_MS;
+
+      const scheduleNext = (ms: number) => {
+          if (timeoutId !== null) window.clearTimeout(timeoutId);
+          timeoutId = window.setTimeout(() => {
+              void loadMsgs();
+          }, ms);
+      };
+
       const loadMsgs = async () => {
-          if (!currentUser) return;
+          if (cancelled || !currentUser) return;
+          if (inFlight) {
+              scheduleNext(nextDelayMs);
+              return;
+          }
+          inFlight = true;
           try {
               const msgs = await getMessages(currentUser.id, isAdmin);
+              if (cancelled) return;
               const unread = msgs.messages.filter(m => !m.read && m.recipientId === currentUser.id).length;
               setUnreadCount(unread);
+              nextDelayMs = MIN_DELAY_MS;
           } catch (error: any) {
               const now = Date.now();
               if (now - lastChatWarnRef.current > 60000) {
                   Logger.warn('Chat: falha ao carregar mensagens.', {
-                       userId: currentUser.id,
-                       code: error?.code,
-                       name: error?.name,
-                       message: error?.message
-                   });
+                      userId: currentUser.id,
+                      code: error?.code,
+                      name: error?.name,
+                      message: error?.message
+                  });
                   lastChatWarnRef.current = now;
               }
               setUnreadCount(0);
+              // Exponential-ish backoff to avoid request storms when Firestore/Network is degraded.
+              nextDelayMs = Math.min(MAX_DELAY_MS, Math.round(nextDelayMs * 1.8));
+          } finally {
+              inFlight = false;
+              if (!cancelled) scheduleNext(nextDelayMs);
           }
       };
-      loadMsgs();
-      const interval = setInterval(loadMsgs, 15000); 
-      return () => clearInterval(interval);
-  }, [currentUser, isAdmin]);
+
+      void loadMsgs();
+      return () => {
+          cancelled = true;
+          if (timeoutId !== null) window.clearTimeout(timeoutId);
+      };
+  }, [currentUser?.id, isAdmin]);
 
   useEffect(() => {
       const loadConfig = async () => {

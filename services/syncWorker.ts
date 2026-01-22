@@ -10,6 +10,7 @@ const MAX_SYNC_RETRIES = 5;
 const BASE_BACKOFF_MS = 1500;
 const MAX_BACKOFF_MS = 60000;
 let syncInterval: number | null = null;
+let syncStartTimeout: number | null = null;
 let syncInFlight = false;
 
 const isOnline = () => (typeof navigator === 'undefined' ? true : navigator.onLine !== false);
@@ -107,17 +108,57 @@ const processPendingSyncs = async () => {
   }
 };
 
-export const startSyncWorker = () => {
-    if (syncInterval !== null) return () => {};
-    processPendingSyncs();
-    syncInterval = window.setInterval(processPendingSyncs, SYNC_INTERVAL_MS);
-    const onOnline = () => processPendingSyncs();
-    window.addEventListener('online', onOnline);
-    return () => {
-        if (syncInterval !== null) {
-            window.clearInterval(syncInterval);
-            syncInterval = null;
-        }
-        window.removeEventListener('online', onOnline);
-    };
+type SyncWorkerOptions = {
+  /** Delay the first processing run (useful right after login to reduce contention). */
+  initialDelayMs?: number;
+  /** Override the default interval. */
+  intervalMs?: number;
+};
+
+export const startSyncWorker = (options: SyncWorkerOptions = {}) => {
+  // Avoid multiple workers (including the "scheduled but not started" window).
+  if (syncInterval !== null || syncStartTimeout !== null) return () => {};
+
+  const { initialDelayMs = 0, intervalMs = SYNC_INTERVAL_MS } = options;
+  let stopped = false;
+
+  const runOnce = () => {
+    if (stopped) return;
+    void processPendingSyncs();
+  };
+
+  const startLoop = () => {
+    if (stopped) return;
+
+    // Clear scheduled handle (if any) now that the worker is actually starting.
+    if (syncStartTimeout !== null) {
+      window.clearTimeout(syncStartTimeout);
+      syncStartTimeout = null;
+    }
+
+    runOnce();
+    syncInterval = window.setInterval(runOnce, intervalMs);
+  };
+
+  if (initialDelayMs > 0) {
+    syncStartTimeout = window.setTimeout(startLoop, initialDelayMs);
+  } else {
+    startLoop();
+  }
+
+  const onOnline = () => runOnce();
+  window.addEventListener('online', onOnline);
+
+  return () => {
+    stopped = true;
+    if (syncStartTimeout !== null) {
+      window.clearTimeout(syncStartTimeout);
+      syncStartTimeout = null;
+    }
+    if (syncInterval !== null) {
+      window.clearInterval(syncInterval);
+      syncInterval = null;
+    }
+    window.removeEventListener('online', onOnline);
+  };
 };
