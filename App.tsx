@@ -342,6 +342,7 @@ const App: React.FC = () => {
                         return;
                     }
                     if (lastUidRef.current === sessionUser.uid) {
+                        setLoading(false);
                         return;
                     }
                     lastUidRef.current = sessionUser.uid;
