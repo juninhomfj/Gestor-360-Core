@@ -598,11 +598,12 @@ export const getStoredTable = async (type: ProductType): Promise<CommissionRule[
       const normalized = rules.sort(
         (a, b) => (a.minPercent ?? Number.NEGATIVE_INFINITY) - (b.minPercent ?? Number.NEGATIVE_INFINITY)
       );
+      Logger.info("[Commission] Regras carregadas do Firestore", { type, count: normalized.length });
       await dbBulkPut(storeName as any, normalized);
       return normalized;
     }
   } catch (e: any) {
-    Logger.error("[Logic] Falha ao buscar tabela de comissão", {
+    Logger.warn("[Commission] Falha ao buscar tabela de comissão no Firestore (usando cache)", {
       type,
       message: e?.message,
       code: e?.code
@@ -610,12 +611,24 @@ export const getStoredTable = async (type: ProductType): Promise<CommissionRule[
   }
 
   const cached = await dbGetAll(storeName as any);
-  return (cached || [])
+  const filtered = (cached || [])
     .filter((r: any) => r.isActive)
     .sort(
       (a: any, b: any) =>
         (a.minPercent ?? Number.NEGATIVE_INFINITY) - (b.minPercent ?? Number.NEGATIVE_INFINITY)
     );
+  
+  if (filtered.length === 0) {
+    Logger.error("[Commission] NENHUMA regra de comissão encontrada!", {
+      type,
+      storeName,
+      cacheCount: (cached || []).length
+    });
+  } else {
+    Logger.info("[Commission] Regras carregadas do cache (IndexedDB)", { type, count: filtered.length });
+  }
+  
+  return filtered;
 };
 
 export const saveCommissionRules = async (type: ProductType, rules: CommissionRule[]) => {

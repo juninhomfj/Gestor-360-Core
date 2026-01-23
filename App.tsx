@@ -648,10 +648,12 @@ const App: React.FC = () => {
 
     const loadDataForUser = async () => {
         try {
+            console.warn("[Bootstrap] Iniciando loadDataForUser...");
             const [rBasic, rNatal] = await Promise.all([
                 getStoredTable(ProductType.BASICA),
                 getStoredTable(ProductType.NATAL)
             ]);
+            console.warn("[Bootstrap] Regras carregadas:", { basicRules: rBasic.length, natalRules: rNatal.length });
             setRulesBasic(rBasic);
             setRulesNatal(rNatal);
 
@@ -663,6 +665,14 @@ const App: React.FC = () => {
                 getSystemConfig(),
                 getReportConfig()
             ]);
+            
+            console.warn("[Bootstrap] Dados carregados do cache/Firebase:", {
+                sales: storedSales?.length || 0,
+                tasks: storedTasks?.length || 0,
+                clients: storedClients?.length || 0,
+                finAccounts: finData.accounts?.length || 0,
+                finTransactions: finData.transactions?.length || 0
+            });
 
             setSystemConfig(sysCfg || null);
             if (sysCfg?.theme) setTheme(sysCfg.theme);
@@ -704,15 +714,18 @@ const App: React.FC = () => {
             
             if (rConfig?.daysForLost) setReportConfig(rConfig as ReportConfig);
             if (!bootstrapLogRef.current) {
-                console.warn("[Bootstrap] Dados carregados.", {
+                console.warn("[Bootstrap] Dados carregados com sucesso.", {
                     sales: storedSales?.length || 0,
                     clients: storedClients?.length || 0,
-                    transactions: finData.transactions?.length || 0
+                    transactions: finData.transactions?.length || 0,
+                    basicRules: rBasic?.length || 0,
+                    natalRules: rNatal?.length || 0
                 });
                 bootstrapLogRef.current = true;
             }
         } catch (e: any) {
-            console.error("[Bootstrap] Falha ao carregar dados.", { code: e?.code, message: e?.message });
+            console.error("[Bootstrap] Falha ao carregar dados.", { code: e?.code, message: e?.message, stack: e?.stack });
+            Logger.error("[Bootstrap] Erro durante loadDataForUser", { error: e?.message, code: e?.code });
         }
     };
 

@@ -234,16 +234,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                                 key={mod.key}
                                 type="button"
                                 onClick={() => setHiddenModules(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${isHidden ? 'bg-amber-50/30 border-amber-300' : 'bg-slate-50 dark:bg-slate-950 border-gray-200 dark:border-slate-700'}`}
+                                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all active:scale-95 active:shadow-lg cursor-pointer hover:shadow-md ${isHidden ? 'bg-amber-50/30 border-amber-300 shadow-sm' : 'bg-slate-50 dark:bg-slate-950 border-gray-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                             >
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white ${isHidden ? 'bg-amber-500' : mod.color}`}>
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white transition-transform ${isHidden ? 'bg-amber-500 scale-110' : mod.color}`}>
                                     <Icon size={16} />
                                 </div>
                                 <div className="flex-1">
-                                    <p className={`text-[10px] font-black uppercase ${isHidden ? 'text-amber-600' : 'text-gray-500'}`}>{mod.label}</p>
-                                    <p className="text-[9px] text-gray-400">{isHidden ? 'Oculto' : 'Visível'}</p>
+                                    <p className={`text-[10px] font-black uppercase transition-colors ${isHidden ? 'text-amber-600' : 'text-gray-500'}`}>{mod.label}</p>
+                                    <p className={`text-[9px] transition-colors ${isHidden ? 'text-amber-500' : 'text-gray-400'}`}>{isHidden ? 'Oculto' : 'Visível'}</p>
                                 </div>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isHidden ? 'bg-amber-500 border-amber-500 text-white' : 'border-gray-300'}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${isHidden ? 'bg-amber-500 border-amber-500 text-white scale-100' : 'border-gray-300 scale-95'}`}>
                                     {isHidden && <Check size={12} />}
                                 </div>
                             </button>
