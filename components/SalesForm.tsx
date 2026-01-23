@@ -5,6 +5,71 @@ import { getStoredTable, computeCommissionValues, getClients, createClientAutoma
 import { X, Calculator, AlertCircle, Truck, DollarSign, Clock, Users, Plus, Check } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { Logger } from '../services/logger';
+import { db } from '../services/firebase';
+import { collection, query, where, getDocsFromServer, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { dbPut } from '../storage/db';
+
+// Helper: Upsert client when sale is created (auto-sync)
+const upsertClientFromSale = async (sale: Sale): Promise<void> => {
+  try {
+    const clientName = (sale.client || "").trim();
+    if (!clientName) return;
+
+    const uid = sale.userId;
+    if (!uid) return;
+
+    const nameLower = clientName.toLowerCase().trim().replace(/\s+/g, " ");
+    // Simple hash function
+    const simpleHash = (str: string): string => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return Math.abs(hash).toString(16);
+    };
+
+    const clientKey = `${uid}__${simpleHash(nameLower)}`;
+    const nowIso = new Date().toISOString();
+
+    // Check if client already exists
+    const existing = await getDocsFromServer(
+      query(collection(db, "clients"), where("userId", "==", uid), where("name", "==", clientName))
+    );
+
+    if (existing.docs.length > 0) {
+      const existingClient = existing.docs[0].data();
+      if (!existingClient.deleted) {
+        // Already active, skip
+        return;
+      }
+    }
+
+    // Upsert client with minimal data
+    const clientData: any = {
+      userId: uid,
+      name: clientName,
+      nameLower,
+      deleted: false,
+      clientStatus: "ACTIVE",
+      updatedAt: nowIso,
+      createdAt: existing.docs.length > 0 ? existing.docs[0].data().createdAt : nowIso
+    };
+
+    const clientId = existing.docs.length > 0 ? existing.docs[0].id : clientKey;
+    
+    // Upsert to local storage
+    await dbPut("clients" as any, { ...clientData, id: clientId } as any);
+    
+    // Upsert to Firestore with merge
+    const clientRef = doc(db, "clients", clientId);
+    await setDoc(clientRef, { ...clientData, updatedAt: serverTimestamp() }, { merge: true });
+  } catch (e: any) {
+    Logger.warn("Sales: Erro ao sincronizar cliente automaticamente", { error: e.message });
+    // Don't throw - sale was already saved successfully
+  }
+};
 
 interface Props {
   isOpen: boolean;
@@ -234,6 +299,8 @@ const SalesForm: React.FC<Props> = ({
             saleId: sale.id,
             userId: sale.userId
         });
+        // Auto-sync client (upsert)
+        await upsertClientFromSale(sale);
         if (isBilled && autoCreateReceivable && !initialData) {
             await createReceivableFromSale(sale);
         }

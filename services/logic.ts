@@ -1587,3 +1587,143 @@ export const restoreClient = async (client: Client): Promise<void> => {
     { deleted: false, deletedAt: null, updatedAt: nowIso } as any
   );
 };
+
+// ===== SYNC CLIENTS FROM SALES (DEV-ONLY) =====
+// Simple deterministic hash function (no external libs)
+const simpleHash = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(16);
+};
+
+export const syncClientsFromSales = async (options?: { allUsers?: boolean }): Promise<{ created: number; updated: number; reactivated: number; errors: string[] }> => {
+  await validateWriteAccess();
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Unauthenticated");
+
+  const result = { created: 0, updated: 0, reactivated: 0, errors: [] };
+  
+  try {
+    // Fetch sales (only current user by default, all if option set)
+    let salesQuery: any;
+    if (options?.allUsers) {
+      salesQuery = query(collection(db, "sales"), limit(2000));
+    } else {
+      salesQuery = query(collection(db, "sales"), where("userId", "==", uid), limit(2000));
+    }
+    
+    const salesDocs = await getDocsFromServer(salesQuery);
+    const sales = salesDocs.docs.map(d => ({ ...(d.data() as any), id: d.id } as Sale));
+
+    if (sales.length === 0) {
+      Logger.info("Sync: Nenhuma venda encontrada");
+      return result;
+    }
+
+    // Group sales by normalized client name per user
+    const clientMap = new Map<string, { userId: string; name: string; sales: Sale[] }>();
+    
+    for (const sale of sales) {
+      const clientName = (sale.client || "").trim();
+      if (!clientName) continue;
+
+      const nameLower = clientName.toLowerCase().trim().replace(/\s+/g, " ");
+      const clientUserId = sale.userId || uid;
+      const clientKey = `${clientUserId}__${simpleHash(nameLower)}`;
+
+      if (!clientMap.has(clientKey)) {
+        clientMap.set(clientKey, {
+          userId: clientUserId,
+          name: clientName,
+          sales: []
+        });
+      }
+      clientMap.get(clientKey)!.sales.push(sale);
+    }
+
+    // Upsert clients
+    for (const [clientKey, clientData] of clientMap.entries()) {
+      try {
+        const { userId, name, sales: clientSales } = clientData;
+        const nowIso = new Date().toISOString();
+
+        // Check if already exists
+        const existingDocs = await getDocsFromServer(
+          query(collection(db, "clients"), where("userId", "==", userId), where("name", "==", name))
+        );
+        
+        const existingClient = existingDocs.docs.length > 0 
+          ? (existingDocs.docs[0].data() as any)
+          : null;
+
+        if (existingClient && !existingClient.deleted) {
+          // Already active, skip
+          result.updated++;
+        } else {
+          // Calculate metrics from sales
+          const metrics = {
+            salesCount: clientSales.length,
+            totalSalesValue: clientSales.reduce((sum, s) => sum + (s.valueSold || s.valueProposed || 0), 0),
+            firstSaleAt: clientSales.reduce((min, s) => {
+              const saleDate = s.date || s.createdAt;
+              return !min || saleDate < min ? saleDate : min;
+            }, ""),
+            lastSaleAt: clientSales.reduce((max, s) => {
+              const saleDate = s.date || s.createdAt;
+              return !max || saleDate > max ? saleDate : max;
+            }, "")
+          };
+          if (metrics.salesCount) {
+            (metrics as any).avgTicket = metrics.totalSalesValue / metrics.salesCount;
+          }
+
+          const clientId = existingClient?.id || crypto.randomUUID();
+          const newClient: any = {
+            id: clientId,
+            userId,
+            name,
+            nameLower: name.toLowerCase(),
+            createdAt: existingClient?.createdAt || nowIso,
+            updatedAt: nowIso,
+            deleted: false,
+            clientStatus: "ACTIVE",
+            ...metrics
+          };
+
+          // Upsert to local IndexedDB
+          await dbPut("clients" as any, newClient);
+          
+          // Upsert to Firestore
+          await safeSetDoc(
+            "clients" as any,
+            clientId,
+            newClient,
+            { merge: true },
+            newClient,
+            existingClient ? "UPDATE" : "INSERT"
+          );
+
+          if (existingClient?.deleted) {
+            result.reactivated++;
+          } else {
+            result.created++;
+          }
+        }
+      } catch (e: any) {
+        result.errors.push(`Erro ao processar cliente: ${e.message}`);
+        Logger.error("Sync: Erro ao upsert client", { error: e.message });
+      }
+    }
+
+    Logger.info("Sync: Clientes sincronizados com sucesso", result);
+  } catch (e: any) {
+    result.errors.push(`Erro geral: ${e.message}`);
+    Logger.error("Sync: Erro ao sincronizar clientes", { error: e.message });
+  }
+
+  return result;
+};

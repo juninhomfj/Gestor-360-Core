@@ -3,11 +3,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
     Code2, Terminal, Database, Server, Cpu, RefreshCw, 
     CheckCircle2, Cloud, Activity, 
-    Shield, Download, FileJson, Copy, AlertTriangle, Trash2, ArrowUpRight, ArrowDownLeft, Eraser, Heart, Globe, AlertCircle
+    Shield, Download, FileJson, Copy, AlertTriangle, Trash2, ArrowUpRight, ArrowDownLeft, Eraser, Heart, Globe, AlertCircle, Zap
 } from 'lucide-react';
 import { db } from '../services/firebase';
 import { Logger } from '../services/logger';
-import { SessionTraffic } from '../services/logic';
+import { SessionTraffic, syncClientsFromSales } from '../services/logic';
 import { collection, onSnapshot, query, limit } from 'firebase/firestore';
 import { dbGetAll } from '../storage/db';
 import { checkBackendHealth } from '../services/healthService';
@@ -15,6 +15,8 @@ import { checkBackendHealth } from '../services/healthService';
 const DevRoadmap: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'CLOUD' | 'DATABASE' | 'LOGS' | 'ROADMAP'>('CLOUD');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<any | null>(null);
   const [traffic, setTraffic] = useState({ reads: 0, writes: 0, last: 'Nunca' });
   const [workerStatus, setWorkerStatus] = useState<'ONLINE' | 'OFFLINE' | 'CHECKING'>('CHECKING');
 
@@ -88,6 +90,25 @@ const DevRoadmap: React.FC = () => {
   const copyToClipboard = (text: string) => {
       navigator.clipboard.writeText(text);
       alert("Copiado!");
+  };
+
+  const handleSyncClientsFromSales = async () => {
+      if (!confirm("Sincronizar clientes a partir das vendas? Isso pode levar alguns segundos...")) return;
+      setIsSyncing(true);
+      setSyncResult(null);
+      try {
+          const result = await syncClientsFromSales();
+          setSyncResult(result);
+          alert(`Sync concluído: ${result.created} criados, ${result.updated} atualizados, ${result.reactivated} reativados`);
+          if (result.errors.length > 0) {
+              alert(`Erros: ${result.errors.join("; ")}`);
+          }
+      } catch (e: any) {
+          alert(`Erro ao sincronizar: ${e.message}`);
+          Logger.error("Sync error", { error: e.message });
+      } finally {
+          setIsSyncing(false);
+      }
   };
 
   const filteredData = useMemo(() => {
@@ -221,6 +242,7 @@ const DevRoadmap: React.FC = () => {
                     </div>
                     <div className="flex gap-2">
                         <button onClick={handleExportCSV} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase">Exportar Tabela</button>
+                        <button onClick={handleSyncClientsFromSales} disabled={isSyncing} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2 ${isSyncing ? 'bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-violet-600 text-white hover:bg-violet-700'}`} title="Sincronizar clientes a partir das vendas"><Zap size={14}/> {isSyncing ? 'Sincronizando...' : 'Sync Clientes'}</button>
                         <button onClick={loadTable} className="p-2 bg-slate-800 rounded-lg" aria-label="Atualizar" title="Atualizar"><RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''}/></button>
                     </div>
                 </div>
