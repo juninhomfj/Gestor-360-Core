@@ -185,7 +185,7 @@ const Layout: React.FC<LayoutProps> = ({
   // Sidebar Items - Expandidos para incluir Perfil e Tabelas
   const commonItems = [
     { id: 'tickets', label: 'Gestão de Tickets', icon: MessageSquare, show: true },
-    { id: 'chat', label: 'Chat interno', icon: MessageSquare, show: true },
+    // { id: 'chat', label: 'Chat interno', icon: MessageSquare, show: true }, // Chat desativado
     { id: 'settings', label: 'Configurações', icon: Settings, show: true },
     { id: 'dev_roadmap', label: 'Diagnostico DEV', icon: Shield, show: isDev },
   ];
@@ -347,7 +347,7 @@ const Layout: React.FC<LayoutProps> = ({
                 notifications={notifications} 
                 onNotificationClick={(notif) => {
                     if (notif.id?.startsWith('chat:')) {
-                        navigate('chat');
+                        navigate('tickets'); // Redireciona para tickets (DEV area)
                         return;
                     }
                     if (notif.id?.startsWith('ticket:')) {
@@ -366,7 +366,8 @@ const Layout: React.FC<LayoutProps> = ({
                 }} 
                 onClearAll={onClearAllNotifications} 
             />
-            <button onClick={() => setIsChatOpen(true)} className="relative p-2 text-slate-400 hover:text-white transition-colors">
+            {/* Ícone de chat redireciona para tickets (DEV area para consultar bug reports) */}
+            <button onClick={() => navigate('tickets')} className="relative p-2 text-slate-400 hover:text-white transition-colors" title="Tickets de Bug Reports">
                 <MessageSquare size={22} />
                 {unreadCount > 0 && <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center ring-2 ring-slate-950 animate-pulse">{unreadCount}</span>}
             </button>
@@ -397,7 +398,8 @@ const Layout: React.FC<LayoutProps> = ({
         hasUnreadMessages={unreadCount > 0} 
       />
 
-      {isChatOpen && (
+      {/* Chat desativado */}
+      {/* {isChatOpen && (
         <InternalChatSystem 
             currentUser={currentUser} 
             isOpen={isChatOpen} 
@@ -405,7 +407,7 @@ const Layout: React.FC<LayoutProps> = ({
             darkMode={['glass', 'cyberpunk', 'dark'].includes(currentTheme)}
             onNotify={onNotify}
         />
-      )}
+      )} */}
     </div>
   );
 };
