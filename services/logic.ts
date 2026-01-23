@@ -1649,6 +1649,7 @@ export const syncClientsFromSales = async (options?: { allUsers?: boolean }): Pr
     for (const [clientKey, clientData] of clientMap.entries()) {
       try {
         const { userId, name, sales: clientSales } = clientData;
+        const nameLower = (name || "").trim().toLowerCase().replace(/\s+/g, " ");
         const nowIso = new Date().toISOString();
 
         // Check if already exists

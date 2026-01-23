@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Bug, AlertTriangle, CheckCircle, Loader2, Paperclip } from 'lucide-react';
+import { X, Bug, AlertTriangle, CheckCircle, Loader2, Paperclip, MessageSquare } from 'lucide-react';
 import { TicketAttachment, TicketPriority, User } from '../types';
 import { Logger } from '../services/logger';
 import { sendPushNotification } from '../services/pushService';
