@@ -112,6 +112,7 @@ const App: React.FC = () => {
     const missingSalesIndexToastRef = useRef(false);
     const notifiedTicketIdsRef = useRef<Set<string>>(new Set());
     const bootstrapLogRef = useRef(false);
+    const lastSeenUpdateRef = useRef<{ chat: number; tickets: number }>({ chat: 0, tickets: 0 });
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [authView, setAuthView] = useState<AuthView>('LOADING');
@@ -174,6 +175,13 @@ const App: React.FC = () => {
     };
     const updateLastSeen = async (key: 'chat' | 'tickets', value: number) => {
         if (!currentUser) return;
+        
+        // Debounce: só atualiza se passou mais de 2 segundos desde última atualização deste tipo
+        const now = Date.now();
+        const lastUpdate = lastSeenUpdateRef.current[key];
+        if (now - lastUpdate < 2000) return;
+        lastSeenUpdateRef.current[key] = now;
+        
         const prefs = currentUser.prefs || {};
         const nextPrefs = {
             ...prefs,
@@ -242,12 +250,14 @@ const App: React.FC = () => {
     useEffect(() => {
         if (!currentUser) return;
         const ref = doc(db, 'profiles', currentUser.id);
+        const lastUpdateRef = { lastSentPrefs: currentUser.prefs };
         const unsubscribe = onSnapshot(ref, (snap) => {
             const data = snap.data() as any;
             if (!data?.prefs) return;
-            const nextPrefs = { ...(currentUser.prefs || {}), ...(data.prefs || {}) };
-            if (JSON.stringify(nextPrefs) === JSON.stringify(currentUser.prefs || {})) return;
-            handleUpdateUserInApp({ ...currentUser, prefs: nextPrefs });
+            // Evita loop infinito: só atualiza se Firestore tem ALGO NOVO que não foi enviado por nós
+            if (JSON.stringify(data.prefs) === JSON.stringify(lastUpdateRef.lastSentPrefs)) return;
+            lastUpdateRef.lastSentPrefs = data.prefs;
+            handleUpdateUserInApp({ ...currentUser, prefs: data.prefs });
         });
         return () => unsubscribe();
     }, [currentUser?.id]);
