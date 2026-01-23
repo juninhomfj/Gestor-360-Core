@@ -355,8 +355,39 @@ const SalesForm: React.FC<Props> = ({
           )}
           <fieldset disabled={isLocked} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Ordem (TAB) do formulário: Cliente → Orçamento → Quantidade → Valor Proposto → Valor da Venda → Margem → Rastreio → Faturamento/Prazo → Tipo de Cesta */}
+              {/* Ordem (TAB) do formulário: Tipo de Cesta → Forma de Pagamento → Cliente → Orçamento → Quantidade → Valor Proposto → Valor da Venda → Margem → Rastreio → Observação → Data de Faturamento + Faturamento Pendente */}
 
+              {/* 1. Tipo de Cesta */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Cesta</label>
+                <select
+                  className={inputClasses}
+                  value={productType}
+                  onChange={e => setProductType(e.target.value as ProductType)}
+                  aria-label="Tipo de cesta"
+                >
+                  <option value={ProductType.BASICA}>Cesta Básica</option>
+                  <option value={ProductType.NATAL}>Cesta de Natal</option>
+                </select>
+              </div>
+
+              {/* 2. Forma de Pagamento */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Forma de Pagamento</label>
+                <select
+                  className={inputClasses}
+                  value={paymentMethod}
+                  onChange={e => setPaymentMethod(e.target.value)}
+                  aria-label="Forma de pagamento"
+                >
+                  <option value="">Selecione</option>
+                  {paymentMethods.map(method => (
+                    <option key={method} value={method}>{method}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 3. Cliente */}
               <div className="relative md:col-span-2">
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1 flex items-center gap-1">
                   <Users size={12} /> Cliente
@@ -399,6 +430,7 @@ const SalesForm: React.FC<Props> = ({
                 )}
               </div>
 
+              {/* 4. Orçamento */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Orçamento</label>
                 <input
@@ -411,6 +443,7 @@ const SalesForm: React.FC<Props> = ({
                 />
               </div>
 
+              {/* 5. Quantidade */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Quantidade</label>
                 <input
@@ -422,6 +455,7 @@ const SalesForm: React.FC<Props> = ({
                 />
               </div>
 
+              {/* 6. Valor Proposto */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor Proposto (R$)</label>
                 <input
@@ -433,6 +467,7 @@ const SalesForm: React.FC<Props> = ({
                 />
               </div>
 
+              {/* 7. Valor da Venda */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Valor da Venda (R$)</label>
                 <div className="relative">
@@ -447,6 +482,7 @@ const SalesForm: React.FC<Props> = ({
                 </div>
               </div>
 
+              {/* 8. Margem */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Margem %</label>
                 <input
@@ -463,6 +499,7 @@ const SalesForm: React.FC<Props> = ({
                 </span>
               </div>
 
+              {/* 9. Rastreio */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Rastreio</label>
                 <div className="relative">
@@ -477,6 +514,19 @@ const SalesForm: React.FC<Props> = ({
                 </div>
               </div>
 
+              {/* 10. Observação */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
+                <textarea
+                  className={`${inputClasses} h-24 resize-none`}
+                  placeholder="Detalhes adicionais do pedido..."
+                  aria-label="Detalhes adicionais do pedido..."
+                  value={observations}
+                  onChange={e => setObservations(e.target.value)}
+                />
+              </div>
+
+              {/* 11. Data de Faturamento + Faturamento Pendente */}
               <div>
                 <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Data de Faturamento</label>
                 <input
@@ -490,59 +540,7 @@ const SalesForm: React.FC<Props> = ({
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-slate-300 uppercase mb-1 ml-1">Prazo</label>
-                <input
-                  type="date"
-                  className={inputClasses}
-                  value={closeDate}
-                  onChange={e => setCloseDate(e.target.value)}
-                  aria-label="Prazo"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Tipo de Cesta</label>
-                <select
-                  className={inputClasses}
-                  value={productType}
-                  onChange={e => setProductType(e.target.value as ProductType)}
-                  aria-label="Tipo de cesta"
-                >
-                  <option value={ProductType.BASICA}>Cesta Básica</option>
-                  <option value={ProductType.NATAL}>Cesta de Natal</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Observações</label>
-                <textarea
-                  className={`${inputClasses} h-24 resize-none`}
-                  placeholder="Detalhes adicionais do pedido..."
-                  aria-label="Detalhes adicionais do pedido..."
-                  value={observations}
-                  onChange={e => setObservations(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1 ml-1">Forma de Pagamento</label>
-                <select
-                  className={inputClasses}
-                  value={paymentMethod}
-                  onChange={e => setPaymentMethod(e.target.value)}
-                  aria-label="Forma de pagamento"
-                >
-                  <option value="">Selecione</option>
-                  {paymentMethods.map(method => (
-                    <option key={method} value={method}>{method}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 cursor-pointer ml-1 group">
+                <label className="flex items-center gap-2 cursor-pointer ml-1 group pt-6">
                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isPendingBilling ? 'bg-amber-500 border-amber-500 shadow-lg shadow-amber-500/20' : 'border-slate-600'}`}>
                         <input 
                             type="checkbox" 
@@ -554,28 +552,28 @@ const SalesForm: React.FC<Props> = ({
                         {isPendingBilling && <Clock size={12} className="text-white" />}
                     </div>
                     <span className={`text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-300' : 'text-slate-400'}`}>
-                        Pendente de Faturamento
+                        Faturamento Pendente
                     </span>
                 </label>
-                
-                <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-900/20 border border-amber-800/60' : 'bg-indigo-900/20 border border-indigo-800/60'}`}>
-                    {isPendingBilling ? (
-                        <>
-                          <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
-                          <p className="text-xs text-amber-200 leading-relaxed font-medium">
-                              Venda marcada como pendente. Ela não aparecerá nos gráficos de faturamento mensal até que você defina uma data.
-                          </p>
-                        </>
-                    ) : (
-                        <>
-                          <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
-                          <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                              Esta data define o mês em que a comissão será contabilizada no seu dashboard.
-                          </p>
-                        </>
-                    )}
-                </div>
               </div>
+            </div>
+
+            <div className={`p-4 rounded-xl flex items-start gap-3 transition-colors ${isPendingBilling ? 'bg-amber-900/20 border border-amber-800/60' : 'bg-indigo-900/20 border border-indigo-800/60'}`}>
+                {isPendingBilling ? (
+                    <>
+                      <Clock className="text-amber-500 shrink-0 mt-0.5" size={16} />
+                      <p className="text-xs text-amber-200 leading-relaxed font-medium">
+                          Venda marcada como pendente. Ela não aparecerá nos gráficos de faturamento mensal até que você defina uma data.
+                      </p>
+                    </>
+                ) : (
+                    <>
+                      <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size={16} />
+                      <p className="text-xs text-indigo-200 leading-relaxed font-medium">
+                          Esta data define o mês em que a comissão será contabilizada no seu dashboard.
+                      </p>
+                    </>
+                )}
             </div>
           </fieldset>
         </div>
