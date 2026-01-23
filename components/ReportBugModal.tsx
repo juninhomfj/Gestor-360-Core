@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { X, Bug, AlertTriangle, CheckCircle, Loader2, Paperclip, MessageSquare } from 'lucide-react';
+import { X, Bug, AlertTriangle, CheckCircle, Loader2, Paperclip } from 'lucide-react';
 import { TicketAttachment, TicketPriority, User } from '../types';
-import { sendMessage } from '../services/internalChat';
 import { Logger } from '../services/logger';
 import { sendPushNotification } from '../services/pushService';
 import { createTicket } from '../services/tickets';
@@ -70,14 +69,15 @@ const ReportBugModal: React.FC<ReportBugModalProps> = ({ isOpen, onClose, curren
             attachments
         });
         
-        await sendMessage(
-            currentUser,
-            content,
-            'BUG_REPORT',
-            'ADMIN',
-            undefined,
-            module.toLowerCase() as any
-        );
+        // Chat desativado - bugs agora vão apenas para tickets na área DEV
+        // await sendMessage(
+        //     currentUser,
+        //     content,
+        //     'BUG_REPORT',
+        //     'ADMIN',
+        //     undefined,
+        //     module.toLowerCase() as any
+        // );
 
         // Dispara PUSH para os administradores
         // Safe check for substring

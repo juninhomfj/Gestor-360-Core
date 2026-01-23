@@ -11,7 +11,8 @@ import { SYSTEM_MODULES } from './config/modulesCatalog';
 import ReportBugModal from './components/ReportBugModal';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import InternalChatSystem from './components/InternalChatSystem';
+// Chat desativado por Supabase Realtime - remover InternalChatSystem
+// import InternalChatSystem from './components/InternalChatSystem';
 
 const LAZY_RELOAD_KEY = 'sys_lazy_reload_once';
 const MODULE_IMPORT_ERROR_PATTERN = /Importing a module script failed|Failed to fetch dynamically imported module|ChunkLoadError|Loading chunk/i;
@@ -83,7 +84,8 @@ import { logout, getSession, updateUser, watchAuthChanges } from './services/aut
 import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
-import { sendMessage, getMessages, subscribeToMessages } from './services/internalChat';
+// Chat desativado - remover imports do Supabase Realtime
+// import { sendMessage, getMessages, subscribeToMessages } from './services/internalChat';
 import { requestAndSaveToken } from './services/pushService';
 import { ShieldAlert, LogOut, Loader2 } from 'lucide-react';
 import { SALES_TASK_LABELS } from './utils/salesTasks';
@@ -463,28 +465,29 @@ const App: React.FC = () => {
 
         const start = async () => {
             try {
-                const created = await subscribeToMessages(currentUser.id, isAdmin, (msg) => {
-                    if (msg.deleted) return;
-                    if (msg.senderId === currentUser.id) return;
-                    if (activeTabRef.current === 'chat') return;
-                    const preview = msg.content?.trim() || (msg.mediaType ? `Mídia: ${msg.mediaType}` : 'Nova mensagem');
-                    pushNotification({
-                        id: `chat:${msg.id}`,
-                        title: `Nova mensagem de ${msg.senderName || 'Usuário'}`,
-                        message: preview,
-                        type: 'INFO',
-                        source: 'SYSTEM',
-                        date: msg.timestamp,
-                        read: false
-                    });
-                });
+                // Chat desativado - Supabase Realtime
+                // const created = await subscribeToMessages(currentUser.id, isAdmin, (msg) => {
+                //     if (msg.deleted) return;
+                //     if (msg.senderId === currentUser.id) return;
+                //     if (activeTabRef.current === 'chat') return;
+                //     const preview = msg.content?.trim() || (msg.mediaType ? `Mídia: ${msg.mediaType}` : 'Nova mensagem');
+                //     pushNotification({
+                //         id: `chat:${msg.id}`,
+                //         title: `Nova mensagem de ${msg.senderName || 'Usuário'}`,
+                //         message: preview,
+                //         type: 'INFO',
+                //         source: 'SYSTEM',
+                //         date: msg.timestamp,
+                //         read: false
+                //     });
+                // });
 
                 // Se o efeito foi desmontado antes do subscribe resolver, fecha imediatamente.
-                if (cancelled) {
-                    created?.unsubscribe?.();
-                    return;
-                }
-                channel = created || null;
+                // if (cancelled) {
+                //     created?.unsubscribe?.();
+                //     return;
+                // }
+                // channel = created || null;
             } catch {}
 
             await pollTickets();
@@ -1259,13 +1262,19 @@ const App: React.FC = () => {
                 return <TicketsManager currentUser={currentUser} darkMode={isDarkMode} isAdmin={isAdmin} />;
             case 'chat':
                 return (
-                    <InternalChatSystem
-                        currentUser={currentUser}
-                        isOpen={true}
-                        onClose={() => navigateTo('home')}
-                        darkMode={isDarkMode}
-                        onNotify={addToast}
-                    />
+                    // Chat desativado - Supabase Realtime
+                    // <InternalChatSystem
+                    //     currentUser={currentUser}
+                    //     isOpen={true}
+                    //     onClose={() => navigateTo('home')}
+                    //     darkMode={isDarkMode}
+                    //     onNotify={addToast}
+                    // />
+                    <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
+                        <div className="text-center">
+                            <p className="text-gray-500 dark:text-gray-400">Sistema de chat desativado</p>
+                        </div>
+                    </div>
                 );
             case 'settings':
                 return (
