@@ -1,5 +1,5 @@
 
-import { collection, endAt, getDocs, limit, orderBy, query, startAt, where } from 'firebase/firestore';
+import { collection, endAt, getDocs, getDocsFromServer, limit, orderBy, query, startAt, where } from 'firebase/firestore';
 import { db } from './firebase';
 import { dbBulkPutSkipPending, dbGetAll } from '../storage/db';
 import { Client, ClientTransferRequest } from '../types';
@@ -24,7 +24,7 @@ export const getMyClients = async (userId: string): Promise<Client[]> => {
             where('userId', '==', validatedUserId),
             where('deleted', '==', false)
         );
-        const snap = await getDocs(q);
+        const snap = await getDocsFromServer(q);
         remoteClients = snap.docs.map(docSnap => ({ ...(docSnap.data() as Client), id: docSnap.id }));
         if (remoteClients.length) await dbBulkPutSkipPending('clients', remoteClients);
     } catch (e) {}
