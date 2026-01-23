@@ -17,8 +17,12 @@ service cloud.firestore {
       return request.auth.token.email;
     }
 
+    function myEmailLower() {
+      return myEmail() != null ? myEmail().lowercase() : null;
+    }
+
     function hasProfile() {
-      return exists(/databases/$(database)/documents/profiles/$(myUid()));
+      return isAuth() && exists(/databases/$(database)/documents/profiles/$(myUid()));
     }
 
     function p() {
@@ -37,7 +41,11 @@ service cloud.firestore {
       return hasProfile() && p().role == "ADMIN";
     }
 
-    // ✅ PRINCIPAL CORREÇÃO: aceitar modules OU permissions (sem mexer no profile)
+    function isPrivileged() {
+      return isDEV() || isADMIN();
+    }
+
+    // ✅ aceitar modules OU permissions (mantido)
     function hasModule(m) {
       return hasProfile() && (
         (p().modules[m] == true) ||
@@ -49,44 +57,56 @@ service cloud.firestore {
       return hasModule("finance") || hasModule("sales");
     }
 
+    // Para leituras: menos restritivo (DEV/ADMIN passam, e usuário com módulo passa)
+    function canReadModule(m) {
+      return isAuth() && (isPrivileged() || hasModule(m));
+    }
+
+    // Para escritas: mantém controle (usuário comum precisa estar ativo)
+    function canWriteModule(m) {
+      return isAuth() && (isPrivileged() || (isActive() && hasModule(m)));
+    }
+
+    function isOwnerByField(field) {
+      return resource.data[field] == myUid();
+    }
+
+    function isOwnerByFieldNew(field) {
+      return request.resource.data[field] == myUid();
+    }
+
     /* ========= USERS ========= */
-    /* users/{uid} - doc do app (metadados do usuário) */
     match /users/{uid} {
-      allow read: if isAuth() && (uid == request.auth.uid || isDEV());
-      allow create: if isAuth() && (uid == request.auth.uid || isDEV());
-      allow update: if isAuth() && (uid == request.auth.uid || isDEV());
+      // leitura mais aberta para admin/dev
+      allow read: if isAuth() && (uid == myUid() || isPrivileged());
+      allow create: if isAuth() && (uid == myUid() || isPrivileged());
+      allow update: if isAuth() && (uid == myUid() || isPrivileged());
       allow delete: if false;
     }
 
-    /* ========= INVITES (CONSOLIDADO) ========= */
-    /* invites/{id} - docId pode ser email OU emailLower (compatível com ambos os padrões) */
+    /* ========= INVITES ========= */
     match /invites/{id} {
 
       // Ler:
-      // - DEV lê tudo
-      // - ADMIN(users) lê tudo
-      // - usuário lê o próprio convite (por docId ou por email no conteúdo)
+      // - DEV/ADMIN lê tudo
+      // - usuário lê o próprio convite por docId email/emailLower ou por campo email
       allow read: if isAuth() && (
-        isDEV() ||
-        (isADMIN() && hasModule("users")) ||
-        (request.auth.token.email != null && request.auth.token.email.lowercase() == id) ||
-        (request.auth.token.email != null && request.auth.token.email == id) ||
-        (myEmail() == resource.data.email)
+        isPrivileged() ||
+        (myEmailLower() != null && myEmailLower() == id) ||
+        (myEmail() != null && myEmail() == id) ||
+        (myEmail() != null && myEmail() == resource.data.email)
       );
 
-      // Criar convite: DEV ou ADMIN(users)
-      allow create: if isAuth() && (
-        isDEV() ||
-        (isADMIN() && hasModule("users"))
-      );
+      // Criar convite: DEV/ADMIN
+      allow create: if isAuth() && isPrivileged();
 
       // Atualizar convite:
-      // - DEV/ADMIN(users) pode
-      // - o próprio usuário pode marcar como usado (usedAt/usedBy) após criar conta
+      // - DEV/ADMIN pode
+      // - o próprio usuário pode marcar como usado (usedBy) após criar conta
       allow update: if isAuth() && (
-        isDEV() ||
-        (isADMIN() && hasModule("users")) ||
+        isPrivileged() ||
         (
+          myEmail() != null &&
           myEmail() == resource.data.email &&
           resource.data.usedAt == null &&
           request.resource.data.usedBy == myUid()
@@ -96,33 +116,34 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    /* ========= PROFILES (usuários) ========= */
+    /* ========= PROFILES ========= */
     match /profiles/{uid} {
 
       // Ler:
       // - o próprio documento
-      // - DEV lê tudo
-      // - ADMIN(users) lê tudo
+      // - DEV/ADMIN lê tudo
       allow read: if isAuth() && (
         uid == myUid() ||
-        isDEV() ||
-        (isADMIN() && hasModule("users"))
+        isPrivileged()
       );
 
       // Criar:
-      // - convite-only: usuário cria SOMENTE o próprio doc, se tiver invite.
+      // - DEV/ADMIN pode
+      // - usuário cria o próprio doc se tiver invite válido
       allow create: if isAuth() && (
-        isDEV() ||
+        isPrivileged() ||
         (
           uid == myUid() &&
+          myEmail() != null &&
           (
             (
               exists(/databases/$(database)/documents/invites/$(myEmail())) &&
               get(/databases/$(database)/documents/invites/$(myEmail())).data.usedAt == null
             ) ||
             (
-              exists(/databases/$(database)/documents/invites/$(myEmail().lowercase())) &&
-              get(/databases/$(database)/documents/invites/$(myEmail().lowercase())).data.usedAt == null
+              myEmailLower() != null &&
+              exists(/databases/$(database)/documents/invites/$(myEmailLower())) &&
+              get(/databases/$(database)/documents/invites/$(myEmailLower())).data.usedAt == null
             )
           ) &&
           request.resource.data.email == myEmail()
@@ -130,13 +151,10 @@ service cloud.firestore {
       );
 
       // Update:
-      // - DEV pode atualizar tudo
-      // - ADMIN(users) pode atualizar tudo
-      // - Usuário comum só pode atualizar prefs/lastLoginAt/displayName/photoURL
-      //   e NÃO pode mudar role/modules/email
+      // - DEV/ADMIN pode atualizar tudo
+      // - Usuário comum: só altera campos “seguros” e mantém sensíveis iguais
       allow update: if isAuth() && (
-        isDEV() ||
-        (isADMIN() && hasModule("users")) ||
+        isPrivileged() ||
         (
           uid == myUid() &&
 
@@ -147,6 +165,7 @@ service cloud.firestore {
           request.resource.data.email == resource.data.email &&
           request.resource.data.emailLower == resource.data.emailLower &&
 
+          // Usuário comum pode manter status/ativação sob controle
           (
             request.resource.data.isActive == resource.data.isActive ||
             (
@@ -175,293 +194,255 @@ service cloud.firestore {
 
     /* ========= WEBHOOKS ========= */
     match /webhooks/{id} {
-      allow read: if isAuth() && (isADMIN() || isDEV());
-      allow write: if isAuth() && (isADMIN() || isDEV());
+      allow read: if isAuth() && isPrivileged();
+      allow write: if isAuth() && isPrivileged();
     }
 
     /* ========= VENDAS360 / FINANCE ========= */
 
     match /accounts/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId")) ||
+        (isActive() && hasFinanceAccess() && isADMIN())
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if canWriteModule("finance") && (
+        isPrivileged() || isOwnerByFieldNew("userId")
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if canWriteModule("finance") && (
+        isPrivileged() || isOwnerByField("userId")
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /transactions/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /sales/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      // ✅ leitura menos restritiva: dev/admin sempre, e sales ativo+modulo pelo owner
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasModule("sales") && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /sales_tasks/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasModule("sales") && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /clients/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasModule("sales") && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasModule("sales") && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /receivables/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /campaigns/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasModule("sales") && (resource.data.userId == myUid())) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasModule("sales") && (request.resource.data.userId == myUid())) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasModule("sales") && (resource.data.userId == myUid())) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasModule("sales") && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /cards/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /categories/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /goals/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /challenges/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /challenge_cells/{id} {
-      allow read: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow create: if isAuth() && isActive() && (
-        (hasFinanceAccess() && request.resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        (hasFinanceAccess() && resource.data.userId == myUid()) ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && hasFinanceAccess() && isOwnerByField("userId"))
       );
 
-      allow delete: if isAuth() && isActive() && (isDEV() || isADMIN());
+      allow delete: if isAuth() && isActive() && isPrivileged();
     }
 
     match /tickets/{id} {
-      allow read: if isAuth() && isActive() && (
-        resource.data.userId == myUid() ||
-        isADMIN() ||
-        isDEV()
+      // tickets: leitura mais ampla para evitar “tela vazia”
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && (isOwnerByField("userId")))
       );
 
-      allow create: if isAuth() && isActive() && (
-        request.resource.data.userId == myUid() ||
-        isADMIN() ||
-        isDEV()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && isOwnerByFieldNew("userId"))
       );
 
-      allow update: if isAuth() && isActive() && (
-        resource.data.userId == myUid() ||
-        isADMIN() ||
-        isDEV()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && isOwnerByField("userId"))
       );
 
       allow delete: if isAuth() && isActive() && isDEV();
@@ -470,52 +451,53 @@ service cloud.firestore {
     /* ========= TABELAS DE COMISSÃO ========= */
     match /commission_basic/{docId} {
       allow read: if isAuth();
-      allow write: if isAuth() && (isDEV() || isADMIN());
+      allow write: if isAuth() && isPrivileged();
     }
 
     match /commission_natal/{docId} {
       allow read: if isAuth();
-      allow write: if isAuth() && (isDEV() || isADMIN());
+      allow write: if isAuth() && isPrivileged();
     }
 
     match /commissions_basic/{docId} {
       allow read: if isAuth();
-      allow write: if isAuth() && (isDEV() || isADMIN());
+      allow write: if isAuth() && isPrivileged();
     }
 
     match /commissions_natal/{docId} {
       allow read: if isAuth();
-      allow write: if isAuth() && (isDEV() || isADMIN());
+      allow write: if isAuth() && isPrivileged();
     }
 
     /* ========= AUDIT ========= */
     match /audit_log/{id} {
-      allow read: if isAuth() && (isDEV() || hasModule("logs"));
+      allow read: if isAuth() && (isPrivileged() || hasModule("logs"));
       allow create: if isAuth();
       allow update, delete: if false;
     }
 
     /* ========= INTERNAL MESSAGES ========= */
     match /internal_messages/{id} {
-      allow read: if isAuth() && isActive() && (
-        isDEV() ||
-        isADMIN() ||
-        resource.data.senderId == myUid() ||
-        resource.data.recipientId == myUid() ||
-        resource.data.recipientId == "BROADCAST"
+      allow read: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && (
+          resource.data.senderId == myUid() ||
+          resource.data.recipientId == myUid() ||
+          resource.data.recipientId == "BROADCAST"
+        ))
       );
 
-      allow create: if isAuth() && isActive() && (
-        isDEV() ||
-        isADMIN() ||
-        request.resource.data.senderId == myUid()
+      allow create: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && request.resource.data.senderId == myUid())
       );
 
-      allow update: if isAuth() && isActive() && (
-        isDEV() ||
-        isADMIN() ||
-        resource.data.senderId == myUid() ||
-        resource.data.recipientId == myUid()
+      allow update: if isAuth() && (
+        isPrivileged() ||
+        (isActive() && (
+          resource.data.senderId == myUid() ||
+          resource.data.recipientId == myUid()
+        ))
       );
 
       allow delete: if false;
