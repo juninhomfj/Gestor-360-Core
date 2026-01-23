@@ -6,6 +6,12 @@ import { Logger } from '../services/logger';
 import { auth } from '../services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Helper: parseNumericInput
+const parseNumericInput = (value: string) => {
+  if (value === '' || value === undefined) return 0;
+  return Number(value);
+};
+
 interface CommissionEditorProps {
   type: ProductType;
   currentUser: User;
