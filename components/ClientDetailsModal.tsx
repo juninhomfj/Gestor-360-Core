@@ -58,12 +58,12 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
                         <div>
                             <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{client.name}</h3>
                             <div className="flex gap-2 mt-1">
-                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Dossiê 360</p>
-                                <div className="w-1 h-1 bg-slate-300 rounded-full my-auto"></div>
+                                <p className="text-xs text-slate-500 dark:text-slate-300 font-bold uppercase tracking-widest">Dossiê 360</p>
+                                <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full my-auto"></div>
                                 {ownerName ? (
                                     <>
-                                        <div className="w-1 h-1 bg-slate-300 rounded-full my-auto"></div>
-                                        <p className="text-xs text-emerald-600 font-bold uppercase tracking-widest">Proprietário: {ownerName}</p>
+                                        <div className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full my-auto"></div>
+                                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Proprietário: {ownerName}</p>
                                     </>
                                 ) : null}
                             </div>
@@ -89,7 +89,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
 
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-2 space-y-4">
-                                    <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                    <h4 className="text-sm font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest flex items-center gap-2">
                                         <BarChart3 size={16}/> Comportamento de Margem
                                     </h4>
                                     <div className="h-64 w-full p-4 rounded-3xl bg-gray-50 dark:bg-slate-950 border dark:border-slate-800 dark:text-slate-100">
@@ -109,11 +109,11 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
                                     </div>
                                 </div>
                                 <div className="space-y-4">
-                                    <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                    <h4 className="text-sm font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest flex items-center gap-2">
                                         <FileText size={16}/> Notas do Parceiro
                                     </h4>
-                                    <div className="p-6 rounded-3xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900 min-h-[150px]">
-                                        <p className="text-sm text-amber-900 dark:text-amber-200 italic leading-relaxed">
+                                    <div className="p-6 rounded-3xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 min-h-[150px]">
+                                        <p className="text-sm text-amber-900 dark:text-amber-100 italic leading-relaxed">
                                             {client.notes || "Nenhuma observação estratégica registrada."}
                                         </p>
                                     </div>
@@ -123,7 +123,7 @@ const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({ client, ownerNa
 
                 {/* Footer */}
                 <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex justify-between items-center px-10 dark:text-slate-100">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Dossiê Gerado em {new Date().toLocaleDateString()}</p>
+                    <p className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">Dossiê Gerado em {new Date().toLocaleDateString()}</p>
                     <button onClick={onClose} className="px-8 py-3 bg-slate-900 text-white font-black rounded-2xl active:scale-95 transition-all text-[10px] uppercase tracking-widest border border-white/10">Fechar Dossiê</button>
                 </div>
 
@@ -139,7 +139,7 @@ const KPICard = ({ label, value, icon, color }: any) => (
             {icon}
         </div>
         <div className="overflow-hidden">
-            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1 truncate">{label}</p>
+            <p className="text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest mb-1 truncate">{label}</p>
             <p className="text-xl font-black text-gray-900 dark:text-white truncate">{value}</p>
         </div>
     </div>
@@ -151,9 +151,9 @@ const SummaryItem = ({ label, value, icon, helper }: { label: string; value: str
             {icon}
         </div>
         <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">{label}</p>
             <p className="text-lg font-black text-gray-900 dark:text-white">{value}</p>
-            {helper ? <p className="text-[11px] text-gray-400">{helper}</p> : null}
+            {helper ? <p className="text-[11px] text-gray-600 dark:text-gray-400">{helper}</p> : null}
         </div>
     </div>
 );
