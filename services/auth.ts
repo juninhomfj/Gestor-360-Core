@@ -167,6 +167,22 @@ export const updateUser = async (userId: string, data: Partial<User>) => {
   }
 };
 
+/**
+ * Salva APENAS as metas (salesTargets) do usuário no seu próprio perfil.
+ * Update mínimo: somente o campo salesTargets + updatedAt.
+ */
+export const updateUserSalesTargets = async (userId: string, salesTargets: any) => {
+  const profileRef = doc(db, "profiles", userId);
+  const updateData = { salesTargets, updatedAt: serverTimestamp() };
+  await updateDoc(profileRef, updateData as any);
+
+  const current = getSession();
+  if (current?.id === userId) {
+    const merged = { ...current, salesTargets } as User;
+    localStorage.setItem("sys_session_v1", JSON.stringify(merged));
+  }
+};
+
 export const login = async (
   email: string,
   pass: string

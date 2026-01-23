@@ -56,6 +56,7 @@ const BulkDateModal = lazyWithRetry(() => import('./components/BulkDateModal'));
 const ClientManagementHub = lazyWithRetry(() => import('./components/ClientManagementHub'));
 const TicketsManager = lazyWithRetry(() => import('./components/TicketsManager'));
 const Campaigns = lazyWithRetry(() => import('./components/Campaigns'));
+const CampaignsDashboard = lazyWithRetry(() => import('./components/CampaignsDashboard'));
 
 import {
     User, Sale, AppMode, AppTheme, FinanceAccount, Transaction, CreditCard,
@@ -1255,7 +1256,21 @@ const App: React.FC = () => {
                     />
                 );
             case 'campaigns':
-                return <Campaigns currentUser={currentUser} darkMode={isDarkMode} onNotify={addToast} />;
+                // DEV/ADMIN: editar campanhas | Usuário comum: visualizar progresso de metas
+                if (isDev || isAdmin) {
+                    return <Campaigns currentUser={currentUser} darkMode={isDarkMode} onNotify={addToast} />;
+                } else {
+                    return (
+                        <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in">
+                            <Suspense fallback={<div className="p-8 text-center"><div className="inline-block animate-spin"><div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full"></div></div></div>}>
+                                <CampaignsDashboard 
+                                    user={currentUser}
+                                    onNavigateToProfile={() => setActiveTab('settings')}
+                                />
+                            </Suspense>
+                        </div>
+                    );
+                }
             case 'clients_hub':
                 return <ClientManagementHub currentUser={currentUser} darkMode={isDarkMode} />;
             case 'tickets':

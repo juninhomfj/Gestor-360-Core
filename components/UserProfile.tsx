@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { User, UserPermissions, SalesTargets } from '../types';
-import { updateUser, deactivateUser } from '../services/auth';
+import { updateUser, updateUserSalesTargets, deactivateUser } from '../services/auth';
 import { requestAndSaveToken } from '../services/pushService';
 import { SYSTEM_MODULES } from '../config/modulesCatalog';
 import { canAccess } from '../services/logic';
@@ -44,6 +44,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
     setMessage(null);
 
     try {
+      // Update dados do usuário (nome, username, tel, etc)
       const updateData = {
         name: name.trim(),
         username: username.trim(),
@@ -51,18 +52,27 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
         profilePhoto: profilePhoto,
         contactVisibility: contactVisibility,
         hiddenModules: hiddenModules,
-        salesTargets: salesTargets,
         prefs: {
             ...currentUser.prefs,
-            defaultModule: defaultModule // Grava apenas no canônico
+            defaultModule: defaultModule
         }
       };
 
       await updateUser(currentUser.id, updateData);
       
+      // Persistir metas APENAS se mudaram (update mínimo)
+      const targetsChanged = 
+        salesTargets.basic !== currentUser.salesTargets?.basic ||
+        salesTargets.natal !== currentUser.salesTargets?.natal;
+      
+      if (targetsChanged) {
+        await updateUserSalesTargets(currentUser.id, salesTargets);
+      }
+      
       const updatedUser: User = { 
         ...currentUser, 
-        ...updateData 
+        ...updateData,
+        salesTargets: salesTargets
       } as User;
 
       localStorage.setItem('sys_session_v1', JSON.stringify(updatedUser));
