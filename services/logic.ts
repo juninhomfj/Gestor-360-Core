@@ -1681,12 +1681,12 @@ export const syncClientsFromSales = async (options?: { allUsers?: boolean }): Pr
             (metrics as any).avgTicket = metrics.totalSalesValue / metrics.salesCount;
           }
 
-          const clientId = existingClient?.id || crypto.randomUUID();
+          const clientId = existingClient?.id || clientKey;
           const newClient: any = {
             id: clientId,
             userId,
             name,
-            nameLower: name.toLowerCase(),
+            nameLower: nameLower,
             createdAt: existingClient?.createdAt || nowIso,
             updatedAt: nowIso,
             deleted: false,
