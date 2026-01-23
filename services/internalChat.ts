@@ -288,7 +288,102 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
 };
 
 /**
+ * Tenta se inscrever ao Supabase Realtime com retry automático.
+ * Em caso de falha, fallback para Firestore.
+ */
+const subscribeToSupabaseWithRetry = async (
+    supabaseClient: any,
+    userId: string,
+    isAdmin: boolean,
+    onNewMessage: (msg: InternalMessage) => void
+): Promise<{ success: boolean; unsubscribe?: () => void }> => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelays = [2000, 5000, 10000];
+
+    const attemptSubscription = async (): Promise<boolean> => {
+        return new Promise((resolve) => {
+            try {
+                const channel = supabaseClient.channel('internal_messages_stream');
+                let subscriptionSucceeded = false;
+
+                channel.on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'internal_messages' },
+                    async (payload) => {
+                        const data = {
+                            ...(payload.new as InternalMessage),
+                            mediaType: (payload.new as any).media_type ?? (payload.new as any).mediaType,
+                            mediaUrl: (payload.new as any).media_url ?? (payload.new as any).mediaUrl,
+                            roomId: (payload.new as any).room_id ?? (payload.new as any).roomId
+                        } as InternalMessage;
+                        if (data.deleted) return;
+                        if (
+                            data.recipientId === userId ||
+                            data.senderId === userId ||
+                            data.recipientId === 'BROADCAST' ||
+                            data.roomId ||
+                            isAdmin
+                        ) {
+                            const existing = await dbGet('internal_messages', data.id);
+                            if (!existing) {
+                                await dbPut('internal_messages', data);
+                                onNewMessage(data);
+                            }
+                        }
+                    }
+                );
+
+                const timeout = setTimeout(() => {
+                    resolve(false);
+                }, 8000);
+
+                channel.subscribe((status) => {
+                    clearTimeout(timeout);
+                    if (status === 'SUBSCRIBED') {
+                        subscriptionSucceeded = true;
+                        logOnce("chat:supabase-success", 'warn', "[Chat] Supabase Realtime conectado com sucesso");
+                        resolve(true);
+                    } else if (status === 'CHANNEL_ERROR') {
+                        logOnce("chat:supabase-error", 'warn', "[Chat] Falha na conexão Supabase Realtime", { 
+                            status, 
+                            attemptNumber: retryCount + 1 
+                        });
+                        resolve(false);
+                    }
+                });
+            } catch (e) {
+                logOnce("chat:supabase-exception", 'error', "[Chat] Exceção ao conectar Supabase", {
+                    error: (e as Error)?.message,
+                    attemptNumber: retryCount + 1
+                });
+                resolve(false);
+            }
+        });
+    };
+
+    while (retryCount < maxRetries) {
+        const success = await attemptSubscription();
+        if (success) return { success: true };
+
+        retryCount++;
+        if (retryCount < maxRetries) {
+            const delay = retryDelays[retryCount - 1];
+            logOnce("chat:supabase-retry", 'warn', `[Chat] Tentando reconectar Supabase em ${delay}ms...`, {
+                attemptNumber: retryCount,
+                nextRetryIn: delay
+            });
+            await sleep(delay);
+        }
+    }
+
+    logOnce("chat:supabase-failed-all", 'error', "[Chat] Falha ao conectar Supabase após 3 tentativas. Usando Firestore apenas.");
+    return { success: false };
+};
+
+/**
  * Subscreve ao Firestore para mensagens novas com filtro de integridade mandatório.
+ * Tenta Supabase primeiro com retry, fallback para Firestore se falhar.
  */
 export const subscribeToMessages = async (
     userId: string, 
@@ -297,46 +392,25 @@ export const subscribeToMessages = async (
     onDegraded?: (message: string) => void
 ) => {
     const supabaseClient = await getSupabase();
+    
+    // Tenta Supabase com retry
     if (supabaseClient) {
-        const channel = supabaseClient.channel('internal_messages_stream');
-        channel.on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'internal_messages' },
-            async (payload) => {
-                const data = {
-                    ...(payload.new as InternalMessage),
-                    mediaType: (payload.new as any).media_type ?? (payload.new as any).mediaType,
-                    mediaUrl: (payload.new as any).media_url ?? (payload.new as any).mediaUrl,
-                    roomId: (payload.new as any).room_id ?? (payload.new as any).roomId
-                } as InternalMessage;
-                if (data.deleted) return;
-                if (
-                    data.recipientId === userId ||
-                    data.senderId === userId ||
-                    data.recipientId === 'BROADCAST' ||
-                    data.roomId ||
-                    isAdmin
-                ) {
-                    const existing = await dbGet('internal_messages', data.id);
-                    if (!existing) {
-                        await dbPut('internal_messages', data);
-                        onNewMessage(data);
-                    }
-                }
-            }
+        const { success } = await subscribeToSupabaseWithRetry(
+            supabaseClient,
+            userId,
+            isAdmin,
+            onNewMessage
         );
-        channel.subscribe((status) => {
-            if (status === 'SUBSCRIBED') return;
-            if (status === 'CHANNEL_ERROR') {
-                logOnce("chat:supabase-realtime", 'warn', "[Chat] Falha ao assinar Supabase Realtime", { status });
-            }
-        });
-
-        return {
-            unsubscribe: () => {
-                supabaseClient.removeChannel(channel);
-            }
-        };
+        
+        if (success) {
+            const channel = supabaseClient.channel('internal_messages_stream');
+            return {
+                unsubscribe: () => {
+                    supabaseClient.removeChannel(channel);
+                }
+            };
+        }
+        // Se falhou após retries, continua para Firestore fallback
     }
 
     const handleSnapshot = (snapshot: any) => {
