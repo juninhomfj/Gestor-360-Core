@@ -10,7 +10,6 @@ import SnowOverlay from './components/SnowOverlay';
 import BootstrapIndicator from './components/BootstrapIndicator';
 import DebugCentral from './components/DebugCentral';
 import { SYSTEM_MODULES } from './config/modulesCatalog';
-import ReportBugModal from './components/ReportBugModal';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 // Chat desativado por Supabase Realtime - remover InternalChatSystem
@@ -59,6 +58,7 @@ const ClientManagementHub = lazyWithRetry(() => import('./components/ClientManag
 const TicketsManager = lazyWithRetry(() => import('./components/TicketsManager'));
 const Campaigns = lazyWithRetry(() => import('./components/Campaigns'));
 const CampaignsDashboard = lazyWithRetry(() => import('./components/CampaignsDashboard'));
+const ReportBugModal = lazyWithRetry(() => import('./components/ReportBugModal'));
 
 import {
     User, Sale, AppMode, AppTheme, FinanceAccount, Transaction, CreditCard,
