@@ -319,23 +319,23 @@ const SalesForm: React.FC<Props> = ({
 
   const modalContent = (
     <div 
-        className="fixed inset-0 z-[1000] flex items-start md:items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 md:p-6 overflow-y-auto"
+        className="fixed inset-0 z-[1000] flex items-start md:items-center justify-center bg-slate-950/80 backdrop-blur-sm p-3 sm:p-4 md:p-6 overflow-y-auto safe-area-mobile"
         onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-slate-950 rounded-2xl md:rounded-3xl w-full max-w-5xl max-h-[92vh] shadow-2xl flex flex-col border border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto text-slate-100">
+      <div className="bg-slate-950 rounded-2xl md:rounded-3xl w-full max-w-2xl sm:max-w-3xl md:max-w-5xl max-h-[90vh] sm:max-h-[92vh] shadow-2xl flex flex-col border border-slate-800 animate-in zoom-in-95 duration-200 overflow-hidden my-auto text-slate-100">
         
-        <div className="p-5 md:p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${isNatal ? 'bg-red-900/40 text-red-300' : 'bg-emerald-900/40 text-emerald-300'}`}>
-              <Calculator size={22} />
+        <div className="p-4 sm:p-5 md:p-6 border-b border-slate-800 flex justify-between items-start sm:items-center bg-slate-900 shrink-0 gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className={`p-2 rounded-xl shrink-0 ${isNatal ? 'bg-red-900/40 text-red-300' : 'bg-emerald-900/40 text-emerald-300'}`}>
+              <Calculator size={20} className="sm:w-[22px] sm:h-[22px]" />
             </div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-lg sm:text-xl font-bold text-white truncate">
               {initialData ? 'Editar Venda' : 'Lançar Nova Venda'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+            className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors shrink-0"
             title="Fechar modal de venda"
             aria-label="Fechar modal de venda"
           >
@@ -343,7 +343,7 @@ const SalesForm: React.FC<Props> = ({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto p-5 md:p-8 space-y-8 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 md:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
           {isLocked && (
             <div className="p-4 rounded-2xl border border-amber-800/60 bg-amber-900/20 text-amber-200 flex items-center gap-3">
               <AlertCircle size={18} />
@@ -354,7 +354,7 @@ const SalesForm: React.FC<Props> = ({
             </div>
           )}
           <fieldset disabled={isLocked} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {/* Ordem (TAB) do formulário: Tipo de Cesta → Forma de Pagamento → Cliente → Orçamento → Quantidade → Valor Proposto → Valor da Venda → Margem → Rastreio → Observação → Data de Faturamento + Faturamento Pendente */}
 
               {/* 1. Tipo de Cesta */}
@@ -578,43 +578,43 @@ const SalesForm: React.FC<Props> = ({
           </fieldset>
         </div>
 
-        <div className="p-5 md:p-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-900 shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="text-center md:text-left">
-              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Comissão</span>
-              <p className="text-lg font-bold text-slate-100">
+        <div className="p-4 sm:p-5 md:p-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 md:gap-6 bg-slate-900 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 order-2 sm:order-1 min-w-0">
+            <div className="text-center sm:text-left">
+              <span className="block text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Comissão</span>
+              <p className="text-base sm:text-lg font-bold text-slate-100 truncate">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(commissionBase)}
               </p>
             </div>
-            <div className="w-px h-8 bg-slate-800"></div>
-            <div className="text-center md:text-left">
-              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Taxa (%)</span>
-              <p className="text-lg font-bold text-indigo-400">
+            <div className="hidden sm:block w-px h-8 bg-slate-800"></div>
+            <div className="text-center sm:text-left">
+              <span className="block text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Taxa (%)</span>
+              <p className="text-base sm:text-lg font-bold text-indigo-400 truncate">
                 {commissionRatePercent.toFixed(2)}%
               </p>
             </div>
-            <div className="w-px h-8 bg-slate-800"></div>
-            <div className="text-center md:text-left">
-              <span className={`block text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-600' : 'text-emerald-600'}`}>
+            <div className="hidden sm:block w-px h-8 bg-slate-800"></div>
+            <div className="text-center sm:text-left">
+              <span className={`block text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-600' : 'text-emerald-600'}`}>
                 {isPendingBilling ? 'Comissão Prevista (Pend.)' : 'Comissão Prevista'}
               </span>
-              <p className={`text-2xl font-black ${isPendingBilling ? 'text-amber-400' : 'text-emerald-400'}`}>
+              <p className={`text-lg sm:text-2xl font-black ${isPendingBilling ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(commissionValue)}
               </p>
             </div>
           </div>
           
-          <div className="flex gap-3 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto order-1 sm:order-2">
             <button 
               onClick={onClose}
-              className="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 transition-colors"
+              className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 transition-colors text-sm sm:text-base"
             >
               Cancelar
             </button>
             <button 
               disabled={isLocked}
               onClick={handleSave}
-              className={`flex-1 md:flex-none px-8 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-white ${isPendingBilling ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-900/20' : (isNatal ? 'bg-red-600 hover:bg-red-700 shadow-red-900/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20')} disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`flex-1 sm:flex-none px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-white text-sm sm:text-base ${isPendingBilling ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-900/20' : (isNatal ? 'bg-red-600 hover:bg-red-700 shadow-red-900/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20')} disabled:opacity-40 disabled:cursor-not-allowed touch-target`}
             >
               {isPendingBilling ? 'Salvar Pendência' : 'Gravar Venda'}
             </button>

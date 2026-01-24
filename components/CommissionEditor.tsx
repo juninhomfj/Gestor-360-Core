@@ -180,70 +180,70 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                        ['mint@gestor360.com', 'soldev@gestor360.com'].includes(currentUser.email?.toLowerCase() || '');
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500 px-4 sm:px-0">
       
       {permissionError && (
-          <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl flex items-center gap-3 text-red-500 text-sm font-bold">
-              <ShieldAlert size={20}/>
+          <div className="bg-red-500/10 border border-red-500/30 p-3 sm:p-4 rounded-lg sm:rounded-2xl flex items-start sm:items-center gap-2 sm:gap-3 text-red-500 text-xs sm:text-sm font-bold">
+              <ShieldAlert size={16} className="sm:w-[20px] sm:h-[20px] flex-shrink-0 mt-0.5 sm:mt-0" />
               <span>Acesso Negado: Sua autoridade Cloud não permite gravar tabelas globais.</span>
           </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden dark:text-slate-100">
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4 dark:text-slate-100">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-2xl ${type === ProductType.NATAL ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-              <Database size={24} />
+      <div className="bg-white dark:bg-slate-900 rounded-lg sm:rounded-[2rem] border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden dark:text-slate-100">
+        <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col gap-3 sm:gap-4 dark:text-slate-100">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+            <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0 ${type === ProductType.NATAL ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+              <Database size={20} className="sm:w-[24px] sm:h-[24px]" />
             </div>
-            <div>
-              <h3 className="text-xl font-black text-gray-900 dark:text-white">Editor Global: {type === ProductType.BASICA ? 'Cesta Básica' : 'Natal'}</h3>
-              <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest flex items-center gap-1">
-                <RefreshCw size={12}/> Live Firestore Sync Active
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-xl font-black text-gray-900 dark:text-white truncate">Editor: {type === ProductType.BASICA ? 'Cesta Básica' : 'Natal'}</h3>
+              <p className="text-[9px] sm:text-[10px] text-gray-500 font-black uppercase tracking-widest flex items-center gap-1 truncate">
+                <RefreshCw size={12} className="flex-shrink-0"/> Live Firestore Sync
               </p>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-end">
             {!readOnly && isAdminOrDev && (
                 <>
                     <label
-                        className="p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl text-gray-500 transition-all"
+                        className="p-2 sm:p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-800 rounded-lg sm:rounded-xl text-gray-500 transition-all touch-target"
                         title="Importar tabela JSON"
                     >
-                        <Upload size={20} />
+                        <Upload size={18} className="sm:w-[20px] sm:h-[20px]" />
                         <input type="file" className="hidden" accept=".json" onChange={handleImportJson} aria-label="Selecionar arquivo" />
                     </label>
                     <button
                         onClick={handleExportJson}
-                        className="p-3 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl text-gray-500 transition-all"
+                        className="p-2 sm:p-3 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-lg sm:rounded-xl text-gray-500 transition-all touch-target"
                         title="Exportar tabela JSON"
                         aria-label="Exportar tabela JSON"
                     >
-                        <Download size={20} />
+                        <Download size={18} className="sm:w-[20px] sm:h-[20px]" />
                     </button>
                 </>
             )}
           </div>
         </div>
 
-        <div className="p-6 overflow-x-auto">
-            <table className="w-full text-sm text-left">
-                <thead className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b dark:border-slate-800">
+        <div className="overflow-x-auto table-responsive-wrapper p-3 sm:p-6">
+            <table className="table-responsive text-xs sm:text-sm text-left">
+                <thead className="text-[9px] sm:text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b dark:border-slate-800">
                     <tr>
-                        <th className="p-4">Margem Mín (%)</th>
-                        <th className="p-4">Margem Máx (%)</th>
-                        <th className="p-4">Comissão (%)</th>
-                        <th className="p-4 text-center">Gestão</th>
+                        <th className="p-2 sm:p-4 whitespace-nowrap">Margem Mín (%)</th>
+                        <th className="p-2 sm:p-4 whitespace-nowrap">Margem Máx (%)</th>
+                        <th className="p-2 sm:p-4 whitespace-nowrap">Comissão (%)</th>
+                        <th className="p-2 sm:p-4 text-center whitespace-nowrap">Gestão</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y dark:divide-slate-800">
                     {rules.map((rule) => (
                         <tr key={rule.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors">
-                            <td className="p-4">
+                            <td className="p-2 sm:p-4">
                                 <input 
                                     type="number" step="0.01"
                                     placeholder="Sem limite"
-                                    className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full"
+                                    className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full text-xs sm:text-sm"
                                     value={rule.minPercent} 
                                     onChange={(e) => handleFieldChange(rule.id, 'minPercent', parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
@@ -251,11 +251,11 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                     title="Margem mínima"
                                 />
                             </td>
-                            <td className="p-4">
+                            <td className="p-2 sm:p-4">
                                 <input 
                                     type="number" step="0.01" 
                                     placeholder="Sem limite"
-                                    className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full"
+                                    className="bg-transparent font-black text-gray-900 dark:text-white outline-none w-full text-xs sm:text-sm"
                                     value={rule.maxPercent === null ? '' : rule.maxPercent} 
                                     onChange={(e) => handleFieldChange(rule.id, 'maxPercent', e.target.value === '' ? null : parseFloat(e.target.value))}
                                     disabled={readOnly || !isAdminOrDev}
@@ -263,11 +263,11 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                     title="Margem máxima"
                                 />
                             </td>
-                            <td className="p-4">
-                                <div className="flex items-center gap-2">
+                            <td className="p-2 sm:p-4">
+                                <div className="flex items-center gap-1 sm:gap-2">
                                     <input 
                                         type="number" step="0.01"
-                                        className="bg-transparent font-black text-emerald-600 dark:text-emerald-400 outline-none w-24 text-right"
+                                        className="bg-transparent font-black text-emerald-600 dark:text-emerald-400 outline-none w-16 sm:w-24 text-right text-xs sm:text-sm"
                                         value={rule.commissionRate === 0 ? "" : rule.commissionRate} 
                                         onChange={(e) => handleFieldChange(rule.id, 'commissionRate', parseNumericInput(e.target.value))}
                                         disabled={readOnly || !isAdminOrDev}
@@ -275,18 +275,18 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
                                         title="Comissão percentual"
                                         placeholder="0"
                                     />
-                                    <span className="text-[10px] font-black text-gray-400">%</span>
+                                    <span className="text-[9px] sm:text-[10px] font-black text-gray-400">%</span>
                                 </div>
                             </td>
-                            <td className="p-4 text-center">
+                            <td className="p-2 sm:p-4 text-center">
                                 {!readOnly && isAdminOrDev && (
                                     <button 
                                         onClick={() => deactivateRow(rule.id)}
-                                        className="p-2 text-red-400 hover:text-red-600 rounded-lg transition-all"
+                                        className="p-1.5 sm:p-2 text-red-400 hover:text-red-600 rounded-lg transition-all touch-target"
                                         title="Remover faixa de comissão"
                                         aria-label="Remover faixa de comissão"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                                     </button>
                                 )}
                             </td>
@@ -297,27 +297,27 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
         </div>
 
         {!readOnly && isAdminOrDev && (
-            <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-4 dark:text-slate-100">
+            <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 dark:text-slate-100">
                 <button 
                     onClick={addRow}
-                    className="w-full md:w-auto px-6 py-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 text-gray-500 font-bold hover:border-indigo-500 hover:text-indigo-500 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 text-gray-500 font-bold hover:border-indigo-500 hover:text-indigo-500 transition-all flex items-center justify-center gap-2 text-sm sm:text-base touch-target"
                 >
-                    <Plus size={18}/> Nova Faixa
+                    <Plus size={16} className="sm:w-[18px] sm:h-[18px]"/> <span className="hidden sm:inline">Nova</span> Faixa
                 </button>
 
-                <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="flex items-center gap-2 sm:gap-4 flex-col-reverse sm:flex-row w-full sm:w-auto">
                     {hasChanges && (
-                        <span className="text-[10px] font-black text-amber-500 uppercase animate-pulse flex items-center gap-1">
-                            <AlertCircle size={14}/> Pendente de Sincronia
+                        <span className="text-[9px] sm:text-[10px] font-black text-amber-500 uppercase animate-pulse flex items-center gap-1 order-2 sm:order-1">
+                            <AlertCircle size={12} className="flex-shrink-0"/> Pendente de Sincronia
                         </span>
                     )}
                     <button 
                         onClick={handleCommit}
                         disabled={!hasChanges || isSaving}
-                        className={`w-full md:w-auto px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl ${hasChanges ? 'bg-indigo-600 text-white shadow-indigo-900/30 hover:bg-indigo-700' : 'bg-gray-200 dark:bg-slate-800 text-gray-400'}`}
+                        className={`flex-1 sm:flex-initial px-4 sm:px-10 py-2.5 sm:py-4 rounded-lg sm:rounded-2xl font-black uppercase text-[9px] sm:text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 shadow-xl text-sm order-1 sm:order-2 ${hasChanges ? 'bg-indigo-600 text-white shadow-indigo-900/30 hover:bg-indigo-700' : 'bg-gray-200 dark:bg-slate-800 text-gray-400'}`}
                     >
-                        {isSaving ? <Loader2 size={18} className="animate-spin"/> : <Save size={18}/>}
-                        Publicar Alterações Cloud
+                        {isSaving ? <Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]"/> : <Save size={16} className="sm:w-[18px] sm:h-[18px]"/>}
+                        <span className="hidden sm:inline">Publicar Alterações Cloud</span><span className="sm:hidden">Publicar</span>
                     </button>
                 </div>
             </div>
