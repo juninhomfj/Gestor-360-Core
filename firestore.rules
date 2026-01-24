@@ -17,8 +17,9 @@ service cloud.firestore {
       return request.auth.token.email;
     }
 
+    // ✅ Correção: lowercase() NÃO existe em Rules; o correto é lower()
     function myEmailLower() {
-      return myEmail() != null ? myEmail().lowercase() : null;
+      return myEmail() != null ? myEmail().lower() : null;
     }
 
     function hasProfile() {
