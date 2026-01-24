@@ -14,6 +14,7 @@ const CampaignsDashboard: React.FC<CampaignsDashboardProps> = ({ user, onNavigat
   const [activeCampaigns, setActiveCampaigns] = useState<CommissionCampaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storedSales, setStoredSales] = useState<Sale[]>([]);
 
   // Obter mês corrente no formato YYYY-MM
   const getCurrentMonthKey = (): string => {
@@ -27,6 +28,15 @@ const CampaignsDashboard: React.FC<CampaignsDashboardProps> = ({ user, onNavigat
   const countMonthlySalessByType = (sales: Sale[], monthKey: string) => {
     let basicCount = 0;
     let natalCount = 0;
+
+    // Guard: garantir que sales é array
+    if (!Array.isArray(sales)) {
+      Logger.warn("CampaignsDashboard: countMonthlySalessByType recebeu entrada não-array", { 
+        type: typeof sales, 
+        isArray: Array.isArray(sales) 
+      });
+      return { basicCount: 0, natalCount: 0 };
+    }
 
     sales.forEach(sale => {
       const saleMonth = getSaleMonthKey(sale);
@@ -50,6 +60,10 @@ const CampaignsDashboard: React.FC<CampaignsDashboardProps> = ({ user, onNavigat
         
         // Carregar campanhas
         const campaigns = await getCampaignsByCompany(companyId);
+        
+        // Carregar vendas armazenadas (async)
+        const salesData = await getStoredSales();
+        setStoredSales(Array.isArray(salesData) ? salesData : []);
         
         // Filtrar apenas campanhas ativas no mês corrente
         const currentMonth = getCurrentMonthKey();
@@ -102,8 +116,7 @@ const CampaignsDashboard: React.FC<CampaignsDashboardProps> = ({ user, onNavigat
 
   // Renderizar campanhas ativas
   const currentMonth = getCurrentMonthKey();
-  const sales = getStoredSales();
-  const { basicCount, natalCount } = countMonthlySalessByType(sales, currentMonth);
+  const { basicCount, natalCount } = countMonthlySalessByType(storedSales, currentMonth);
   const basicTarget = resolveMonthlyBasicBasketTarget(user);
 
   // Calcular progresso
