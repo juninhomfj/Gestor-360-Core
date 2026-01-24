@@ -514,7 +514,7 @@ const TicketsManager: React.FC<TicketsManagerProps> = ({ currentUser, darkMode, 
                                         <select
                                             value={selectedTicket.assigneeId || ''}
                                             onChange={e => handleAssign(e.target.value || undefined)}
-                                            className={`mt-3 w-full px-3 py-2 rounded-xl border text-xs font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-gray-200'}`}
+                                            className={`mt-3 w-full px-3 py-2 rounded-xl border text-xs font-bold ${darkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-100 border-gray-300 text-gray-900'}`}
                                         >
                                             <option value="">Sem responsável</option>
                                             {users.map(user => (

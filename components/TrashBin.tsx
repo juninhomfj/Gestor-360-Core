@@ -69,7 +69,7 @@ const TrashBin: React.FC<TrashBinProps> = ({ darkMode }) => {
     };
 
     const bgClass = darkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200 text-gray-900';
-    const cardClass = darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100 shadow-sm';
+    const cardClass = darkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-slate-100 border-gray-300 text-gray-900 shadow-sm';
 
     const getDaysRemaining = (deletedAt?: string) => {
         if (!deletedAt) return 0;

@@ -189,8 +189,8 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
           </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 rounded-lg sm:rounded-[2rem] border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden dark:text-slate-100">
-        <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col gap-3 sm:gap-4 dark:text-slate-100">
+      <div className="bg-slate-100 dark:bg-slate-900 rounded-lg sm:rounded-[2rem] border border-gray-300 dark:border-slate-800 shadow-xl overflow-hidden dark:text-slate-100 text-gray-900">
+        <div className="p-4 sm:p-6 border-b border-gray-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex flex-col gap-3 sm:gap-4 dark:text-slate-100 text-gray-900">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
             <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0 ${type === ProductType.NATAL ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
               <Database size={20} className="sm:w-[24px] sm:h-[24px]" />
@@ -297,7 +297,7 @@ const CommissionEditor: React.FC<CommissionEditorProps> = ({ type, currentUser, 
         </div>
 
         {!readOnly && isAdminOrDev && (
-            <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 dark:text-slate-100">
+            <div className="p-4 sm:p-6 border-t border-gray-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 dark:text-slate-100 text-gray-900">
                 <button 
                     onClick={addRow}
                     className="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 text-gray-500 font-bold hover:border-indigo-500 hover:text-indigo-500 transition-all flex items-center justify-center gap-2 text-sm sm:text-base touch-target"

@@ -1039,7 +1039,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
+                            <div className="p-4 rounded-xl border border-gray-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100">
                                 <label className="flex items-center justify-between cursor-pointer">
                                     <span className="text-sm font-bold">Ativar Sons</span>
                                     <input 
@@ -1050,8 +1050,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
                                     />
                                 </label>
                             </div>
-                            <div className="p-4 rounded-xl border dark:border-slate-800 bg-gray-50 dark:bg-slate-950 dark:text-slate-100">
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Volume Geral</label>
+                            <div className="p-4 rounded-xl border border-gray-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+                                <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-2">Volume Geral</label>
                                 <input 
                                     type="range" min="0" max="1" step="0.1"
                                     value={soundVolume}

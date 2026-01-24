@@ -167,7 +167,7 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                                     key={mod.key}
                                     type="button"
                                     onClick={() => setNewPermissions(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                    className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border text-left transition-all cursor-pointer touch-target min-h-[44px] ${isEnabled ? 'bg-indigo-50/10 dark:bg-indigo-900/20 border-indigo-500' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-slate-600'}`}
+                                    className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border text-left transition-all cursor-pointer touch-target min-h-[44px] ${isEnabled ? 'bg-indigo-50/10 dark:bg-indigo-900/20 border-indigo-500' : 'bg-slate-100 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100'}`}
                                 >
                                     <div className={`w-9 sm:w-10 h-9 sm:h-10 rounded-lg flex items-center justify-center text-white shrink-0 ${mod.color}`}>
                                         <mod.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -193,7 +193,7 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                                     key={mod.key}
                                     type="button"
                                     onClick={() => setNewHiddenModules(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                    className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border text-left transition-all cursor-pointer touch-target min-h-[44px] ${isHidden ? 'bg-amber-50/20 dark:bg-amber-900/20 border-amber-400' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-slate-600'}`}
+                                    className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border text-left transition-all cursor-pointer touch-target min-h-[44px] ${isHidden ? 'bg-amber-50/20 dark:bg-amber-900/20 border-amber-400' : 'bg-slate-100 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100'}`}
                                 >
                                     <div className={`w-9 sm:w-10 h-9 sm:h-10 rounded-lg flex items-center justify-center text-white shrink-0 ${isHidden ? 'bg-amber-500' : mod.color}`}>
                                         <mod.icon size={16} className="sm:w-[18px] sm:h-[18px]" />

@@ -159,7 +159,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">WhatsApp</label>
                         <div className="relative">
                             <Phone size={16} className="absolute left-3 top-3.5 text-gray-500 flex-shrink-0" />
-                            <input className="w-full pl-10 pr-4 py-2.5 md:py-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100 focus:ring focus:ring-indigo-400" value={tel} onChange={e => setTel(e.target.value)} placeholder="55..." />
+                            <input className="w-full pl-10 pr-4 py-2.5 md:py-3 bg-slate-100 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl outline-none text-gray-900 dark:text-slate-100 focus:ring focus:ring-indigo-400" value={tel} onChange={e => setTel(e.target.value)} placeholder="55..." />
                         </div>
                     </div>
                 </div>
@@ -174,11 +174,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Nome Completo</label>
-                        <input className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100 focus:ring focus:ring-indigo-400" value={name} onChange={e => setName(e.target.value)} />
+                        <input className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl outline-none text-gray-900 dark:text-slate-100 focus:ring focus:ring-indigo-400" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Usuário</label>
-                        <input className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-mono dark:text-slate-100 focus:ring focus:ring-indigo-400 break-all" value={username} onChange={e => setUsername(e.target.value)} />
+                        <input className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border border-gray-300 dark:border-slate-700 rounded-xl outline-none font-mono text-gray-900 dark:text-slate-100 focus:ring focus:ring-indigo-400 break-all" value={username} onChange={e => setUsername(e.target.value)} />
                     </div>
                 </div>
             </div>
@@ -212,7 +212,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-2.5 md:p-3 bg-slate-50 dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 dark:text-slate-100 transition-all"
+                            className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border-2 border-gray-300 dark:border-slate-700 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 text-gray-900 dark:text-slate-100 transition-all"
                             value={salesTargets.basic === 0 ? '' : salesTargets.basic}
                             onChange={e => setSalesTargets(prev => ({ ...prev, basic: parseNumericInput(e.target.value) }))}
                         />
@@ -222,7 +222,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-2.5 md:p-3 bg-slate-50 dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 dark:text-slate-100 transition-all"
+                            className="w-full p-2.5 md:p-3 bg-slate-100 dark:bg-slate-950 border-2 border-gray-300 dark:border-slate-700 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 text-gray-900 dark:text-slate-100 transition-all"
                             value={salesTargets.natal === 0 ? '' : salesTargets.natal}
                             onChange={e => setSalesTargets(prev => ({ ...prev, natal: parseNumericInput(e.target.value) }))}
                         />

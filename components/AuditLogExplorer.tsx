@@ -68,7 +68,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
         (l.userName || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const bgClass = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200';
+    const bgClass = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-gray-300 text-gray-900';
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
@@ -80,7 +80,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <p className="text-sm text-gray-500">Monitoramento transacional de infraestrutura cloud.</p>
                 </div>
                 <div className="flex w-full flex-wrap gap-2 md:w-auto">
-                    <button onClick={handleExport} className="flex-1 p-3 bg-gray-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 transition-colors md:flex-none dark:text-slate-100" aria-label="Baixar" title="Baixar">
+                    <button onClick={handleExport} className="flex-1 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors md:flex-none dark:text-slate-100 text-gray-900" aria-label="Baixar" title="Baixar">
                         <Download size={20}/>
                     </button>
                     <button onClick={loadLogs} className="flex-1 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors md:flex-none" aria-label="Atualizar" title="Atualizar">
@@ -95,7 +95,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                     <div className="relative">
                         <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
                         <input 
-                            className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} 
+                            className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-gray-300 text-gray-900'}`} 
                             placeholder="Mensagem ou UID..." aria-label="Mensagem ou UID..." 
                             value={searchTerm} 
                             onChange={e => setSearchTerm(e.target.value)} 
@@ -105,7 +105,7 @@ const AuditLogExplorer: React.FC<AuditLogExplorerProps> = ({ darkMode }) => {
                 <div className="md:col-span-3">
                     <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Nível</label>
                     <select 
-                        className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`}
+                        className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-gray-300 text-gray-900'}`}
                         value={filterLevel}
                         onChange={e => setFilterLevel(e.target.value as any)}
                     >

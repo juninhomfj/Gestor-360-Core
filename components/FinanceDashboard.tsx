@@ -129,7 +129,7 @@ const FinanceDashboard: React.FC<FinanceDashboardProps> = ({
       URL.revokeObjectURL(url);
   };
 
-  const cardStyle = darkMode ? 'glass-panel border-slate-700' : 'bg-white border-gray-100 shadow-sm';
+  const cardStyle = darkMode ? 'glass-panel border-slate-700' : 'bg-slate-100 border-gray-300 shadow-sm text-gray-900';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
