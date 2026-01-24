@@ -1,11 +1,19 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Sale, ProductType, DashboardWidgetConfig, Transaction, User, SalesTargets, Receivable, SalesTask } from '../types'; 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users, Sparkles, Target } from 'lucide-react';
+import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users, Sparkles, Target, Loader2 } from 'lucide-react';
 import { getFinanceData, getABCAnalysis, analyzeClients, buildBilledSalesMap } from '../services/logic'; 
 import { SALES_TASK_LABELS } from '../utils/salesTasks';
-import CampaignsDashboard from './CampaignsDashboard';
+const CampaignsDashboard = lazy(() => import('./CampaignsDashboard'));
+
+// Fallback loader para CampaignsDashboard
+const CampaignsDashboardLoader = () => (
+  <div className="flex items-center justify-center p-8">
+    <Loader2 className="animate-spin text-indigo-500 mr-2" size={20} />
+    <span className="text-sm text-gray-500">Carregando campanhas...</span>
+  </div>
+);
 
 interface DashboardProps {
   sales: Sale[];
@@ -372,7 +380,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         // ABA CAMPANHAS
         <div>
           {currentUser && (
-            <CampaignsDashboard user={currentUser} onNavigateToProfile={() => {}} />
+            <Suspense fallback={<CampaignsDashboardLoader />}>
+              <CampaignsDashboard user={currentUser} onNavigateToProfile={() => {}} />
+            </Suspense>
           )}
         </div>
       )}
