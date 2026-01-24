@@ -106,10 +106,113 @@
     @apply btn-base bg-transparent text-slate-300 hover:text-slate-100;
   }
 
-  .field-contrast {
-    @apply bg-slate-900 text-slate-100 border border-slate-700 placeholder:text-slate-400;
+  /* === THEME V2: Form Inputs === */
+  .field-base {
+    @apply w-full px-3 py-2 rounded-lg border-2 transition-all outline-none;
   }
 
+  .field-input {
+    @apply field-base bg-slate-800 text-slate-100 border-slate-600 placeholder:text-slate-500;
+    @apply focus:border-indigo-500 focus:ring-2 focus:ring-indigo-900/50;
+  }
+
+  .field-input-lg {
+    @apply field-input p-3;
+  }
+
+  .field-contrast {
+    @apply field-input;
+  }
+
+  .field-label {
+    @apply block text-xs font-black uppercase tracking-widest text-gray-300 mb-1.5;
+  }
+
+  .field-label-secondary {
+    @apply block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1;
+  }
+
+  .field-hint {
+    @apply text-[11px] text-gray-400 mt-1;
+  }
+
+  /* === THEME V2: Cards & Surfaces === */
+  .card-base {
+    @apply bg-slate-900 border border-slate-700 rounded-2xl shadow-sm;
+  }
+
+  .card-elevated {
+    @apply card-base shadow-lg;
+  }
+
+  .card-surface {
+    @apply bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm;
+  }
+
+  .card-header {
+    @apply font-black text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2 border-b dark:border-slate-800 pb-2 uppercase text-xs tracking-widest;
+  }
+
+  .card-section {
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100;
+  }
+
+  /* === THEME V2: Text Colors === */
+  .text-primary {
+    @apply text-gray-900 dark:text-slate-100;
+  }
+
+  .text-secondary {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .text-hint {
+    @apply text-gray-500 dark:text-gray-500;
+  }
+
+  .text-muted {
+    @apply text-gray-500 dark:text-slate-500;
+  }
+
+  /* === THEME V2: Tables & Lists === */
+  .table-header {
+    @apply bg-slate-800 text-slate-100 font-bold uppercase text-xs tracking-widest;
+  }
+
+  .table-row {
+    @apply border-b border-slate-700 hover:bg-slate-800/50 transition-colors;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-sm text-slate-100;
+  }
+
+  .table-cell-secondary {
+    @apply table-cell text-slate-400;
+  }
+
+  /* === THEME V2: Tabs & Navigation === */
+  .tab-base {
+    @apply relative px-4 py-2 text-sm font-semibold transition-all border-b-2 border-transparent;
+  }
+
+  .tab-active {
+    @apply tab-base text-indigo-400 border-b-2 border-indigo-500;
+  }
+
+  .tab-inactive {
+    @apply tab-base text-slate-400 hover:text-slate-300;
+  }
+
+  .tab-panel {
+    @apply block w-full;
+  }
+
+  .tab-panel-hidden {
+    @apply hidden;
+  }
+
+  /* === THEME V2: Modal Components === */
   .modal-surface {
     @apply bg-slate-950/90 text-slate-100 border border-slate-800 shadow-2xl backdrop-blur-md;
   }
@@ -120,6 +223,10 @@
 
   .modal-footer {
     @apply bg-slate-900/70 border-t border-slate-800;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
   }
 }
 

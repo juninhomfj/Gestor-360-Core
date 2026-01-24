@@ -139,26 +139,26 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-indigo-500/20 animate-in zoom-in-95 mb-6 dark:text-slate-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Nome do Usuário</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 dark:text-slate-100" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: João Silva" />
+                        <label className="field-label">Nome do Usuário</label>
+                        <input className="field-input" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: João Silva" />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">E-mail Corporativo</label>
-                        <input className="w-full p-4 rounded-2xl border dark:bg-slate-950 dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 disabled:opacity-50 dark:text-slate-100" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
+                        <label className="field-label">E-mail Corporativo</label>
+                        <input className="field-input disabled:opacity-50" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="joao@empresa.com" disabled={!!editingId} />
                     </div>
                 </div>
 
                 <div className="p-6 bg-gray-50 dark:bg-slate-950/50 rounded-2xl border dark:border-slate-800 dark:text-slate-100">
-                    <label className="block text-xs font-black text-gray-500 uppercase mb-6 tracking-widest">Nível de Autoridade</label>
+                    <label className="field-label text-gray-700 dark:text-gray-300 mb-6">Nível de Autoridade</label>
                     <div className="flex gap-4 mb-10">
                         {['USER', 'ADMIN', 'DEV'].map((r) => (
-                            <button key={r} onClick={() => setNewRole(r as any)} className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border ${newRole === r ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl' : 'bg-white dark:bg-slate-900 text-gray-400 border-gray-200 dark:border-slate-800 text-gray-400'}`}>
+                            <button key={r} onClick={() => setNewRole(r as any)} className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border ${newRole === r ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl' : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-800'}`}>
                                 {r}
                             </button>
                         ))}
                     </div>
 
-                    <label className="block text-xs font-black text-gray-500 uppercase mb-6 tracking-widest">Controle de Módulos (Catalogo 360)</label>
+                    <label className="field-label text-gray-700 dark:text-gray-300 mb-6">Controle de Módulos (Catalogo 360)</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {SYSTEM_MODULES.map((mod) => {
                             const isEnabled = newPermissions[mod.key];
@@ -167,16 +167,16 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                                     key={mod.key}
                                     type="button"
                                     onClick={() => setNewPermissions(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                    className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${isEnabled ? 'bg-indigo-50/10 border-indigo-500' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 opacity-60'}`}
+                                    className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all cursor-pointer ${isEnabled ? 'bg-indigo-50/10 dark:bg-indigo-900/20 border-indigo-500' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-slate-600'}`}
                                 >
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 ${mod.color}`}>
                                         <mod.icon size={18} />
                                     </div>
                                     <div className="flex-1 overflow-hidden">
-                                        <p className={`text-[10px] font-black uppercase truncate ${isEnabled ? 'text-indigo-600' : 'text-gray-400'}`}>{mod.label}</p>
-                                        <p className="text-[9px] text-gray-500 truncate">{isEnabled ? 'Habilitado' : 'Bloqueado'}</p>
+                                        <p className={`text-[10px] font-black uppercase truncate ${isEnabled ? 'text-indigo-400 dark:text-indigo-300' : 'text-gray-600 dark:text-gray-300'}`}>{mod.label}</p>
+                                        <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate">{isEnabled ? 'Habilitado' : 'Bloqueado'}</p>
                                     </div>
-                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isEnabled ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300'}`}>
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${isEnabled ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 dark:border-slate-600'}`}>
                                         {isEnabled && <Check size={12}/>}
                                     </div>
                                 </button>
@@ -184,7 +184,7 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                         })}
                     </div>
 
-                    <label className="block text-xs font-black text-gray-500 uppercase mb-6 tracking-widest mt-10">Ocultar Módulos na UI (não bloqueia regras)</label>
+                    <label className="field-label text-gray-700 dark:text-gray-300 mb-6 mt-10">Ocultar Módulos na UI (não bloqueia regras)</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {SYSTEM_MODULES.map((mod) => {
                             const isHidden = newHiddenModules[mod.key];
@@ -193,16 +193,16 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                                     key={mod.key}
                                     type="button"
                                     onClick={() => setNewHiddenModules(prev => ({ ...prev, [mod.key]: !prev[mod.key] }))}
-                                    className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${isHidden ? 'bg-amber-50/30 border-amber-400' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800'}`}
+                                    className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all cursor-pointer ${isHidden ? 'bg-amber-50/20 dark:bg-amber-900/20 border-amber-400' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-slate-600'}`}
                                 >
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 ${isHidden ? 'bg-amber-500' : mod.color}`}>
                                         <mod.icon size={18} />
                                     </div>
                                     <div className="flex-1 overflow-hidden">
-                                        <p className={`text-[10px] font-black uppercase truncate ${isHidden ? 'text-amber-600' : 'text-gray-400'}`}>{mod.label}</p>
-                                        <p className="text-[9px] text-gray-500 truncate">{isHidden ? 'Oculto' : 'Visível'}</p>
+                                        <p className={`text-[10px] font-black uppercase truncate ${isHidden ? 'text-amber-500 dark:text-amber-400' : 'text-gray-600 dark:text-gray-300'}`}>{mod.label}</p>
+                                        <p className="text-[9px] text-gray-500 dark:text-gray-400 truncate">{isHidden ? 'Oculto' : 'Visível'}</p>
                                     </div>
-                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isHidden ? 'bg-amber-500 border-amber-500 text-white' : 'border-gray-300'}`}>
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${isHidden ? 'bg-amber-500 border-amber-500 text-white' : 'border-gray-300 dark:border-slate-600'}`}>
                                         {isHidden && <Check size={12}/>}
                                     </div>
                                 </button>
