@@ -66,7 +66,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notifications, 
               const isLeftSide = rect.left < (screenWidth / 2);
               const style: React.CSSProperties = {
                   top: rect.bottom + 10,
-                  maxHeight: 'calc(100vh - 100px)',
+                  maxHeight: 'calc(100dvh - 100px)',
                   position: 'fixed',
                   ...(isLeftSide ? { left: rect.left } : { right: screenWidth - rect.right })
               };

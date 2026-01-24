@@ -63,7 +63,10 @@ async function getProfileFromFirebase(fbUser: any): Promise<User | null> {
       fbUser.email === "admin@admin.com" ||
       fbUser.email === "dev@gestor360.com";
 
+    // ETAPA 5: Verificação dupla - profile já existe?
     if (!profileSnap.exists()) {
+      Logger.info('[Auth] Profile não encontrado. Criando novo', { uid: fbUser.uid, email: fbUser.email });
+      
       const newProfile = {
         uid: fbUser.uid,
         username: fbUser.email?.split("@")[0] || "user",
@@ -80,8 +83,17 @@ async function getProfileFromFirebase(fbUser: any): Promise<User | null> {
         updatedAt: serverTimestamp(),
         prefs: { defaultModule: "home" },
       };
-      await setDoc(profileRef, newProfile);
+      
+      try {
+        await setDoc(profileRef, newProfile);
+        Logger.info('[Auth] Profile criado com sucesso no login', { uid: fbUser.uid });
+      } catch (error: any) {
+        Logger.error('[Auth] Falha ao criar profile no login', { uid: fbUser.uid, error: error?.message });
+      }
+      
       profileSnap = await getDoc(profileRef);
+    } else {
+      Logger.info('[Auth] Profile encontrado para usuário existente', { uid: fbUser.uid, email: fbUser.email });
     }
 
     const data = profileSnap.data();
@@ -112,6 +124,8 @@ async function getProfileFromFirebase(fbUser: any): Promise<User | null> {
       (isRoot && (data?.role === "USER" || data?.isActive === false)) ||
       shouldActivate
     ) {
+      Logger.info('[Auth] Atualizando profile com novos valores', { uid: fbUser.uid, isRoot, shouldActivate });
+      
       await updateDoc(profileRef, {
         role: isRoot ? "DEV" : data?.role,
         isActive: isRoot ? true : shouldActivate ? true : data?.isActive,
@@ -141,6 +155,8 @@ async function getProfileFromFirebase(fbUser: any): Promise<User | null> {
       prefs: migratedPrefs,
     };
 
+    Logger.info('[Auth] Profile carregado com sucesso', { uid: fbUser.uid, role: user.role, status: user.userStatus });
+    
     await dbPut("users", user);
     localStorage.setItem("sys_session_v1", JSON.stringify(user));
     return user;
@@ -220,13 +236,29 @@ export const listUsers = async (): Promise<User[]> => {
 export const createUser = async (adminId: string, userData: any): Promise<void> => {
   const { name, email, role, modules_config, hiddenModules, salesTargets } = userData;
   const trimmedEmail = String(email || "").trim().toLowerCase();
-  if (!trimmedEmail) throw new Error("Email inválido.");
-
-  const existingMethods = await fetchSignInMethodsForEmail(auth, trimmedEmail);
-  if (existingMethods.length > 0) {
-    throw new Error("Usuário já existe no Auth. Reenvie o convite ou solicite recuperação de senha.");
+  
+  if (!trimmedEmail) {
+    throw new Error("Email inválido.");
   }
 
+  // ETAPA 5: Verificação dupla - usuário já existe?
+  Logger.info('[Auth] Verificando existência de usuário', { email: trimmedEmail });
+  
+  try {
+    const existingMethods = await fetchSignInMethodsForEmail(auth, trimmedEmail);
+    if (existingMethods.length > 0) {
+      Logger.warn('[Auth] Usuário já existe em Auth', { email: trimmedEmail, methods: existingMethods });
+      throw new Error("Usuário já existe no Auth. Reenvie o convite ou solicite recuperação de senha.");
+    }
+  } catch (error: any) {
+    if (error.message.includes("já existe")) throw error;
+    Logger.error('[Auth] Erro ao verificar usuário existente', { email: trimmedEmail, error: error?.message });
+    throw error;
+  }
+
+  // ETAPA 5: Criar usuário em Auth
+  Logger.info('[Auth] Criando novo usuário em Auth', { email: trimmedEmail });
+  
   const secondaryAppName = "admin-user-create";
   const app =
     getApps().find((existing) => existing.name === secondaryAppName) ??
@@ -234,9 +266,20 @@ export const createUser = async (adminId: string, userData: any): Promise<void> 
   const secondaryAuth = getAuth(app);
 
   const tempPassword = `${crypto.randomUUID().slice(0, 8)}!${Date.now().toString().slice(-4)}`;
-  const cred = await createUserWithEmailAndPassword(secondaryAuth, trimmedEmail, tempPassword);
-  const newUid = cred.user.uid;
+  let newUid: string;
+  
+  try {
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, trimmedEmail, tempPassword);
+    newUid = cred.user.uid;
+    Logger.info('[Auth] Usuário criado em Auth com sucesso', { email: trimmedEmail, uid: newUid });
+  } catch (error: any) {
+    Logger.error('[Auth] Falha ao criar usuário em Auth', { email: trimmedEmail, error: error?.code });
+    throw error;
+  }
 
+  // ETAPA 5: Criar profile no Firestore
+  Logger.info('[Auth] Criando profile no Firestore', { uid: newUid, email: trimmedEmail });
+  
   const profileRef = doc(db, "profiles", newUid);
   const newProfile = {
     id: newUid,
@@ -271,9 +314,28 @@ export const createUser = async (adminId: string, userData: any): Promise<void> 
     createdBy: adminId,
   };
 
-  await setDoc(profileRef, newProfile);
-  await sendPasswordResetEmail(auth, trimmedEmail);
-  await secondaryAuth.signOut();
+  try {
+    await setDoc(profileRef, newProfile);
+    Logger.info('[Auth] Profile criado com sucesso', { uid: newUid, email: trimmedEmail });
+  } catch (error: any) {
+    Logger.error('[Auth] Falha ao criar profile', { uid: newUid, email: trimmedEmail, error: error?.message });
+    throw error;
+  }
+
+  // ETAPA 5: Enviar email de reset de senha
+  Logger.info('[Auth] Enviando email de reset de senha', { email: trimmedEmail });
+  
+  try {
+    await sendPasswordResetEmail(auth, trimmedEmail);
+    Logger.info('[Auth] Email de reset enviado com sucesso', { email: trimmedEmail });
+  } catch (error: any) {
+    Logger.error('[Auth] Falha ao enviar email de reset', { email: trimmedEmail, error: error?.message });
+    throw error;
+  }
+
+  try {
+    await secondaryAuth.signOut();
+  } catch {}
 };
 
 export const resendInvitation = async (email: string): Promise<void> => {

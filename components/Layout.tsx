@@ -263,10 +263,10 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className={`flex h-[100dvh] overflow-hidden transition-all duration-500 relative ${currentStyle.background}`}>
+    <div className={`flex min-h-[100dvh] overflow-hidden transition-all duration-500 relative ${currentStyle.background}`}>
       
-      {/* Sidebar Desktop/Mobile */}
-      <aside className={`fixed md:static inset-y-0 left-0 w-72 z-[80] flex flex-col transition-all duration-500 ease-in-out transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${currentStyle.sidebar} md:rounded-r-[2.5rem] md:my-4 md:ml-4 md:h-[calc(100vh-2rem)] shadow-2xl`}>
+      {/* Sidebar Desktop/Mobile - ETAPA 6: min-height para mobile */}
+      <aside className={`fixed md:static inset-y-0 left-0 w-72 z-[80] flex flex-col transition-all duration-500 ease-in-out transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${currentStyle.sidebar} md:rounded-r-[2.5rem] md:my-4 md:ml-4 md:min-h-[calc(100dvh-2rem)] shadow-2xl`}>
         <div className={`p-8 flex items-center justify-between border-b border-white/5`}>
           <Logo size="sm" variant="full" lightMode={['glass', 'cyberpunk', 'dark'].includes(currentTheme)} planUser={currentUser} />
           <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-white/50 hover:text-white p-2">
@@ -304,8 +304,8 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] animate-in fade-in" onClick={() => setIsMobileMenuOpen(false)}></div>
       )}
 
-      {/* Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 md:h-screen min-h-0 overflow-hidden">
+      {/* Content Area - ETAPA 6: min-height para mobile */}
+      <main className="flex-1 flex flex-col min-w-0 md:min-h-screen min-h-0 overflow-hidden">
         <header className="h-20 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 shrink-0 border-b border-white/5">
           <div className="flex items-center gap-4">
               <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-slate-400 hover:text-white transition-colors">

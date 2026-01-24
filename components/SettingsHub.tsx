@@ -533,7 +533,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   ];
 
   return (
-    <div className="min-h-[calc(100vh-10rem)] flex flex-col md:flex-row gap-6 relative animate-in fade-in pb-20 overflow-x-hidden">
+    <div className="min-h-[calc(100dvh-10rem)] flex flex-col md:flex-row gap-6 relative animate-in fade-in pb-20 overflow-x-hidden">
        <input type="file" ref={audioInputRef} className="hidden" accept="audio/*" onChange={handleAudioUpload} aria-label="Selecionar arquivo" />
        <ReportBugModal 
          isOpen={bugModalOpen} 
@@ -544,7 +544,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
 
        {/* Sidebar Menu */}
        <div className={`w-full md:w-64 shrink-0 flex flex-col gap-1 ${showMobileContent ? 'hidden md:flex' : 'flex'}`}>
-           <div className={`max-h-[calc(100vh-8rem)] overflow-y-auto p-4 rounded-2xl border ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'} shadow-sm`}>
+           <div className={`max-h-[calc(100dvh-8rem)] overflow-y-auto p-4 rounded-2xl border ${darkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-gray-200'} shadow-sm`}>
                <h2 className="px-2 mb-4 text-[10px] font-black uppercase tracking-widest text-indigo-500">Gerais</h2>
                <NavBtn id="PROFILE" icon={UserIcon} label="Meu Perfil" />
                <NavBtn id="SOUNDS" icon={Volume2} label="Sons & Avisos" />

@@ -7,6 +7,8 @@ import LoadingScreen from './components/LoadingScreen';
 import Dashboard from './components/Dashboard'; 
 import ToastContainer, { ToastMessage } from './components/Toast';
 import SnowOverlay from './components/SnowOverlay';
+import BootstrapIndicator from './components/BootstrapIndicator';
+import DebugCentral from './components/DebugCentral';
 import { SYSTEM_MODULES } from './config/modulesCatalog';
 import ReportBugModal from './components/ReportBugModal';
 import { Analytics } from "@vercel/analytics/react";
@@ -85,6 +87,7 @@ import { logout, getSession, updateUser, watchAuthChanges } from './services/aut
 import { AudioService } from './services/audioService';
 import { Logger } from './services/logger';
 import { startSyncWorker } from './services/syncWorker';
+import { bootstrapLock } from './services/bootstrapLock';
 // Chat desativado - remover imports do Supabase Realtime
 // import { sendMessage, getMessages, subscribeToMessages } from './services/internalChat';
 import { requestAndSaveToken } from './services/pushService';
@@ -116,7 +119,11 @@ const App: React.FC = () => {
     const notifiedTicketIdsRef = useRef<Set<string>>(new Set());
     const bootstrapLogRef = useRef(false);
     const lastSeenUpdateRef = useRef<{ chat: number; tickets: number }>({ chat: 0, tickets: 0 });
+    
+    // ETAPA 2: Estados separados para Auth x Sistema
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [authResolved, setAuthResolved] = useState(false);  // Auth OK (usuário logado ou não)
+    const [systemReady, setSystemReady] = useState(false);    // Bootstrap completo
     const [loading, setLoading] = useState(true);
     const [authView, setAuthView] = useState<AuthView>('LOADING');
     const [authError, setAuthError] = useState<string | null>(null);
@@ -134,6 +141,7 @@ const App: React.FC = () => {
     const [toasts, setSortedToasts] = useState<ToastMessage[]>([]);
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [bugModalOpen, setBugModalOpen] = useState(false);
+    const [debugCentralOpen, setDebugCentralOpen] = useState(false);
     const [bugPrompt, setBugPrompt] = useState<{ message: string; level: LogLevel } | null>(null);
     const bugPromptCooldownRef = useRef(0);
 
@@ -226,6 +234,19 @@ const App: React.FC = () => {
         window.addEventListener('app:bug-detected', handler as EventListener);
         return () => window.removeEventListener('app:bug-detected', handler as EventListener);
     }, [currentUser]);
+
+    // ETAPA 4: Keyboard shortcut para Debug Central (Ctrl+Shift+D)
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && e.code === 'KeyD' && (isDev || isAdmin)) {
+                e.preventDefault();
+                setDebugCentralOpen(!debugCentralOpen);
+            }
+        };
+
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [debugCentralOpen, isDev, isAdmin]);
 
     useEffect(() => {
         activeTabRef.current = activeTab;
@@ -348,16 +369,19 @@ const App: React.FC = () => {
                     if (!sessionUser) {
                         lastUidRef.current = null;
                         setAuthView('LOGIN');
+                        setAuthResolved(true);  // ETAPA 2: Auth resolvido (sem usuário)
                         setLoading(false);
                         return;
                     }
                     if (lastUidRef.current === sessionUser.uid) {
+                        setAuthResolved(true);  // ETAPA 2: Auth resolvido (mesmo usuário)
                         setLoading(false);
                         return;
                     }
                     lastUidRef.current = sessionUser.uid;
                     if (!sessionUser.isActive || sessionUser.userStatus === 'INACTIVE') {
                         setAuthView('BLOCKED');
+                        setAuthResolved(true);  // ETAPA 2: Auth resolvido (usuário bloqueado)
                         setLoading(false);
                         return;
                     }
@@ -366,6 +390,7 @@ const App: React.FC = () => {
             } catch (e: any) {
                 setAuthError("Erro na conexao Cloud Firestore.");
                 setAuthView('ERROR');
+                setAuthResolved(true);  // ETAPA 2: Auth resolvido (erro)
                 setLoading(false);
             }
         };
@@ -506,15 +531,31 @@ const App: React.FC = () => {
 
     const handleLoginSuccess = async (user: User) => {
         setCurrentUser(user);
+        setAuthResolved(true);  // ETAPA 2: Auth resolvido imediatamente
+        
         try {
-            console.warn("[Bootstrap] Iniciando carga inicial Firestore.", { uid: user.uid });
-            await bootstrapProductionData();
-            await loadDataForUser();
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
-            }
-            await requestAndSaveToken(user.id);
+            Logger.info('[App] handleLoginSuccess iniciado', { uid: user.uid });
+            
+            // Bootstrap rodará em background, mas não bloqueia a UI
+            void bootstrapLock.runBootstrap(async () => {
+                console.warn("[Bootstrap] Iniciando carga inicial Firestore.", { uid: user.uid });
+                await bootstrapProductionData();
+                await loadDataForUser();
+                
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+                }
+                await requestAndSaveToken(user.id);
+                
+                // ETAPA 2: Sistema está pronto
+                setSystemReady(true);
+            }).catch(error => {
+                Logger.error('[App] Bootstrap falhou', { error: error?.message, uid: user.uid });
+                // Continua mesmo se bootstrap falhar
+                setSystemReady(true);
+            });
 
+            // Configurações de navegação (não bloqueador) - executa imediatamente
             const onboarded = localStorage.getItem("sys_onboarded_v1") === "true";
             if (!onboarded) {
                 setActiveTab("home");
@@ -543,12 +584,14 @@ const App: React.FC = () => {
                     localStorage.setItem('sys_last_mode', 'SALES');
                 }
             }
+            
             setAuthView('APP');
-        } catch (e) {
-            setAuthView('APP');
-        } finally {
-            console.warn("[Bootstrap] Finalizado.", { uid: user.uid });
             setLoading(false);
+        } catch (e) {
+            Logger.error('[App] Erro em handleLoginSuccess', { error: e });
+            setAuthView('APP');
+            setLoading(false);
+            setSystemReady(true); // Mesmo em erro, marca pronto
         }
     };
 
@@ -663,6 +706,11 @@ const App: React.FC = () => {
     const loadDataForUser = async () => {
         try {
             console.warn("[Bootstrap] Iniciando loadDataForUser...");
+            Logger.info('[App] loadDataForUser iniciado', { 
+                uid: currentUser?.uid,
+                bootstrapReady: bootstrapLock.isReady() 
+            });
+            
             const [rBasic, rNatal] = await Promise.all([
                 getStoredTable(ProductType.BASICA),
                 getStoredTable(ProductType.NATAL)
@@ -727,6 +775,16 @@ const App: React.FC = () => {
             setCells(finData.cells || []);
             
             if (rConfig?.daysForLost) setReportConfig(rConfig as ReportConfig);
+            
+            Logger.info('[App] loadDataForUser concluído com sucesso', {
+                uid: currentUser?.uid,
+                sales: storedSales?.length || 0,
+                clients: storedClients?.length || 0,
+                transactions: finData.transactions?.length || 0,
+                basicRules: rBasic?.length || 0,
+                natalRules: rNatal?.length || 0
+            });
+            
             if (!bootstrapLogRef.current) {
                 console.warn("[Bootstrap] Dados carregados com sucesso.", {
                     sales: storedSales?.length || 0,
@@ -739,7 +797,11 @@ const App: React.FC = () => {
             }
         } catch (e: any) {
             console.error("[Bootstrap] Falha ao carregar dados.", { code: e?.code, message: e?.message, stack: e?.stack });
-            Logger.error("[Bootstrap] Erro durante loadDataForUser", { error: e?.message, code: e?.code });
+            Logger.error("[Bootstrap] Erro durante loadDataForUser", { 
+                error: e?.message, 
+                code: e?.code,
+                uid: currentUser?.uid 
+            });
         }
     };
 
@@ -1391,14 +1453,14 @@ const App: React.FC = () => {
         }
     };
 
-    if (loading) return <LoadingScreen />;
+    if (loading || !authResolved) return <LoadingScreen />;
     if (authView === 'LOGIN') return <Login onLoginSuccess={handleLoginSuccess} onRequestReset={() => setAuthView('REQUEST_RESET')} />;
     if (authView === 'REQUEST_RESET') return <RequestReset onBack={() => setAuthView('LOGIN')} />;
     if (authView === 'ERROR') return <div className="p-20 text-center text-red-500 font-bold">{authError}</div>;
 
     if (authView === 'BLOCKED') {
         return (
-            <div className="h-screen bg-[#020617] flex items-center justify-center p-6 text-center animate-in fade-in">
+            <div className="min-h-[100dvh] bg-[#020617] flex items-center justify-center p-6 text-center animate-in fade-in">
                 <div className="bg-slate-900 border-2 border-red-500/50 p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(239,68,68,0.2)] max-w-sm w-full">
                     <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-500">
                         <ShieldAlert size={40} className="animate-pulse" />
@@ -1412,6 +1474,9 @@ const App: React.FC = () => {
             </div>
         );
     }
+
+    // ETAPA 2: Renderiza Layout mesmo que systemReady=false (bootstrap em background)
+    // Dashboard funcionará com dados parciais até bootstrap completar
 
     return (
         <Layout 
@@ -1487,6 +1552,15 @@ const App: React.FC = () => {
                 />
             )}
 
+            {/* ETAPA 4: Central de Depuração (DEV/ADMIN only) */}
+            {(isDev || isAdmin) && (
+                <DebugCentral
+                    isOpen={debugCentralOpen}
+                    onClose={() => setDebugCentralOpen(false)}
+                    isDarkMode={isDarkMode}
+                />
+            )}
+
             {bugPrompt && (
                 <div className="fixed bottom-6 right-6 z-[120] max-w-sm w-full">
                     <div className={`rounded-2xl border shadow-2xl p-4 flex flex-col gap-3 ${['glass', 'cyberpunk', 'dark'].includes(theme) ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
@@ -1517,6 +1591,9 @@ const App: React.FC = () => {
 
             <ToastContainer toasts={toasts} removeToast={removeToast} />
             {showSnow && <SnowOverlay />}
+            
+            {/* ETAPA 2: Indicador de Bootstrap em background */}
+            {currentUser && <BootstrapIndicator isDarkMode={isDarkMode} />}
 
             {/* ✅ Vercel Analytics (Vite/React) */}
             <Analytics />
