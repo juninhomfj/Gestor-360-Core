@@ -305,8 +305,8 @@ const Layout: React.FC<LayoutProps> = ({
       )}
 
       {/* Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 md:h-screen min-h-0">
-        <header className="h-20 flex items-center justify-between px-6 md:px-10 shrink-0">
+      <main className="flex-1 flex flex-col min-w-0 md:h-screen min-h-0 overflow-hidden">
+        <header className="h-20 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 shrink-0 border-b border-white/5">
           <div className="flex items-center gap-4">
               <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-slate-400 hover:text-white transition-colors">
                 <Menu size={24} />
@@ -374,9 +374,8 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-10 pb-32 md:pb-10 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 md:px-8 lg:px-10 py-4 md:py-6 pb-24 md:pb-10 custom-scrollbar safe-area-mobile">
            {children}
-
         </div>
       </main>
 

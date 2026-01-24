@@ -411,7 +411,7 @@ const SalesList: React.FC<SalesListProps> = ({
           </div>
       </div>
 
-      <div className={`p-6 rounded-3xl border ${containerClass} grid grid-cols-1 md:grid-cols-12 gap-4 items-end`}>
+      <div className={`p-4 sm:p-6 rounded-3xl border ${containerClass} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end`}>
           <div className="md:col-span-2">
               <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Pesquisar</label>
               <div className="relative">
@@ -517,8 +517,8 @@ const SalesList: React.FC<SalesListProps> = ({
       </div>
 
       <div className={`rounded-3xl border overflow-hidden ${containerClass}`}>
-          <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
+          <div className="table-responsive-wrapper">
+              <table className="table-responsive text-left">
                   <thead className={`text-[10px] font-black uppercase tracking-widest border-b ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-500'}`}>
                       <tr>
                           <th className="p-5 w-12"><input disabled={isReadOnly} type="checkbox" onChange={e => setSelectedIds(e.target.checked ? processedSales.map(s => s.id) : [])} checked={selectedIds.length === processedSales.length && processedSales.length > 0} /></th>

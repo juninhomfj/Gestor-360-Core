@@ -271,3 +271,236 @@
   20% { opacity: 1; }
   100% { transform: translateY(50px) rotate(-360deg); opacity: 0; }
 }
+
+/* === RESPONSIVIDADE - FASE 2 === */
+@layer components {
+  /* Container Guidelines */
+  .container-mobile {
+    @apply px-3 sm:px-4;
+  }
+
+  .container-tablet {
+    @apply sm:px-6;
+  }
+
+  .container-desktop {
+    @apply lg:px-8;
+  }
+
+  .container-responsive {
+    @apply px-3 sm:px-4 md:px-6 lg:px-8;
+  }
+
+  /* Responsive Grid Patterns */
+  .grid-auto-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+
+  .grid-responsive-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  /* Typography Responsive */
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-lg {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+
+  .text-responsive-base {
+    @apply text-sm sm:text-base md:text-base;
+  }
+
+  /* Flex Responsive */
+  .flex-responsive {
+    @apply flex flex-col sm:flex-row gap-4;
+  }
+
+  .flex-responsive-center {
+    @apply flex flex-col sm:flex-row items-center justify-between gap-4;
+  }
+
+  /* Text Truncate Patterns */
+  .text-truncate-1 {
+    @apply truncate;
+  }
+
+  .text-truncate-2 {
+    @apply line-clamp-2;
+  }
+
+  .text-truncate-3 {
+    @apply line-clamp-3;
+  }
+
+  .text-break-word {
+    @apply break-words;
+  }
+
+  /* Table Wrapper */
+  .table-responsive-wrapper {
+    @apply overflow-x-auto -mx-3 sm:mx-0;
+  }
+
+  .table-responsive {
+    @apply w-full min-w-[800px] text-sm;
+  }
+
+  /* Modal Responsive */
+  .modal-responsive {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6;
+  }
+
+  .modal-responsive-content {
+    @apply bg-slate-900 dark:bg-slate-900 rounded-2xl border border-slate-800 w-full max-w-2xl max-h-[85vh] overflow-y-auto;
+  }
+
+  .modal-responsive-footer {
+    @apply flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-800;
+  }
+
+  .modal-responsive-buttons {
+    @apply flex flex-col sm:flex-row gap-3 w-full;
+  }
+
+  .modal-responsive-button {
+    @apply px-4 py-2.5 sm:py-2 text-sm font-bold rounded-lg transition-all flex-1 sm:flex-none;
+  }
+
+  /* Form Responsive */
+  .form-group-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .form-group-responsive-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .form-group-full {
+    @apply col-span-1 md:col-span-2 lg:col-span-3;
+  }
+
+  .form-group-half {
+    @apply col-span-1 md:col-span-1;
+  }
+
+  /* Card Responsive */
+  .card-responsive {
+    @apply bg-slate-900 rounded-2xl border border-slate-800 p-4 sm:p-6;
+  }
+
+  .card-responsive-content {
+    @apply flex flex-col gap-4 min-w-0;
+  }
+
+  /* Touch Target Minimum */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .button-responsive {
+    @apply min-h-[44px] px-4 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95;
+  }
+
+  /* Focus States */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  .focus-ring-light {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-white;
+  }
+
+  /* Flex Safety */
+  .flex-safe {
+    @apply min-w-0 flex-shrink;
+  }
+
+  /* Safe Area Responsive */
+  .safe-area-mobile {
+    @apply pb-16 md:pb-0;
+  }
+
+  .safe-area-mobile-top {
+    @apply pt-2 md:pt-0;
+  }
+
+  /* Overflow Patterns */
+  .overflow-x-scroll-smooth {
+    @apply overflow-x-auto scroll-smooth;
+  }
+
+  .overflow-hidden-mobile {
+    @apply overflow-hidden sm:overflow-visible;
+  }
+
+  /* Visibility Patterns */
+  .show-mobile {
+    @apply block sm:hidden;
+  }
+
+  .hide-mobile {
+    @apply hidden sm:block;
+  }
+
+  .show-tablet {
+    @apply hidden sm:block md:block;
+  }
+
+  .show-desktop {
+    @apply hidden lg:block;
+  }
+
+  /* Spacing Responsive */
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 md:gap-4;
+  }
+
+  .p-responsive {
+    @apply p-3 sm:p-4 md:p-6 lg:p-8;
+  }
+
+  .py-responsive {
+    @apply py-2 sm:py-3 md:py-4 lg:py-6;
+  }
+
+  .px-responsive {
+    @apply px-3 sm:px-4 md:px-6 lg:px-8;
+  }
+
+  /* Density Adjustment (1366px fix) */
+  @screen lg {
+    .lg-compact {
+      @apply px-4 py-2;
+    }
+  }
+
+  @media (min-width: 1366px) {
+    .compact-1366 {
+      @apply px-4 py-2 text-sm;
+    }
+
+    .px-compact-1366 {
+      @apply px-4;
+    }
+  }
+
+  /* Width Responsive */
+  .w-responsive-full {
+    @apply w-full;
+  }
+
+  .max-w-responsive {
+    @apply max-w-full sm:max-w-[90%] md:max-w-[85%] lg:max-w-6xl;
+  }
+}
