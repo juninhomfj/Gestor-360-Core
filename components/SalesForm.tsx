@@ -588,6 +588,13 @@ const SalesForm: React.FC<Props> = ({
             </div>
             <div className="w-px h-8 bg-slate-800"></div>
             <div className="text-center md:text-left">
+              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Taxa (%)</span>
+              <p className="text-lg font-bold text-indigo-400">
+                {commissionRatePercent.toFixed(2)}%
+              </p>
+            </div>
+            <div className="w-px h-8 bg-slate-800"></div>
+            <div className="text-center md:text-left">
               <span className={`block text-[10px] font-black uppercase tracking-widest ${isPendingBilling ? 'text-amber-600' : 'text-emerald-600'}`}>
                 {isPendingBilling ? 'Comissão Prevista (Pend.)' : 'Comissão Prevista'}
               </span>

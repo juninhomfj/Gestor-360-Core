@@ -492,6 +492,7 @@ const SalesList: React.FC<SalesListProps> = ({
                           <th className="p-5">Cliente</th>
                           <th className="p-5">Tipo</th>
                           <th className="p-5 text-right">Margem</th>
+                          <th className="p-5 text-right">Taxa (%)</th>
                           <th className="p-5 text-right">Comissão</th>
                           <th className="p-5 text-center">Ações</th>
                       </tr>
@@ -509,6 +510,7 @@ const SalesList: React.FC<SalesListProps> = ({
                               <td className="p-5 font-bold">{sale.client}</td>
                               <td className="p-5"><span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase ${sale.type === ProductType.NATAL ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>{sale.type === ProductType.NATAL ? 'Natal' : 'Básica'}</span></td>
                               <td className="p-5 text-right font-mono text-xs">{sale.marginPercent.toFixed(2)}%</td>
+                              <td className="p-5 text-right font-mono text-xs text-indigo-400 font-bold">{(sale.commissionRateUsed <= 1 ? sale.commissionRateUsed * 100 : sale.commissionRateUsed).toFixed(2)}%</td>
                               <td className="p-5 text-right">
                                   <div className="flex flex-col items-end gap-1">
                                       <span className={`font-black ${sale.campaignTag ? (sale.campaignColor === 'amber' ? 'text-amber-500' : 'text-emerald-400') : 'text-emerald-600'}`}>
