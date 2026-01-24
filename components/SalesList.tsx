@@ -412,14 +412,14 @@ const SalesList: React.FC<SalesListProps> = ({
       </div>
 
       <div className={`p-6 rounded-3xl border ${containerClass} grid grid-cols-1 md:grid-cols-12 gap-4 items-end`}>
-          <div className="md:col-span-3">
+          <div className="md:col-span-2">
               <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Pesquisar</label>
               <div className="relative">
                   <Search className="absolute left-3 top-2.5 text-gray-400" size={16}/>
                   <input className={`w-full pl-10 pr-4 py-2 rounded-xl border text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} placeholder="Cliente ou Rastreio..." aria-label="Cliente ou Rastreio..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
               </div>
           </div>
-          <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Tipo</label>
                   <select className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={filterType} onChange={e => setFilterType(e.target.value as any)}>
@@ -437,7 +437,7 @@ const SalesList: React.FC<SalesListProps> = ({
                   </select>
               </div>
           </div>
-          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Início</label>
                   <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
@@ -447,7 +447,27 @@ const SalesList: React.FC<SalesListProps> = ({
                   <input type="date" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} value={dateTo} onChange={e => setDateTo(e.target.value)} />
               </div>
           </div>
-          <div className="md:col-span-2 flex flex-col gap-2 sm:flex-row">
+          <div className="md:col-span-2 grid grid-cols-2 gap-2">
+              <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Taxa Min (%)</label>
+                  <input type="number" step="0.01" min="0" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} placeholder="0" value={minCommissionRate} onChange={e => setMinCommissionRate(e.target.value === '' ? '' : parseFloat(e.target.value))} />
+              </div>
+              <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Taxa Máx (%)</label>
+                  <input type="number" step="0.01" min="0" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} placeholder="99" value={maxCommissionRate} onChange={e => setMaxCommissionRate(e.target.value === '' ? '' : parseFloat(e.target.value))} />
+              </div>
+          </div>
+          <div className="md:col-span-2 grid grid-cols-2 gap-2">
+              <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Qtd Min</label>
+                  <input type="number" step="1" min="0" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} placeholder="0" value={minQuantity} onChange={e => setMinQuantity(e.target.value === '' ? '' : parseInt(e.target.value))} />
+              </div>
+              <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Qtd Máx</label>
+                  <input type="number" step="1" min="0" className={`w-full p-2 rounded-xl border text-sm ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50'}`} placeholder="999" value={maxQuantity} onChange={e => setMaxQuantity(e.target.value === '' ? '' : parseInt(e.target.value))} />
+              </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
               <button disabled={isReadOnly} onClick={onOpenBulkAdvanced} className="flex-1 p-2.5 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transition-all flex items-center justify-center gap-2 font-black text-[10px] uppercase disabled:opacity-40 disabled:cursor-not-allowed">
                   <CalendarCheck size={16}/> Lote
               </button>
