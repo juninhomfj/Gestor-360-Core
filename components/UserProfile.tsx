@@ -208,27 +208,27 @@ const UserProfile: React.FC<UserProfileProps> = ({ user: currentUser, onUpdate, 
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Cestas Básicas (Qtd)</label>
+                        <label className="block text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase mb-1 tracking-widest">Cestas Básicas (Qtd)</label>
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
+                            className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 dark:text-slate-100 transition-all"
                             value={salesTargets.basic === 0 ? '' : salesTargets.basic}
                             onChange={e => setSalesTargets(prev => ({ ...prev, basic: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Cestas de Natal (Qtd)</label>
+                        <label className="block text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase mb-1 tracking-widest">Cestas de Natal (Qtd)</label>
                         <input
                             type="number"
                             min={0}
-                            className="w-full p-3 bg-slate-100 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl outline-none dark:text-slate-100"
+                            className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900 dark:text-slate-100 transition-all"
                             value={salesTargets.natal === 0 ? '' : salesTargets.natal}
                             onChange={e => setSalesTargets(prev => ({ ...prev, natal: parseNumericInput(e.target.value) }))}
                         />
                     </div>
                 </div>
-                <p className="text-[11px] text-gray-500 mt-3">A meta de cestas básicas alimenta o indicador de campanha por margem baixa.</p>
+                <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-3">A meta de cestas básicas alimenta o indicador de campanha por margem baixa.</p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 shadow-sm dark:text-slate-100">
