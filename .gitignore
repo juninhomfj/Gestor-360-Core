@@ -25,6 +25,7 @@ supabase_setup_commands.txt
 supabase_clients.txt
 supabase_keys.txt
 secrets.json
+secrets/
 
 # Backups e Snapshots (Arquivos Grandes/Sensíveis)
 *.log
