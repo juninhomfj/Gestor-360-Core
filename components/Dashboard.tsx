@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sale, ProductType, DashboardWidgetConfig, Transaction, User, SalesTargets, Receivable, SalesTask } from '../types'; 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users, Sparkles } from 'lucide-react';
+import { DollarSign, Gift, ShoppingBasket, Plus, Calendar, Eye, EyeOff, Settings, X, Clock, CheckCircle2, Edit3, ShoppingBag, ArrowRight, AlertTriangle, UserMinus, Users, Sparkles, Target } from 'lucide-react';
 import { getFinanceData, getABCAnalysis, analyzeClients, buildBilledSalesMap } from '../services/logic'; 
 import { SALES_TASK_LABELS } from '../utils/salesTasks';
+import CampaignsDashboard from './CampaignsDashboard';
 
 interface DashboardProps {
   sales: Sale[];
@@ -49,6 +50,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showConfig, setShowConfig] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]); 
   const [receivables, setReceivables] = useState<Receivable[]>([]); 
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns'>('overview');
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
@@ -185,22 +187,52 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-6 relative h-auto pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className={`text-2xl font-black ${darkMode ? 'text-white' : 'text-gray-800'}`}>Visão Geral</h1>
-          <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Competência: {capitalizedMonth} / {currentYear}</p>
+      {/* CABEÇALHO + ABAS */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className={`text-2xl font-black ${darkMode ? 'text-white' : 'text-gray-800'}`}>Visão Geral</h1>
+            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Competência: {capitalizedMonth} / {currentYear}</p>
+          </div>
+          
+          <div className="flex gap-2 items-center">
+              <button onClick={onToggleHide} className={`p-2 rounded-lg transition-colors ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-white border border-gray-200 text-gray-600'}`}>
+                  {hideValues ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+              <button onClick={onNewSale} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center shadow-sm active:scale-95 transition-all">
+                  <Plus size={20} className="mr-2" /> Nova Venda
+              </button>
+          </div>
         </div>
-        
-        <div className="flex gap-2 items-center">
-            <button onClick={onToggleHide} className={`p-2 rounded-lg transition-colors ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-white border border-gray-200 text-gray-600'}`}>
-                {hideValues ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-            <button onClick={onNewSale} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center shadow-sm active:scale-95 transition-all">
-                <Plus size={20} className="mr-2" /> Nova Venda
-            </button>
+
+        {/* ABAS */}
+        <div className={`border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'} flex gap-8`}>
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 px-2 font-black text-sm uppercase tracking-widest transition-all border-b-2 ${
+              activeTab === 'overview'
+                ? `${darkMode ? 'text-indigo-400 border-indigo-500' : 'text-indigo-600 border-indigo-600'}`
+                : `${darkMode ? 'text-slate-400 border-transparent hover:text-slate-300' : 'text-gray-500 border-transparent hover:text-gray-700'}`
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('campaigns')}
+            className={`pb-3 px-2 font-black text-sm uppercase tracking-widest transition-all border-b-2 flex items-center gap-2 ${
+              activeTab === 'campaigns'
+                ? `${darkMode ? 'text-emerald-400 border-emerald-500' : 'text-emerald-600 border-emerald-600'}`
+                : `${darkMode ? 'text-slate-400 border-transparent hover:text-slate-300' : 'text-gray-500 border-transparent hover:text-gray-700'}`
+            }`}
+          >
+            <Target size={16} /> Campanhas
+          </button>
         </div>
       </div>
       
+      {/* CONTEÚDO DA ABA SELECIONADA */}
+      {activeTab === 'overview' ? (
+        <>
       {/* ALERTA DE OPERAÇÕES CRÍTICAS & RADAR DE CHURN (Etapa 4 + 5) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {overdueCommissions.length > 0 && (
@@ -334,7 +366,15 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
         )}
-      </div>
+        </>
+      ) : (
+        // ABA CAMPANHAS
+        <div>
+          {currentUser && (
+            <CampaignsDashboard user={currentUser} onNavigateToProfile={() => {}} />
+          )}
+        </div>
+      )}
     </div>
   );
 };
