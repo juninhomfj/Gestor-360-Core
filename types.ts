@@ -164,6 +164,11 @@ export interface Ticket {
   closedAt?: string | null;
   logs?: LogEntry[];
   attachments?: TicketAttachment[];
+  // Novos campos para contexto cirúrgico (Etapa 7)
+  route?: string;           // Ex: '/dashboard', '/sales', '/profiles'
+  screen?: string;          // Ex: 'SalesForm', 'UserProfile', 'AdminUsers'
+  action?: string;          // Ex: 'editar comissão', 'carregar campanhas', 'salvar meta'
+  collectionPath?: string;  // Ex: 'sales/sale-123', 'profiles/user-456'
 }
 
 export interface CommissionRule {

@@ -20,6 +20,11 @@ interface CreateTicketPayload {
     createdBy: User;
     logs?: LogEntry[];
     attachments?: TicketAttachment[];
+    // Novos campos para contexto cirúrgico (Etapa 7)
+    route?: string;
+    screen?: string;
+    action?: string;
+    collectionPath?: string;
 }
 
 export const createTicket = async ({
@@ -29,7 +34,11 @@ export const createTicket = async ({
     priority,
     createdBy,
     logs = [],
-    attachments = []
+    attachments = [],
+    route,
+    screen,
+    action,
+    collectionPath
 }: CreateTicketPayload) => {
     const now = new Date().toISOString();
     const ticket: Ticket = {
@@ -46,7 +55,12 @@ export const createTicket = async ({
         updatedAt: now,
         closedAt: null,
         logs,
-        attachments
+        attachments,
+        // Novos campos
+        route,
+        screen,
+        action,
+        collectionPath
     };
 
     await dbPut('tickets', ticket);
