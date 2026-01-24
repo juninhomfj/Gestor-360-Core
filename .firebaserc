@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "Gestor360": "gestor360-app",
+    "prod": "gestor360-app"
+  },
+  "targets": {},
+  "etags": {}
+}
