@@ -41,6 +41,10 @@ const SalesList: React.FC<SalesListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [minCommissionRate, setMinCommissionRate] = useState<number | ''>('');
+  const [maxCommissionRate, setMaxCommissionRate] = useState<number | ''>('');
+  const [minQuantity, setMinQuantity] = useState<number | ''>('');
+  const [maxQuantity, setMaxQuantity] = useState<number | ''>('');
   const [itemsPerPage, setItemsPerPage] = useState<number | 'ALL'>(25);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Sale | 'status', direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
@@ -71,6 +75,16 @@ const SalesList: React.FC<SalesListProps> = ({
       const compDate = sale.date || sale.completionDate || '';
       if (dateFrom && compDate < dateFrom) return false;
       if (dateTo && compDate > dateTo) return false;
+      
+      // Filtro de taxa de comissão
+      const saleRate = sale.commissionRateUsed <= 1 ? sale.commissionRateUsed * 100 : sale.commissionRateUsed;
+      if (minCommissionRate !== '' && saleRate < parseFloat(String(minCommissionRate))) return false;
+      if (maxCommissionRate !== '' && saleRate > parseFloat(String(maxCommissionRate))) return false;
+      
+      // Filtro de quantidade
+      if (minQuantity !== '' && sale.quantity < parseFloat(String(minQuantity))) return false;
+      if (maxQuantity !== '' && sale.quantity > parseFloat(String(maxQuantity))) return false;
+      
       return true;
     });
 
@@ -86,7 +100,7 @@ const SalesList: React.FC<SalesListProps> = ({
         return 0;
     });
     return result;
-  }, [sales, searchTerm, filterType, filterStatus, dateFrom, dateTo, sortConfig]);
+  }, [sales, searchTerm, filterType, filterStatus, dateFrom, dateTo, sortConfig, minCommissionRate, maxCommissionRate, minQuantity, maxQuantity]);
 
   const salesSummary = useMemo(() => {
     const totals = {
