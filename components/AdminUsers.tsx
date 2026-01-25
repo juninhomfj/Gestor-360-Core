@@ -113,8 +113,12 @@ const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
         setNewPermissions(DEFAULT_PERMISSIONS);
         setNewHiddenModules(DEFAULT_HIDDEN_MODULES);
         loadUsers();
-    } catch (e) {
+    } catch (e: any) {
+      if (e.code === 'auth/email-already-in-use') {
+        alert('Este e-mail já está em uso por outra conta.');
+      } else {
         alert("Erro ao salvar usuário.");
+      }
     }
   };
 
