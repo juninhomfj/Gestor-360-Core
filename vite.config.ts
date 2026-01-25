@@ -68,44 +68,25 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || appVersion),
     },
     build: {
-      // Reduzir warning limit para forçar bundler a ser mais agressivo
-      chunkSizeWarningLimit: 800,
+      chunkSizeWarningLimit: 1500,
       rollupOptions: {
         output: {
           manualChunks: (id: string) => {
-            // Firebase é a biblioteca MAIS pesada - isolar completamente
+            // Firebase isolado - é o maior e não tem dependências circulares com app
             if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
               return 'firebase-vendor';
             }
 
-            // React é essencial mas pode ser separado
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
+            // React - essencial, deixar separado
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
               return 'react-vendor';
             }
 
-            // services/logic é MUITO pesado (1700+ linhas) - separar em chunk próprio
-            if (id.includes('services/logic.ts')) {
-              return 'logic-chunk';
-            }
-
-            // services de comissão - agrupar com logic
-            if (id.includes('services/commissionCampaignOverlay') || id.includes('services/campaignService')) {
-              return 'logic-chunk';
-            }
-
-            // Componentes financeiros pesados
-            if (id.includes('components/FinanceDashboard') || id.includes('components/FinanceManager') || id.includes('components/FinanceReceivables')) {
-              return 'finance-chunk';
-            }
-
-            // Componentes administrativos pesados
-            if (id.includes('components/SettingsHub') || id.includes('components/AdminUsers') || id.includes('components/AdminMessaging')) {
-              return 'admin-chunk';
-            }
-
-            // Componentes de cliente
-            if (id.includes('components/ClientManagementHub') || id.includes('components/SalesList')) {
-              return 'client-chunk';
+            // IMPORTANTE: Deixar componentes de UI no main bundle
+            // para evitar circular dependencies
+            // React Router pode ficar com React
+            if (id.includes('node_modules/react-router')) {
+              return 'react-vendor';
             }
           },
         },
