@@ -67,6 +67,31 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || appVersion),
     },
+    build: {
+      chunkSizeWarningLimit: 1500,
+      rollupOptions: {
+        output: {
+          manualChunks: (id: string) => {
+            // Firebase isolado - é o maior e não tem dependências circulares com app
+            if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
+              return 'firebase-vendor';
+            }
+
+            // React - essencial, deixar separado
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'react-vendor';
+            }
+
+            // IMPORTANTE: Deixar componentes de UI no main bundle
+            // para evitar circular dependencies
+            // React Router pode ficar com React
+            if (id.includes('node_modules/react-router')) {
+              return 'react-vendor';
+            }
+          },
+        },
+      },
+    },
     test: {
       environment: "jsdom",
       globals: true,

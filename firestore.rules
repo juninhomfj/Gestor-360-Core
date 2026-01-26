@@ -451,12 +451,12 @@ service cloud.firestore {
 
     /* ========= TABELAS DE COMISSÃO ========= */
     match /commission_basic/{docId} {
-      allow read: if isAuth() && isPrivileged();
+      allow read: if isAuth();
       allow write: if isAuth() && isPrivileged();
     }
 
     match /commission_natal/{docId} {
-      allow read: if isAuth() && isPrivileged();
+      allow read: if isAuth();
       allow write: if isAuth() && isPrivileged();
     }
 

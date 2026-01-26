@@ -193,7 +193,7 @@ export const getMessages = async (userId: string, isAdmin: boolean): Promise<Cha
             const scopedQuery = isAdmin
                 ? baseQuery
                 : baseQuery.or(
-                    `recipientId.eq.${userId},recipientId.eq.BROADCAST,senderId.eq.${userId}`
+                    `recipientid.eq.${userId},recipientid.eq.BROADCAST,senderid.eq.${userId}`
                 );
 
             const { data, error } = await scopedQuery
